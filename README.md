@@ -6,7 +6,7 @@
 
 <h1 align="center">seatrial</h1>
 
-An audit skill set for SaaS codebases, built on Claude skills.
+An audit skill set for codebases, built on Claude skills.
 
 You build something fast, often with AI. It works, and you have no idea whether
 it survives users or someone poking at it. seatrial runs a codebase through
