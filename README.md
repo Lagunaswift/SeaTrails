@@ -1,5 +1,7 @@
+
+
 <p align="center">
-  <img src="docs/SeaTrail.png" alt="SeaTrial logo" width="300">
+  <img width="500" height="500" alt="Image" src="https://github.com/user-attachments/assets/f0c271fb-3c54-44de-945b-f32528383f6f" />
 </p>
 
 <h1 align="center">seatrial</h1>
