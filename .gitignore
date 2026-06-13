@@ -1,0 +1,25 @@
+# Never commit real audit output or anything that names a live app
+*report*.json
+*report*.md
+/reports/
+/runs/
+/output/
+*.local
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*serviceAccount*.json
+*credentials*.json
+
+# Claude Code local config (per-machine, not repo state)
+.claude/
+
+# Internal packaging docs (not for the public repo)
+docs/
+
+# Noise
+node_modules/
+__pycache__/
+.DS_Store
