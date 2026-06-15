@@ -74,6 +74,8 @@ The patterns a senior developer checks during code review, organized by category
 
 **Debug flags and test scaffolding.** `const DEBUG = true`, `if (DEV_MODE)`, test fixtures or mock data left in production code, environment checks that enable unsafe behaviour (`if (process.env.NODE_ENV !== 'production') allowAll()`).
 
+**Deferred implementations disguised as done.** Functions that exist, are called, but return hardcoded values (`return true`, `return []`, `return null`) instead of doing real work. Validation that always passes, permission checks that always allow, data fetching that returns mock data. The code compiles and the tests pass (because the tests were written against the stub). See `ai-code-tells.md` § Deferred implementations for the full catalogue — this is the single most common way AI-generated code looks finished when it isn't.
+
 ## Async discipline
 
 **Unawaited promises.** Calling an async function without `await` and without storing the promise. The operation runs in the background with no error handling and no guarantee it completes before the response is sent. This is the most common source of silent data loss in async code.

@@ -122,10 +122,12 @@ you that isn't covered, it should be.
 
 ## What this isn't
 
-A first pass that catches known patterns. It doesn't understand your app's
-business logic: the ownership check that's right on nine routes and missing on
-the tenth, or a deletion that doesn't delete. Those need a human reading the
-code with full context. Run this first; it clears the common ground fast.
+A first pass that catches known patterns. It raises the floor, it doesn't
+remove the ceiling. It doesn't understand your app's business logic: the
+ownership check that's right on nine routes and missing on the tenth, or a
+deletion that doesn't delete. Those need a human reading the code with full
+context. Run this first; it clears the common ground so the human review
+can focus on the hard stuff.
 
 ## Licence
 

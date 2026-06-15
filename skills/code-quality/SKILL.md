@@ -57,7 +57,11 @@ Scan for external data (API responses, user input, file reads, env vars) consume
 
 Scan for business logic in route handlers or UI components, god components with page-length render functions, framework imports in domain logic, and files that mix data fetching, business rules, and presentation. See checklist § Separation of concerns.
 
-### Pass 11: AI-generated code tells
+### Pass 11: Deferred implementations
+
+Scan for code that looks complete but quietly defers the real work: placeholder functions that return hardcoded values or empty arrays, TODO/FIXME comments standing in for actual logic, validation functions that always return true, stubbed error handling (`// handle error`), mock data in production code paths, incomplete switch/if chains that silently skip cases, and security-critical operations left as comments (`// TODO: add auth check`). AI-generated code does this constantly — it builds the scaffolding and skips the load-bearing parts without flagging that anything is missing. The structure looks finished; the behaviour is a stub. See `references/ai-code-tells.md` § Deferred implementations.
+
+### Pass 12: AI-generated code tells
 
 Scan for the patterns that specifically signal AI-authored code left unreviewed: over-abstraction, "just in case" defensive code against impossible states, inconsistent patterns across the same codebase, over-commented obvious code paired with under-commented subtle code, and unnecessary wrapper functions. See `references/ai-code-tells.md`.
 

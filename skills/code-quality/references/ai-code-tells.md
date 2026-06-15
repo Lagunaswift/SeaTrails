@@ -48,6 +48,28 @@ These patterns are not about whether the code works. AI-generated code often pas
 
 **Missing project-specific patterns.** The project has a logging utility, but the AI-generated code uses `console.log`. The project has a custom error class, but the new code throws generic `Error`. The project has a response helper, but the new route builds the response object manually. AI doesn't grep the codebase for existing utilities before writing.
 
+## Deferred implementations
+
+The most dangerous AI pattern. The code looks complete — the file structure is there, the functions exist, the types are defined — but the actual work is deferred behind placeholders. AI does this because it generates structure eagerly and fills in behaviour on request. If nobody asks "did you actually implement this?", the stub ships.
+
+**Placeholder return values.** A function that returns `[]`, `null`, `{}`, `true`, `0`, or a hardcoded string instead of computing the real result. The function signature promises behaviour; the body delivers a constant. Common in validation (`return true`), data fetching (`return []`), and permission checks (`return false` — which silently denies everyone, or `return true` — which silently allows everyone).
+
+**TODO as implementation.** A function body that's a comment: `// TODO: implement this`, `// TODO: add validation`, `// TODO: connect to database`. The function exists, it's called, the caller handles its return value — but the function does nothing. AI produces these when it's building the call graph and hasn't been told to fill in every leaf. The caller looks correct. The leaf is empty.
+
+**Stubbed error handling.** `catch(e) { // handle error here }` or `catch(e) { // TODO: proper error handling }`. The try/catch structure exists, which makes it look like errors are handled. They aren't. The error is silently swallowed, and the code continues as if nothing went wrong.
+
+**Mock data in production paths.** Hardcoded arrays of users, products, or configuration that should come from a database or API. AI often generates these as examples during development and they survive into production because they work in demos. The tell: the data has suspiciously clean formatting, round numbers, and names like "John Doe" or "Acme Corp."
+
+**Incomplete branching.** A switch statement or if/else chain that handles two of five cases, with the rest falling through to a default that returns nothing or throws a generic error. Sometimes there's a comment (`// handle other cases`), sometimes not. The code looks like it covers the domain; it covers a fraction of it.
+
+**Deferred security.** Comments where security controls should be: `// TODO: add authentication`, `// TODO: check permissions`, `// TODO: rate limit this endpoint`, `// TODO: sanitize input`. These are the highest-risk deferrals because the code is reachable and unprotected, and the comment creates a false sense that someone knows about it.
+
+**Fake configuration.** Config objects with hardcoded values that look like they should be environment-driven: `const config = { apiUrl: 'https://api.example.com', timeout: 5000, retries: 3 }`. The structure suggests configurability; the values are baked in.
+
+**Empty lifecycle and hooks.** `useEffect(() => { // fetch data on mount }, [])` or `componentDidMount() { // initialize }`. The hook is registered, the dependency array is correct, the body is a comment. The component mounts and does nothing.
+
+**How to catch it:** search for functions shorter than 5 lines that contain `return` followed by a literal (`true`, `false`, `null`, `[]`, `{}`), and for `TODO`/`FIXME`/`HACK` inside function bodies (not above them). A TODO above a function is a note; a TODO *as* the function body is a deferred implementation.
+
 ## Volume without depth
 
 **Many files, shallow implementation.** A feature spread across a dozen files (types, utils, helpers, constants, hooks, components, tests) where three files would do. AI models tend to produce more files because they generate code in a pattern-completion mode that reaches for structure before substance. The tell is when the majority of files are thin wrappers or type re-exports.
