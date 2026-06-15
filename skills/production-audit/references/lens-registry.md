@@ -141,10 +141,10 @@ When running a lens (Stage 2), the orchestrator should:
 ## Lens 15: adversary-emulation  (prefix CHAIN · priority 7 · SYNTHESIS, runs last)
 
 - **Skill:** `.claude/skills/adversary-emulation/SKILL.md`
-- **Owns:** Chaining atomic findings into realistic attack paths (MITRE ATT&CK), assessing detection coverage (blue), pairing each path with its detection gap and cheapest break (purple). Finds chained exploits atomic auditing misses.
+- **Owns:** Chaining atomic findings into realistic attack paths (MITRE ATT&CK), assessing detection coverage (blue), pairing each path with its detection gap and cheapest break (purple), assessing developer awareness of the risk (yellow), and cross-referencing against known exploit patterns (orange). Finds chained exploits atomic auditing misses.
 - **Consumes:** The whole ledger; credits component findings in `chain.component_findings`. Observability findings (scaling-audit) feed the detection pass.
-- **Output:** `CHAIN`-prefixed findings, category `attack-path`, with the `chain` schema block. Severity = realised impact of the path, not max of parts.
-- **Passes:** Red: objectives → Red: kill-chains (ATT&CK) → Blue: detection → Purple: path→gap→fix → White: scope hygiene.
+- **Output:** `CHAIN`-prefixed findings, category `attack-path`, with the `chain` schema block including `builder_awareness` and `threat_intel` fields. Severity = realised impact of the path, not max of parts.
+- **Passes:** Red: objectives → Red: kill-chains (ATT&CK) → Blue: detection → Purple: path→gap→fix → Yellow: builder awareness → Orange: threat intel → White: scope hygiene.
 - **Boundary:** STRICTLY DEFENSIVE — owned-system threat modelling; never weaponised exploits, C2, evasion-for-attackers, or third-party targeting.
 - **When to run:** any security-sensitive app. Skip for a static site with no backend.
 
@@ -157,3 +157,12 @@ When running a lens (Stage 2), the orchestrator should:
 - **When to run:** the app has meaningful user-facing copy (a marketing site, onboarding, rich microcopy, customer emails). Light for a very early prototype; skip for a headless API, an internal dev tool, or a app with negligible copy. It audits the app's *own* text — never code comments, logs, or machine-to-machine output.
 - **Overlap:** the copy twin of `frontend-design` (which owns *visual* anti-slop, category `design-aesthetic`); the two compose into the one "Design & copy quality" section. Distinct from `email-deliverability` (owns deliverability mechanics — SPF/DKIM/streams — not copy voice) and `seo-discoverability` (owns metadata *presence*, not its writing quality); cross-reference via `dedup.also_seen_by_lenses` where they touch the same text.
 - **Note — same skill, two roles:** `anti-slop-writing` also governs the *audit report's own prose* (see SKILL.md). As a lens it audits the *product's* copy; as a prose governor it keeps the report itself slop-free. The two roles do not conflict.
+
+## Lens 17: code-quality  (prefix QUAL · priority 3 · ATOMIC)
+
+- **Skill:** `.claude/skills/code-quality/SKILL.md`
+- **Owns:** Line-level and file-level code quality — the patterns a senior developer flags in PR review. Magic numbers, hardcoded values, loose equality, blanket `any` types, empty catches, inconsistent naming, async anti-patterns (unawaited promises, sequential awaits), mutation bugs, missing boundary validation, dead code and debug leftovers, separation-of-concerns violations, and the specific tells of AI-generated code (over-abstraction, "just in case" guards, inconsistent patterns across the same codebase, volume without depth).
+- **Output:** `QUAL`-prefixed findings, category `code-quality`. Most findings are medium or low — these are maintainability issues, not safety issues. Escalate to high only when the pattern creates a real risk (empty catch silencing a payment failure, missing boundary check letting malformed data propagate); in those cases the consequence drives the category (`correctness`/`security`) and the relevant lens owns it.
+- **Passes:** Hardcoding → Type safety → Control flow → Error handling hygiene → Naming → Dead code → Async discipline → Mutation → Boundary hygiene → Separation of concerns → AI-code tells.
+- **Overlap:** Complements `refactoring` (which covers architectural smells: duplication, god objects, tangled modules) and `code-audit` Pass 5 (which applies refactoring as its structure lens). This lens covers the line-level patterns those miss. Also complements `error-handling-patterns` (architectural error strategy) — this lens flags the surface tells (empty catches, lost context) without prescribing the architecture.
+- **When to run:** any codebase review. Especially useful when assessing code that may have been AI-generated and merged without senior review.

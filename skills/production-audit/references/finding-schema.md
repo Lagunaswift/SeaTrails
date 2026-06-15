@@ -60,7 +60,9 @@ A `chain` finding ties several atomic findings into one exploit path. It carries
     "component_findings": ["FE-012", "SEC-004", "PRIV-002"],
     "root_cause_finding": null,        // see below — the one already-reported defect this chain re-narrates, or null if emergent
     "severity_basis": ["FE-012", "SEC-004"],  // constituent ids this chain's severity rests on (for recomputation if a constituent is dropped/merged)
-    "detection_gap": "No logging or alerting on cross-user export; the blue-team pass found no audit trail (OPS-009)."
+    "detection_gap": "No logging or alerting on cross-user export; the blue-team pass found no audit trail (OPS-009).",
+    "builder_awareness": "blind-spot",   // "tested" | "intentional-gap" | "blind-spot" — did the devs know this was dangerous? (Yellow team)
+    "threat_intel": "OWASP A01:2021 Broken Access Control — IDOR pattern matches mass-scraping breaches"  // known real-world pattern match, or null (Orange team)
   },
   // ...all the normal fields still apply (location points to the entry-point site, fix describes the chain break)
 }
@@ -79,9 +81,9 @@ Why it matters: the ledger keeps both records (no loss — see `ledger-and-recon
 
 ## Enums
 
-**`lens`** — `code-audit` · `ai-saas-security` · `scaling-audit` · `release-and-ops` · `data-privacy` · `frontend-robustness` · `performance` · `accessibility` · `email-deliverability` · `soc2-compliance` · `adversary-emulation` · `seo-discoverability` · `mobile-and-responsive` · `analytics-and-instrumentation` · `internationalisation` · `anti-slop-writing`
+**`lens`** — `code-audit` · `ai-saas-security` · `scaling-audit` · `release-and-ops` · `data-privacy` · `frontend-robustness` · `performance` · `accessibility` · `email-deliverability` · `soc2-compliance` · `adversary-emulation` · `seo-discoverability` · `mobile-and-responsive` · `analytics-and-instrumentation` · `internationalisation` · `anti-slop-writing` · `code-quality`
 
-**`category`** — `security` · `correctness` · `scaling` · `ops` · `privacy` · `performance` · `accessibility` · `email` · `frontend` · `seo` · `mobile` · `analytics` · `i18n` · `compliance` · `attack-path` · `design-aesthetic` · `content`
+**`category`** — `security` · `correctness` · `scaling` · `ops` · `privacy` · `performance` · `accessibility` · `email` · `frontend` · `seo` · `mobile` · `analytics` · `i18n` · `compliance` · `attack-path` · `design-aesthetic` · `content` · `code-quality`
 
 > **`design-aesthetic` is special — and deliberately narrow. Cap by consequence, not by lens.** It is for **purely visual / polish** findings whose worst realistic outcome is "it looks unprofessional or generated": colour, spacing, typographic hierarchy, brand consistency, anti-AI-slop aesthetics (default gradients, dashboard skeletons, template fonts, one-radius-everything), microcopy *tone*. These carry `category: design-aesthetic`, report in their own "Design quality & distinctiveness" section, and the harness **hard-caps them at medium** (critical/high fails the build) because generic aesthetics are a credibility/conversion risk, not a safety one — and letting them sit beside security findings dilutes the report.
 >
@@ -116,6 +118,7 @@ Each lens owns one or more prefixes so reconciliation can trace findings back to
 | mobile-and-responsive | `MOB` |
 | analytics-and-instrumentation | `ANL` |
 | internationalisation | `I18N` |
+| code-quality | `QUAL` |
 | anti-slop-writing | `COPY` |
 
 ## `confidence_type`: the factual / reasoning distinction

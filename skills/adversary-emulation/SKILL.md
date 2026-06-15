@@ -30,6 +30,8 @@ This lens internalises the standard red/blue/purple/white roles and runs them as
 - **Blue (detect):** for each chain, would the system notice? Is there logging, alerting, rate-limiting, anomaly detection along the path?
 - **Purple (synthesise):** combine them — each attack path paired with its detection gap and its fix. This is the value: defenders learning directly from the modelled attack.
 - **White (rules of engagement):** the scope boundary above — keep the exercise defensive, owned-system-only, and non-destructive (model impact, don't execute it).
+- **Yellow (builder awareness):** for each chain, did the developers know this was dangerous? Look for evidence of intentional security decisions vs blind spots in the code.
+- **Orange (threat intel):** cross-reference chains against known real-world attack patterns (OWASP Top 10, common CVE classes, recent breach patterns) and priority-bump chains that match what attackers are actively exploiting.
 
 ## Passes
 
@@ -65,7 +67,24 @@ For each attack path, walk it again asking "would we know?":
 ### Pass 4 (Purple): synthesise path → gap → fix
 For each chain, produce the defender's takeaway: the path, where detection is blind, and the **single cheapest link to break** (often one missing check defeats the whole chain — name it). Prefer fixes that break the chain early (at Initial Access or Execution) over deep mitigations.
 
-### Pass 5 (White): scope hygiene check
+### Pass 5 (Yellow): builder awareness
+For each chain, check whether the developers appeared to understand the risk at each link:
+- Is there intentional security code at the vulnerable point (input validation, auth checks, rate limits) that's incomplete or misconfigured? That's a near-miss — the team knew, they just got it wrong.
+- Is there no security code at all — no validation, no auth check, no comment acknowledging the risk? That's a blind spot, and it's worse than a near-miss because there are probably no compensating controls elsewhere either.
+- Are security-sensitive code paths covered by tests, or untested?
+- Is auth/crypto code purpose-built for this app, or copy-pasted boilerplate with default config?
+
+Record the assessment per chain as `chain.builder_awareness`: `intentional-gap` (team knew, mitigated partially), `blind-spot` (no sign the team considered this), or `tested` (risk is acknowledged and covered by tests/controls). Blind spots should weight severity up — an unknown risk has no compensating controls.
+
+### Pass 6 (Orange): threat intel cross-reference
+For each chain, check whether the attack pattern matches known, actively exploited vulnerability classes:
+- Does the chain map to an OWASP Top 10 category? Which one?
+- Does the chain follow a pattern seen in real breaches (mass IDOR scraping, chained SSRF-to-cloud-metadata, JWT confusion, OAuth redirect hijack, etc.)?
+- Is the vulnerable component or pattern associated with known CVE classes?
+
+Record as `chain.threat_intel`: the matched pattern name and why it matched. Chains that match actively exploited patterns get a priority bump — an IDOR chain in a health-data app maps directly to the pattern behind real regulatory fines. A chain with no known real-world analogue is still valid but is less urgent than one attackers have playbooks for.
+
+### Pass 7 (White): scope hygiene check
 Before reporting, re-read findings against the boundary above. Strip anything that reads as an exploit recipe rather than a defensive fix. Confirm every chain targets the owned system. Confirm impact is *modelled*, never executed against live data/users.
 
 ## What to produce
