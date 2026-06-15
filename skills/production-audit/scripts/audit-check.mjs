@@ -33,10 +33,12 @@ const LENSES = new Set([
   'frontend-robustness', 'performance', 'accessibility',
   'email-deliverability', 'soc2-compliance', 'adversary-emulation', 'seo-discoverability',
   'mobile-and-responsive', 'analytics-and-instrumentation', 'internationalisation', 'anti-slop-writing',
+  'code-quality', 'dependency-audit', 'infrastructure-config',
 ]);
 const CATEGORIES = new Set([
   'security', 'correctness', 'scaling', 'ops', 'privacy', 'performance', 'accessibility',
   'email', 'frontend', 'seo', 'mobile', 'analytics', 'i18n', 'compliance', 'attack-path', 'design-aesthetic', 'content',
+  'code-quality', 'supply-chain', 'infrastructure',
 ]);
 const SEVERITIES = ['info', 'low', 'medium', 'high', 'critical'];
 const SEV_RANK = Object.fromEntries(SEVERITIES.map((s, i) => [s, i]));
@@ -67,6 +69,9 @@ const LENS_CATEGORIES = {
   'analytics-and-instrumentation': ['analytics', 'privacy'],
   'internationalisation': ['i18n'],
   'anti-slop-writing': ['content'],
+  'code-quality': ['code-quality', 'correctness', 'security'],
+  'dependency-audit': ['supply-chain', 'security'],
+  'infrastructure-config': ['infrastructure', 'security', 'ops'],
 };
 // Which id prefixes each lens may use (from finding-schema.md's prefix table).
 const LENS_PREFIXES = {
@@ -86,6 +91,9 @@ const LENS_PREFIXES = {
   'analytics-and-instrumentation': ['ANL'],
   'internationalisation': ['I18N'],
   'anti-slop-writing': ['COPY'],
+  'code-quality': ['QUAL'],
+  'dependency-audit': ['DEP'],
+  'infrastructure-config': ['INFRA'],
 };
 
 const failures = [];

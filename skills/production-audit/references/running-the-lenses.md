@@ -27,6 +27,9 @@ Run in roughly descending order of how catastrophically a miss bites, so the mos
 4. `frontend-robustness`: user-facing breakage on real conditions.
 5. `performance`, `accessibility`, `mobile-and-responsive`: usability and reach.
 6. `email-deliverability`, `seo-discoverability`, `internationalisation`, `analytics-and-instrumentation`, `anti-slop-writing`: reach, discoverability, measurement, and copy quality.
+7. `code-quality`: line-level quality, deferred implementations, and AI-code tells.
+8. `dependency-audit`: supply chain — lock files, version pinning, postinstall scripts, CI scanning.
+9. `infrastructure-config`: deployment config — Docker, Terraform, K8s, CI/CD, reverse proxy, secrets files.
 
 The order is a guide, not a constraint; what matters is that all selected lenses run and nothing is dropped because attention flagged late.
 
