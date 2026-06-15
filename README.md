@@ -10,8 +10,9 @@ An audit skill set for codebases, built on Claude skills.
 
 You build something fast, often with AI. It works, and you have no idea whether
 it survives users or someone poking at it. seatrial runs a codebase through
-17 audit lenses (security, privacy, scaling, compliance, accessibility,
-AI-specific risks, code quality, and more), each reading for one kind of problem. An
+19 audit lenses (security, privacy, scaling, compliance, accessibility,
+AI-specific risks, code quality, dependencies, infrastructure, and more), each
+reading for one kind of problem. An
 orchestrator collates, de-duplicates, and ranks the findings.
 
 It produces a report; you decide what to fix. It won't change your code or claim
@@ -74,7 +75,7 @@ Weakening the harness flips a test.
 share a root cause, ranks by likely damage, and demands evidence before anything
 is reported as fact. The harness gates the final output.
 
-**17 audit lenses**, one per concern:
+**19 audit lenses**, one per concern:
 
 | Lens | Concern |
 |---|---|
@@ -94,6 +95,8 @@ is reported as fact. The harness gates the final output.
 | anti-slop-writing | user-facing copy quality, AI-slop detection |
 | soc2-compliance | trust services criteria, data-protection duties (synthesis) |
 | code-quality | magic numbers, loose equality, AI spaghetti, senior-review checklist |
+| dependency-audit | lock files, version pinning, supply chain, postinstall scripts |
+| infrastructure-config | Docker, Terraform, K8s, CI/CD, nginx, secrets in config |
 | adversary-emulation | attack chains from atomic findings (synthesis, runs last) |
 
 **11 craft skills** for the fix phase: refactoring, testing-strategy,
@@ -101,7 +104,7 @@ debugging-methodology, data-modelling, error-handling-patterns,
 api-and-interface-design, state-management, frontend-design, UX-UI,
 stripe-best-practices, saas-production-security.
 
-29 skills total (17 lenses + 1 orchestrator + 11 craft).
+31 skills total (19 lenses + 1 orchestrator + 11 craft).
 
 ## How it works
 

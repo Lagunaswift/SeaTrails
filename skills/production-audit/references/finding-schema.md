@@ -81,9 +81,9 @@ Why it matters: the ledger keeps both records (no loss — see `ledger-and-recon
 
 ## Enums
 
-**`lens`** — `code-audit` · `ai-saas-security` · `scaling-audit` · `release-and-ops` · `data-privacy` · `frontend-robustness` · `performance` · `accessibility` · `email-deliverability` · `soc2-compliance` · `adversary-emulation` · `seo-discoverability` · `mobile-and-responsive` · `analytics-and-instrumentation` · `internationalisation` · `anti-slop-writing` · `code-quality`
+**`lens`** — `code-audit` · `ai-saas-security` · `scaling-audit` · `release-and-ops` · `data-privacy` · `frontend-robustness` · `performance` · `accessibility` · `email-deliverability` · `soc2-compliance` · `adversary-emulation` · `seo-discoverability` · `mobile-and-responsive` · `analytics-and-instrumentation` · `internationalisation` · `anti-slop-writing` · `code-quality` · `dependency-audit` · `infrastructure-config`
 
-**`category`** — `security` · `correctness` · `scaling` · `ops` · `privacy` · `performance` · `accessibility` · `email` · `frontend` · `seo` · `mobile` · `analytics` · `i18n` · `compliance` · `attack-path` · `design-aesthetic` · `content` · `code-quality`
+**`category`** — `security` · `correctness` · `scaling` · `ops` · `privacy` · `performance` · `accessibility` · `email` · `frontend` · `seo` · `mobile` · `analytics` · `i18n` · `compliance` · `attack-path` · `design-aesthetic` · `content` · `code-quality` · `supply-chain` · `infrastructure`
 
 > **`design-aesthetic` is special — and deliberately narrow. Cap by consequence, not by lens.** It is for **purely visual / polish** findings whose worst realistic outcome is "it looks unprofessional or generated": colour, spacing, typographic hierarchy, brand consistency, anti-AI-slop aesthetics (default gradients, dashboard skeletons, template fonts, one-radius-everything), microcopy *tone*. These carry `category: design-aesthetic`, report in their own "Design quality & distinctiveness" section, and the harness **hard-caps them at medium** (critical/high fails the build) because generic aesthetics are a credibility/conversion risk, not a safety one — and letting them sit beside security findings dilutes the report.
 >
@@ -119,6 +119,8 @@ Each lens owns one or more prefixes so reconciliation can trace findings back to
 | analytics-and-instrumentation | `ANL` |
 | internationalisation | `I18N` |
 | code-quality | `QUAL` |
+| dependency-audit | `DEP` |
+| infrastructure-config | `INFRA` |
 | anti-slop-writing | `COPY` |
 
 ## `confidence_type`: the factual / reasoning distinction

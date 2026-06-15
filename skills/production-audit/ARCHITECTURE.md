@@ -1,6 +1,6 @@
 # Production-Audit — Architecture & Lens Map
 
-How the production-audit orchestrator is wired: the pipeline, every lens, the machinery that makes the output trustworthy, and how all 29 skills in `.claude/skills/` relate to it.
+How the production-audit orchestrator is wired: the pipeline, every lens, the machinery that makes the output trustworthy, and how all 31 skills in `.claude/skills/` relate to it.
 
 ---
 
@@ -46,7 +46,7 @@ How the production-audit orchestrator is wired: the pipeline, every lens, the ma
 
 ---
 
-## The lenses (17)
+## The lenses (19)
 
 Atomic lenses scan the code; the two **synthesis** lenses run last and consume the ledger of atomic findings.
 
@@ -69,6 +69,8 @@ Atomic lenses scan the code; the two **synthesis** lenses run last and consume t
 | 15 | **adversary-emulation** | CHAIN | Chains findings into MITRE ATT&CK attack paths; detection gaps; red/blue/purple | **synthesis** · pri 7 (last) |
 | 16 | **anti-slop-writing** | COPY | Quality of user-facing copy (landing/onboarding/microcopy/email) — AI-slop writing tells. Capped at medium → `content` | atomic · pri 5 |
 | 17 | **code-quality** | QUAL | Senior-review checklist: magic numbers, loose equality, empty catches, naming, async anti-patterns, boundary hygiene, AI-code tells | atomic · pri 3 |
+| 18 | **dependency-audit** | DEP | Lock file hygiene, version pinning, dependency bloat, postinstall scripts, dev/prod boundaries, CI vulnerability scanning | atomic · pri 2 |
+| 19 | **infrastructure-config** | INFRA | Docker, Terraform, K8s, CI/CD pipelines, reverse proxy, secrets files — deployment config checked into the repo | atomic · pri 2 |
 
 **Conditional deepener:** when Stage 0 detects **Stripe**, code-audit's Security/Correctness passes also apply **`stripe-best-practices`** (webhook signatures, idempotency, key handling, subscription-state). Findings carry `SEC`/`COR` prefixes, tagged `also_seen_by_lenses:["stripe-best-practices"]`.
 
@@ -133,7 +135,7 @@ code-audit  ──┬── Pass 1 Security      ── lens: saas-production-se
 
 | Role | Skills |
 |------|--------|
-| **Lens (17)** | code-audit, ai-saas-security, scaling-audit, release-and-ops, data-privacy, frontend-robustness, performance, accessibility, mobile-and-responsive, email-deliverability, seo-discoverability, analytics-and-instrumentation, internationalisation, soc2-compliance, adversary-emulation, anti-slop-writing, code-quality |
+| **Lens (19)** | code-audit, ai-saas-security, scaling-audit, release-and-ops, data-privacy, frontend-robustness, performance, accessibility, mobile-and-responsive, email-deliverability, seo-discoverability, analytics-and-instrumentation, internationalisation, soc2-compliance, adversary-emulation, anti-slop-writing, code-quality, dependency-audit, infrastructure-config |
 | **Craft sub-skill** (applied inside code-audit's passes) | saas-production-security, debugging-methodology, testing-strategy, refactoring, UX-UI, frontend-design |
 | **Fix-phase craft skill** (handoff after the report, if fixing) | error-handling-patterns, data-modelling, api-and-interface-design, state-management (+ debugging-methodology, refactoring, testing-strategy reused) |
 | **Conditional deepener** | stripe-best-practices (Stripe apps only) |
