@@ -99,12 +99,17 @@ is reported as fact. The harness gates the final output.
 | infrastructure-config | Docker, Terraform, K8s, CI/CD, nginx, secrets in config |
 | adversary-emulation | attack chains from atomic findings (synthesis, runs last) |
 
-**11 craft skills** for the fix phase: refactoring, testing-strategy,
+**12 craft skills** for the fix phase: refactoring, testing-strategy,
 debugging-methodology, data-modelling, error-handling-patterns,
 api-and-interface-design, state-management, frontend-design, UX-UI,
-stripe-best-practices, saas-production-security.
+stripe-best-practices, saas-production-security, ui-ux-pro-max.
 
-31 skills total (19 lenses + 1 orchestrator + 11 craft).
+32 skills total (19 lenses + 1 orchestrator + 12 craft).
+
+`ui-ux-pro-max` is a data-driven design intelligence toolkit with searchable
+CSV databases (161 color palettes, 57 font pairings, 67+ UI styles, 25 chart
+types, 99 UX guidelines) and a BM25 search engine that generates complete
+design systems from product-type queries. Requires Python 3.
 
 ## How it works
 
