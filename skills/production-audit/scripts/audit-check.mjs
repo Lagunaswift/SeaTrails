@@ -104,7 +104,9 @@ const prefixOf = (id) => (typeof id === 'string' ? id.replace(/-\d+$/, '') : '')
 const hasRealEvidence = (e) =>
   typeof e === 'string' && e.trim().length >= 12 && (EVIDENCE_LOC.test(e) || EVIDENCE_CODE.test(e));
 // Extract finding-id patterns from prose (chain steps, issue text, detection_gap).
-const FINDING_ID_IN_TEXT = /\b([A-Z]{2,6}-\d{3,})\b/g;
+// Letter-first, then letters or digits: every registered prefix (incl. A11Y, SOC2,
+// I18N) must be extractable here, or a dangling reference in prose evades the check.
+const FINDING_ID_IN_TEXT = /\b([A-Z][A-Z0-9]{1,5}-\d{3,})\b/g;
 const extractReferencedIds = (text) =>
   typeof text === 'string' ? [...text.matchAll(FINDING_ID_IN_TEXT)].map((m) => m[1]) : [];
 

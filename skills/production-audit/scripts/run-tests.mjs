@@ -395,6 +395,32 @@ const cases = [
     }),
   },
   {
+    // CHAIN TEXT ORPHAN, digit-bearing prefix: same attack as above but the dropped
+    // id's prefix contains digits (A11Y). The prose scanner must extract these too —
+    // a pure-letter-only regex lets A11Y/SOC2/I18N references evade the check.
+    // remediation_order is supplied so the ONLY possible failure is the prose reference.
+    name: 'chain step text references a DROPPED A11Y finding (digit-bearing prefix) FAILS',
+    expect: 'fail',
+    ledger: [
+      finding({ id: 'SEC-001', severity: 'high', verification: { status: 'verified', evidence: GOOD_EVIDENCE } }),
+      finding({ id: 'A11Y-001', lens: 'accessibility', category: 'accessibility', severity: 'medium' }),
+      finding({ id: 'CHAIN-001', lens: 'adversary-emulation', category: 'attack-path', severity: 'high', confidence_type: 'reasoning', verification: { status: 'verified', evidence: GOOD_EVIDENCE, note: 'traced' }, chain: { objective: 'exfil', steps: ['SEC-001 — entry', 'A11Y-001 keeps the victim from noticing the prompt'], component_findings: ['SEC-001'] } }),
+    ],
+    report: report({
+      scope: { app: 't', lenses_selected: ['code-audit', 'accessibility', 'adversary-emulation'], lenses_run: ['code-audit', 'accessibility', 'adversary-emulation'] },
+      reconciliation: { raw: 3, reported: 2, merged: 0, dropped: 1 },
+      dropped: [{ id: 'A11Y-001', reason: 'focus trap not reproducible; modal releases focus' }],
+      findings: [
+        finding({ id: 'SEC-001', severity: 'high', verification: { status: 'verified', evidence: GOOD_EVIDENCE } }),
+        finding({ id: 'CHAIN-001', lens: 'adversary-emulation', category: 'attack-path', severity: 'high', confidence_type: 'reasoning', verification: { status: 'verified', evidence: GOOD_EVIDENCE, note: 'traced' }, chain: { objective: 'exfil', steps: ['SEC-001 — entry', 'A11Y-001 keeps the victim from noticing the prompt'], component_findings: ['SEC-001'] } }),
+      ],
+      remediation_order: [
+        { id: 'SEC-001', reason: 'the entry point; closing it breaks the chain' },
+        { id: 'CHAIN-001', reason: 'chain persists until the entry point is closed' },
+      ],
+    }),
+  },
+  {
     // SEVERITY-BASIS ORPHAN: chain components are all reconciled, but severity_basis
     // lists a dropped finding whose severity drove the chain's critical rating.
     name: 'chain severity_basis references a dropped finding FAILS',
