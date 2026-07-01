@@ -1,6 +1,6 @@
 # Production-Audit — Architecture & Lens Map
 
-How the production-audit orchestrator is wired: the pipeline, every lens, the machinery that makes the output trustworthy, and how all 31 skills in `.claude/skills/` relate to it.
+How the production-audit orchestrator is wired: the pipeline, every lens, the machinery that makes the output trustworthy, and how all 32 skills in `.claude/skills/` relate to it.
 
 ---
 
@@ -139,6 +139,7 @@ code-audit  ──┬── Pass 1 Security      ── lens: saas-production-se
 | **Craft sub-skill** (applied inside code-audit's passes) | saas-production-security, debugging-methodology, testing-strategy, refactoring, UX-UI, frontend-design |
 | **Fix-phase craft skill** (handoff after the report, if fixing) | error-handling-patterns, data-modelling, api-and-interface-design, state-management (+ debugging-methodology, refactoring, testing-strategy reused) |
 | **Conditional deepener** | stripe-best-practices (Stripe apps only) |
+| **Design-data toolkit** (fix/design phase) | ui-ux-pro-max (searchable design databases + BM25 generator, Python 3; the data layer behind fixing `design-aesthetic`/`content` findings) |
 | **The orchestrator** | production-audit |
 
 

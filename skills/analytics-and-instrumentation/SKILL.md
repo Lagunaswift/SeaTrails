@@ -70,4 +70,4 @@ Match to stage and need. A pre-launch product with no users does not need elabor
 ## Skills this leans on
 - `data-privacy`: consent for tracking and PII minimisation in events, this skill defers to it for the lawful-tracking requirements; measure usage without breaching privacy
 - `scaling-audit`: operational observability (is it up/slow/erroring) is the sibling measurement discipline; this is product usage, that is system health
-- `belief-shift-engine`, product strategy: the questions worth measuring often come from the product/growth strategy that defines what success means
+- product strategy (no skill in this suite): the questions worth measuring often come from the product/growth strategy that defines what success means
