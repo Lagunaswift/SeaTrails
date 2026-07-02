@@ -50,7 +50,7 @@ Use `dedup.also_seen_by_lenses` when the underlying issue is another lens's find
 - **<skill>** — <boundary: what it owns that this doesn't>
 ```
 
-Family A (the 14 prose specialists) exists for skills that are also useful standalone; its "cardinal principle / areas in priority order / How to report / Scoping / Skills this leans on" skeleton is documented in `docs/HANDOVER.md`. If you write one, remember it carries **no** schema language — the registry injects the contract — so its registry entry matters even more.
+Family A (the 14 prose specialists) exists for skills that are also useful standalone; its skeleton is "cardinal principle / areas in priority order / How to report / Scoping / What to produce under a production-audit / Skills this leans on". The `## What to produce under a production-audit` block is required either way — the consistency checker fails any lens whose declared prefix or primary category is missing or disagrees with the harness maps. Phrase it with the parse anchors: ``prefix `X` `` and ``category `y` ``.
 
 House style either way: British English, two frontmatter keys only (`name`, `description`), declarative and concrete, no slop (reread `skills/anti-slop-writing/SKILL.md`).
 

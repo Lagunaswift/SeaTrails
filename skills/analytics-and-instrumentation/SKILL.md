@@ -67,6 +67,10 @@ Order by what unlocks decisions: measuring nothing meaningful (flying blind) or 
 ## Scoping
 Match to stage and need. A pre-launch product with no users does not need elaborate analytics, it needs the instrumentation ready to learn once users arrive (an activation event, a key funnel). A live product making decisions needs the key metrics, clean events, and funnels. Avoid the opposite failure too: over-instrumenting (tracking everything, huge schemas, dashboards no one reads) is its own waste and a privacy liability. The honest output for most products is "you are either flying blind or drowning in vanity metrics; pick the three questions that matter (activation, the key funnel's drop-off, retention), instrument those cleanly and with consent, and act on them."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `ANL`, category `analytics` — or `privacy` where the consequence is consent or PII exposure. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `data-privacy`: consent for tracking and PII minimisation in events, this skill defers to it for the lawful-tracking requirements; measure usage without breaching privacy
 - `scaling-audit`: operational observability (is it up/slow/erroring) is the sibling measurement discipline; this is product usage, that is system health

@@ -66,6 +66,10 @@ Order by risk and likelihood of enforcement: no deletion path, tracking without 
 ## Scoping
 Match to what the app handles and who it serves. A no-account static site collecting nothing has almost no obligations, say so. An app with accounts, analytics, marketing email, or special-category data (health, finance) serving a worldwide audience carries the full set and should assume the strictest applicable regime. The honest output for a simple app is often "you collect little; do these three things (consent for analytics, a real deletion path, an accurate policy) and you have covered the main practical risk", and for a data-heavy one, "get a lawyer/DPO involved, here is what to fix on the engineering side meanwhile."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `PRIV`, category `privacy` — or `compliance` or `security` where the consequence lands there. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `ai-saas-security`, `code-audit`: preventing breaches (the security side); this skill owns the privacy obligations around the data and after a breach
 - `scaling-audit`: data durability and backups, which complicate complete deletion, and observability, which determines whether you can assess a breach

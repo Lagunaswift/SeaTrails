@@ -68,6 +68,10 @@ Order by user impact: things that cause real damage or total breakage (double-su
 ## Scoping
 Match to stakes. A static informational page has little async to get wrong; a data-driven app with forms, money, and real-time updates needs the full set. But the four-states discipline and double-submit prevention are cheap and prevent the most common, most damaging failures, they should be default for anything with a form or a fetch. The honest output for most fast-built apps is "the happy path is built; loading and error states are missing or partial, the submit can double-fire, and it breaks on empty/missing data, handle those and it becomes robust."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `FE`, category `frontend` — or `correctness` or `accessibility` where the consequence lands there. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `frontend-design`: the visual/UX side; this is how the interface behaves, that is how it looks (the states this skill demands still need designing)
 - `state-management`: async state, races, and stale data are state problems; this is their UI-facing edge

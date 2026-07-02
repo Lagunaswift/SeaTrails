@@ -72,6 +72,10 @@ Order by barrier severity: things that make a task impossible for some users (ke
 ## Scoping
 Match to reach and obligation. A throwaway internal tool used by a known team has lighter obligations than a public consumer service (which likely has legal duties under the ADA/Equality Act/EAA). But the foundational items, semantic markup, keyboard operability, labels, contrast, are cheap, benefit everyone, and should be the default for anything user-facing. The honest output for most apps is "the markup and keyboard support are the real gaps; fix the non-semantic controls, add the missing labels and alt text, fix contrast, and you have cleared the barriers that actually exclude people."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `A11Y`, category `accessibility` — or `frontend` where the failure is interaction robustness rather than access. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `frontend-design`: the visual/UX side; accessibility ensures that experience reaches everyone (contrast and focus styling live at the overlap)
 - `performance`: semantic markup overlaps; both benefit from clean structure

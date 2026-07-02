@@ -229,3 +229,7 @@ Scan for every entry in the Banned Words and Phrases section. Replace each hit.
 Read the whole thing once more and ask: does this read like a specific human wrote it, or like a model padding toward a word count? If the latter, the most likely cause is a structural tell that survived Step 1. Go back and find it.
 
 Do not return the draft until all four steps have run.
+
+## What to produce under a production-audit
+
+Standalone, this skill is a writing standard applied to drafts. As a lens under `production-audit` it audits the app's own user-facing copy — landing and marketing pages, onboarding, microcopy, button labels, empty/error-state wording, notification and transactional-email copy; never code comments, logs, or machine-to-machine output — and emits findings in the canonical schema (`production-audit/references/finding-schema.md`), appended to the run's `raw-findings.jsonl` as discovered: prefix `COPY`, category `content`, hard-capped at medium by the harness and reported in the "Design & copy quality" section, never the readiness tiers. Copy whose worst case is a real failure (a misleading legal disclaimer, instructions that lose data) is categorised by that consequence and owned by the relevant lens; reserve `content` for "the worst case is it reads badly". The same standard also governs the audit report's own prose — the harness hard-fails the report on the banned-word tells.

@@ -119,3 +119,7 @@ For reference, the lenses and what each covers:
 - `data-modelling`: persisted data shape (pass 5)
 - `UX-UI`: usability, interaction patterns, accessibility (pass 6, UI code only)
 - `frontend-design`: visual design quality, AI-pattern avoidance, aesthetic distinctiveness (pass 6, UI code only)
+
+## What to produce under a production-audit
+
+Standalone, report per "How to report findings". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered, with prefixes `SEC`/`COR`/`DBG`/`TST`/`STR`/`UIUX` by pass. Category follows the consequence: `security` or `correctness` for passes 1–5, `performance` where that is the cost, and for pass 6 `frontend` when an interaction failure has real impact (keeping its real severity) or `design-aesthetic` only when the worst case is "it looks generic" (hard-capped at medium). Access barriers surfaced in pass 6 belong to the `accessibility` lens's category — record them via `dedup.also_seen_by_lenses` rather than filing them under this lens. The schema overrides the prose format.

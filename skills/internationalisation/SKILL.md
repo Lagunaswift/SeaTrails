@@ -67,6 +67,10 @@ Order by impact: hard-coded text (blocks translation entirely) and timezone bugs
 ## Scoping
 Match to actual reach and plans. An app firmly for one locale with no expansion plans may legitimately defer most of this, but the cheap structural parts (UTF-8 everywhere, externalised strings, locale-aware date/number formatting, UTC time storage) are worth doing even then, because they cost little now and save a painful refactor if it ever goes international. For a genuinely worldwide app, the full set applies. The honest output for a single-locale app with worldwide ambitions is "you are locale-locked in these ways; the structural fixes (externalise text, format by locale, store UTC) are cheap now and expensive later, do those even before you translate."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `I18N`, category `i18n` (its only category). The schema overrides the prose format above.
+
 ## Skills this leans on
 - `frontend-design`: layouts must flex for text expansion and flip for RTL, the design has to accommodate i18n, not fight it
 - `anti-slop-writing`: the quality of the source strings being translated (separate from the i18n mechanics)

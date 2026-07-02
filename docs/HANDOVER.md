@@ -1,17 +1,17 @@
 # Handover — state of seatrial
 
-Written 2026-07-01 on branch `claude/opus-4.8-documentation-gy6nfh`, after a full read of the repo by a documentation pass. This is the orientation document for the next agent or maintainer: what exists, what just changed, what is known-broken or known-odd, and what is worth doing next.
+Written 2026-07-01 on branch `claude/opus-4.8-documentation-gy6nfh`, after a full read of the repo by a documentation pass; updated 2026-07-02 after a second pass that executed the backlog's top three items. This is the orientation document for the next agent or maintainer: what exists, what just changed, what is known-broken or known-odd, and what is worth doing next.
 
 **Reading order for a new session:** `CLAUDE.md` (root — the working rules) → this file → `docs/OPERATORS-GUIDE.md` (if running audits) → `docs/decisions/` (before changing architecture) → `skills/production-audit/ARCHITECTURE.md` (the wiring).
 
 ## What this repo is
 
-seatrial (repo name SeaTrails): 32 Claude skills — 19 audit lenses, the `production-audit` orchestrator, 12 craft skills — plus a zero-dependency integrity harness (`audit-check.mjs`) that gates every audit report, its adversarial regression suite (`run-tests.mjs`, 43 cases), and a renderer (`render-report.mjs`) that generates the human report from gated data. The audit is executed by an agent reading prose; the scripts make its output's *integrity* machine-checked. ADRs 0001–0014 record why.
+seatrial (repo name SeaTrails): 32 Claude skills — 19 audit lenses, the `production-audit` orchestrator, 12 craft skills — plus a zero-dependency integrity harness (`audit-check.mjs`) that gates every audit report, its adversarial regression suite (`run-tests.mjs`, 50 cases), and a renderer (`render-report.mjs`) that generates the human report from gated data. The audit is executed by an agent reading prose; the scripts make its output's *integrity* machine-checked. ADRs 0001–0014 record why.
 
 ## Verify this handover's claims
 
 ```bash
-node skills/production-audit/scripts/run-tests.mjs                    # 43 passed, 0 failed
+node skills/production-audit/scripts/run-tests.mjs                    # 50 passed, 0 failed
 node .claude/skills/release-check/scripts/check-consistency.mjs      # 0 failures, 2 known warnings
 ```
 
@@ -25,6 +25,7 @@ The two warnings (UX-UI and seo-discoverability name mismatches) are documented 
 | 2026-06-15 | Three lenses added (`e663ae7`…`4258a21`) | code-quality (+ yellow/orange adversary passes, deferred-implementation detection), dependency-audit, infrastructure-config; wired into harness + registry → 31 skills |
 | 2026-06-25 | `ui-ux-pro-max` (`c8cfb3e`) | vendored design-intelligence toolkit: 3 Python scripts + 32 CSVs (+9.3k lines) → 32 skills |
 | 2026-07-01 | this branch | documentation layer + drift repairs + one harness gap closed (below) |
+| 2026-07-02 | this branch | backlog items 1–3 executed: coverage-matrix enforcement, runnable fixtures, inline lens contracts (below) |
 
 ## What this branch changed
 
@@ -55,31 +56,36 @@ The two warnings (UX-UI and seo-discoverability name mismatches) are documented 
 
 The trap bit twice during this very pass: the protective `*report*.md` ignore (meant for real audit output) caught the new `references/report-format.md` at commit time, and then caught `docs/decisions/0013-report-rendered-from-gated-data.md` — a directory negation does not override a file-glob match, so `!docs/decisions/*.md` had to be explicit. Both fixed with targeted negations, and the consistency checker now runs `git check-ignore` over every tree that is meant to be tracked (`skills/`, `docs/decisions/`, `.claude/skills/`, `.github/`, the tracked root docs) so a repo file caught by an ignore pattern is a hard failure, not a silent omission.
 
+## What the second pass changed (2026-07-02)
+
+The top three backlog items, each done under the harness-dev discipline:
+
+- **Coverage matrix enforced** (was backlog #1). Four bypasses were written and observed wrongly passing, then `checkCoverage` was extended: when lenses ran, `coverage.matrix` must exist with a row per run lens, `areas_total` must be a positive number, and a row naming a lens that neither ran nor was deferred fails (coverage padding). A boundary case locks the legitimate pattern — a deferred lens's empty row. The suite's `report()` helper now derives a conforming default matrix from each case's own `lenses_run`, and the two pre-existing coverage cases carry explicit matrices so each still pins its original attack.
+- **Fixtures are runnable worked examples** (was backlog #2). Both fixture dirs gained their paired `report.json`; the runner gained `fixtureDir` (spawn the harness against a committed directory) and `expectExit` (assert exit 1, a gate failure, not exit 2, an input error); the last two suite cases now run the fixtures end-to-end, so they cannot rot. `fixtures/README.md` explains what each demonstrates — the pass fixture shows merge, verification, a re-narrated chain, the compliance duty, the polish cap, and a full coverage block; the fail fixture is rejected for exactly four named reasons, including the "keeping as high pending verification" tell. The `*report*.json` ignore gained a fixtures negation.
+- **Every lens declares its contract inline** (was backlog #3). All 14 Family A lenses now carry a `## What to produce under a production-audit` block naming their prefix, primary category, consequence-routed secondaries, and the ledger-append duty — including `anti-slop-writing` (COPY, `content`, the medium cap, the copy-vs-consequence boundary, and its second role governing the report's own prose) and `seo-discoverability` (which now states in-file that the `lens` enum value is the directory name, not its frontmatter name). The consistency checker verifies every lens's declared prefix set and primary category against the harness maps, so the blocks cannot drift.
+- Also: the original chain-prose test case gained a `remediation_order` so the dropped-id-in-prose reference is its only possible failure (was backlog #6).
+
 ## Known oddities — understood, deliberately not "fixed"
 
 - **`seo-discoverability`**: frontmatter `name: seo-and-discoverability` vs directory + lens-enum `seo-discoverability`. Documented in `lens-registry.md` as a known mismatch. Any finding must use the enum value. Aligning the frontmatter is a one-line fix *plus* the registry note — left alone because the author documented rather than fixed it, which reads as a choice; see backlog.
 - **`UX-UI`**: directory name vs frontmatter `ux-ui-patterns`; every cross-reference uses `ux-ui-patterns`. Same treatment.
 - **Install-location paths**: every path inside the product docs assumes `.claude/skills/` (the installed location in a *target* repo). In this repo the files live under `skills/`. This is correct, not drift — do not "fix" product docs to point at `skills/`.
-- **`scripts/fixtures/{pass,fail}/`** contain only `raw-findings.jsonl` — no `report.json` — so neither can actually run through the harness, and `run-tests.mjs` never references them (each case builds its own inputs in a temp dir). They are illustrative ledgers only, despite ARCHITECTURE.md billing them as "worked examples". See backlog.
-- **Family A vs Family B lenses.** 14 lenses are standalone prose specialists with no schema/category language in-file; the orchestrator's registry *injects* the output contract at run time (and its instruction explicitly overrides their own "How to report" sections). 5 lenses (soc2-compliance, code-quality, dependency-audit, infrastructure-config, adversary-emulation) carry the contract inline in a `## What to produce` section. Asymmetric by history, not by design intent.
+- **Family A vs Family B lenses.** 14 lenses are standalone prose specialists (Family A) whose primary output is a prose report; 5 are audit-native (Family B). Since the second pass, both families carry the output contract in-file (`## What to produce under a production-audit` for A, bare `## What to produce` for B) and the checker verifies the declarations. The registry's override instruction still applies when Family A runs as lenses: the schema beats their "How to report" prose. The remaining reliable family discriminator is the description phrase "or when a production-audit selects this lens" (Family B only).
 - **The suite's own prose vs its own rules.** The lens files use bolded-bullet lead-ins and em-dashes densely — patterns `anti-slop-writing` flags. The slop gate applies to audit *reports*, not repo prose; still, an irony to be aware of when editing.
 - **`audit-check.mjs` invariant comments** are numbered non-monotonically in source (INVARIANT 8 sits above 7). Call order at the bottom of the file is what runs. Cosmetic.
 
 ## Improvement backlog, ranked
 
-Each entry: why it matters, then the sketch. Ordered by value-to-effort for an agent picking up the repo.
+Each entry: why it matters, then the sketch. Ordered by value-to-effort for an agent picking up the repo. (The 2026-07-01 list's items 1, 2, 3 and 6 were executed on 2026-07-02 — see "What the second pass changed".)
 
-1. **Enforce the coverage matrix.** `checkCoverage` gates only `files_examined`/`files_total`; `coverage-matrix.md` specifies `areas_total` and a lens×area matrix that nothing validates — a coverage claim that can still be hollow at lens granularity. Attack-first: write the bypass case (matrix omits an area the lens's skill defines, or `areas_total` missing while lenses ran), then extend `checkCoverage`.
-2. **Complete the fixtures into a runnable worked example.** Add the paired `report.json` to `fixtures/pass/` and `fixtures/fail/`, and add two suite cases asserting the pass fixture exits 0 and the fail fixture exits 1. Then ARCHITECTURE.md's description becomes true, newcomers get a full valid audit to imitate, and the fixture files can't silently rot.
-3. **Give Family A lenses a minimal inline contract.** A three-line `## What to produce` block (schema pointer, prefix, category) in each of the 14 prose specialists — matching what the registry injects — makes each lens self-describing and removes the single-point dependence on the registry prompt. Highest-value single target: `anti-slop-writing`, whose entire lens contract (COPY prefix, `content` category, medium cap) currently lives nowhere in its own file.
-4. **Resolve the two name mismatches** (`seo-and-discoverability`, `ux-ui-patterns`) one way or the other: align frontmatter to directory (then update `lens-registry.md`'s note, `CLAUDE.md`, and the consistency checker's allowlist) or record an ADR saying why they stay. Today they are allowlisted warnings; either resolution is better than the standing exception.
-5. **`ui-ux-pro-max` intake debt.** It ships two orphaned CSVs no script reads (`design.csv`, `draft.csv` — ~3.5k rows, bilingual content, one marked "backup/reference only" in a Chinese note); it is American-English against house style; its Python has no tests; and its data provenance/licence is unrecorded. Decide: wire the orphans in, or delete them; add a smoke test (`search.py --design-system "saas dashboard"` exits 0 and emits a palette); record provenance in the SKILL.md.
-6. **Strengthen the older chain-prose test case** (dropped `SEC-002` in step text) with a `remediation_order`, so it pins the prose check the way the new A11Y case does, rather than failing for the incidental reason.
-7. **Reshape `ai-saas-security` into lens form.** It is registered as a priority-1 lens but written as a build guide (implementation checklists, no numbered passes); the registry's pass list re-labels its sections. Rewrite into detection-oriented passes without losing its content, or accept and document the genre exception.
-8. **Harness `--json` output.** A machine-readable failure list would let CI annotate PRs and let orchestrating agents branch on specific invariants instead of parsing prose. Additive flag; attack-first cases for the flag's own shape.
-9. **Distribution.** Installation is "copy skills/ into .claude/skills/" (now documented in the operator guide), but there is no install script, no versioning, no update path. Options: a `schema_version` field in `report.json` (gate warns on mismatch), a tagged-release convention, or packaging as a Claude Code plugin. Decide when there are external users to serve.
-10. **`stripe-best-practices` staleness.** Vendored with a pinned API version string ("2026-04-22.dahlia"). Add a check-against-current-docs note in the skill, or a refresh cadence.
-11. **Naming.** The product calls itself seatrial; the repo is SeaTrails. Cosmetic, author's call — but pick one before external users cite it.
+1. **Resolve the code-audit ↔ `accessibility` category tension.** `lens-registry.md`'s code-audit entry says pass-6 access barriers are "categorised `frontend` … or `accessibility`", but `LENS_CATEGORIES` does not grant code-audit the `accessibility` category — a UIUX-prefixed finding filed as `accessibility` hard-fails. The inline contract added in the second pass routes access barriers to the accessibility lens via `dedup.also_seen_by_lenses`, matching the harness. Either extend code-audit's ownership deliberately (attack-first, with a boundary case) or tighten the registry wording to match the harness; today the registry sentence overstates.
+2. **Resolve the two name mismatches** (`seo-and-discoverability`, `ux-ui-patterns`) one way or the other: align frontmatter to directory (then update `lens-registry.md`'s note, `CLAUDE.md`, and the consistency checker's allowlist) or record an ADR saying why they stay. Today they are allowlisted warnings; either resolution is better than the standing exception. The seo trap is at least now stated inside the skill itself.
+3. **`ui-ux-pro-max` intake debt.** It ships two orphaned CSVs no script reads (`design.csv`, `draft.csv` — ~3.5k rows, bilingual content, one marked "backup/reference only" in a Chinese note); it is American-English against house style; its Python has no tests; and its data provenance/licence is unrecorded. Decide: wire the orphans in, or delete them; add a smoke test (`search.py --design-system "saas dashboard"` exits 0 and emits a palette); record provenance in the SKILL.md.
+4. **Reshape `ai-saas-security` into lens form.** It is registered as a priority-1 lens but written as a build guide (implementation checklists, no numbered passes); the registry's pass list re-labels its sections. Its new What-to-produce block covers the output contract, but the body still reads build-first. Rewrite into detection-oriented passes without losing its content, or accept and document the genre exception.
+5. **Harness `--json` output.** A machine-readable failure list would let CI annotate PRs and let orchestrating agents branch on specific invariants instead of parsing prose. Additive flag; attack-first cases for the flag's own shape.
+6. **Distribution.** Installation is "copy skills/ into .claude/skills/" (now documented in the operator guide), but there is no install script, no versioning, no update path. Options: a `schema_version` field in `report.json` (gate warns on mismatch), a tagged-release convention, or packaging as a Claude Code plugin. Decide when there are external users to serve.
+7. **`stripe-best-practices` staleness.** Vendored with a pinned API version string ("2026-04-22.dahlia"). Add a check-against-current-docs note in the skill, or a refresh cadence.
+8. **Naming.** The product calls itself seatrial; the repo is SeaTrails. Cosmetic, author's call — but pick one before external users cite it.
 
 ## Working agreements
 

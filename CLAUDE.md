@@ -41,8 +41,8 @@ Stages 0–5: detect stack → select lenses → run lenses (append every findin
 
 The 19 lenses split into two families you must not confuse:
 
-- **Family A (14 prose specialists)** — code-audit, ai-saas-security, scaling-audit, release-and-ops, data-privacy, performance, accessibility, email-deliverability, frontend-robustness, internationalisation, seo-discoverability, mobile-and-responsive, analytics-and-instrumentation, anti-slop-writing. Standalone craft-style skills; they say nothing about schemas or categories. The orchestrator's `lens-registry.md` **injects** the output contract when they run as lenses (the canonical schema overrides their "How to report" prose).
-- **Family B (5 audit-native)** — soc2-compliance, code-quality, dependency-audit, infrastructure-config, adversary-emulation. Written for this suite; each carries a `## What to produce` section naming its prefix and category inline.
+- **Family A (14 prose specialists)** — code-audit, ai-saas-security, scaling-audit, release-and-ops, data-privacy, performance, accessibility, email-deliverability, frontend-robustness, internationalisation, seo-discoverability, mobile-and-responsive, analytics-and-instrumentation, anti-slop-writing. Standalone craft-style skills whose primary output is a prose report; each also carries a `## What to produce under a production-audit` block naming its prefix and category, and the orchestrator's `lens-registry.md` repeats the same contract (the canonical schema overrides their "How to report" prose when run as lenses).
+- **Family B (5 audit-native)** — soc2-compliance, code-quality, dependency-audit, infrastructure-config, adversary-emulation. Written for this suite; each carries a bare `## What to produce` section. Either way, the consistency checker verifies every lens's declared prefix and primary category against the harness maps.
 
 ## Changing things: the registration points
 
@@ -72,7 +72,7 @@ Changing the **harness** (`audit-check.mjs`) has its own discipline — attack-f
 
 - `seo-discoverability/SKILL.md` frontmatter says `name: seo-and-discoverability`, but the lens enum value and directory are `seo-discoverability`. Findings must use the enum value or the harness rejects them. Documented in `lens-registry.md`; do not "fix" one side without the other.
 - `UX-UI/` directory ↔ frontmatter `name: ux-ui-patterns`; cross-references use `ux-ui-patterns`. Its supporting .md files sit flat in the skill root.
-- `scripts/fixtures/{pass,fail}/` contain illustrative ledgers only (no report.json); they are not used by `run-tests.mjs` and cannot be run through the harness as-is.
+- `scripts/fixtures/{pass,fail}/` are complete worked examples (ledger + report.json) run through the real harness by the last two suite cases — see `fixtures/README.md`. Changing a fixture or the harness can flip them; that is the point.
 - The orchestrator's SKILL.md description block is the *triggering surface* for the whole suite — edit its phrasing carefully.
 
 ## Before you finish any change

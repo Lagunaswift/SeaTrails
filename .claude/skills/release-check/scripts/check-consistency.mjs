@@ -212,7 +212,34 @@ for (const dir of skillDirs) {
   }
 }
 
-// ---- 10. no product or tracked-doc file is gitignored -------------------------
+// ---- 10. every lens's What-to-produce contract matches the harness maps -------
+// Each lens SKILL.md carries a "## What to produce" section (bare for the
+// audit-native lenses, "…under a production-audit" for the prose specialists)
+// declaring its prefix and primary category. Both must agree with
+// LENS_PREFIXES / LENS_CATEGORIES, or the inline contract misleads subagents.
+for (const lens of harnessLenses) {
+  const p = join(SKILLS, lens, 'SKILL.md');
+  if (!existsSync(p)) continue; // missing SKILL.md already failed above
+  const src = readFileSync(p, 'utf8');
+  const sec = src.match(/^## What to produce[^\n]*\n[\s\S]*?(?=^## |$(?![\s\S]))/m);
+  if (!sec) { fail(`skills/${lens}/SKILL.md has no "## What to produce" section — the lens does not state its output contract`); continue; }
+  const text = sec[0];
+  const prefixDecl = text.match(/prefix(?:es)?\s+((?:`[A-Z][A-Z0-9]{1,5}`\s*[\/,]?\s*)+)/i);
+  if (!prefixDecl) fail(`skills/${lens}/SKILL.md "What to produce" does not declare a prefix (phrase: prefix \`X\`)`);
+  else {
+    const declared = [...prefixDecl[1].matchAll(/`([A-Z][A-Z0-9]{1,5})`/g)].map((m) => m[1]).sort();
+    const expected = (harnessLensPrefixes[lens] || []).slice().sort();
+    if (declared.join() !== expected.join()) fail(`skills/${lens}/SKILL.md declares prefix(es) [${declared}] but the harness registers [${expected}]`);
+  }
+  const catDecl = text.match(/category\s[^`\n]{0,40}`([a-z0-9-]+)`/i);
+  if (!catDecl) fail(`skills/${lens}/SKILL.md "What to produce" does not declare a category (phrase: category \`x\`)`);
+  else {
+    const primary = (harnessLensCategories[lens] || [])[0];
+    if (catDecl[1] !== primary) fail(`skills/${lens}/SKILL.md declares category \`${catDecl[1]}\` but the harness's primary category for ${lens} is \`${primary}\``);
+  }
+}
+
+// ---- 11. no product or tracked-doc file is gitignored -------------------------
 // The protective ignores (*report*.md etc.) exist for real audit output; a
 // repo file caught by them ships silently untracked. Found live twice:
 // references/report-format.md, then docs/decisions/0013-report-*.md, both

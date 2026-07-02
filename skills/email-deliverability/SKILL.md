@@ -68,6 +68,10 @@ Order by impact: missing authentication (SPF/DKIM/DMARC) is the top finding beca
 ## Scoping
 Match to volume and type. An app sending only low-volume transactional mail (password resets) from an authenticated domain needs the authentication and a clean from-domain and little else. An app running marketing sequences to a list needs the full set: authentication, reputation management, list hygiene, unsubscribe, content care. The honest minimum for any app sending email at all is SPF + DKIM + DMARC on a real domain; without those, even a perfect password-reset email may not arrive.
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `EMAIL`, category `email` — or `ops` where the issue is sending infrastructure rather than deliverability itself. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `data-privacy`: consent for marketing email, working unsubscribe, and the legal duties around both, this skill's list-hygiene and the privacy obligations are the same coin
 - `anti-slop-writing`: the copy quality of the emails themselves (separate from whether they arrive)

@@ -69,6 +69,10 @@ Order by risk: secrets exposure and no-rollback first (they cause the worst inci
 ## Scoping
 Match to stakes. A solo prototype on a hobby host does not need feature flags and gradual rollout; it does need secrets out of the repo and a way to roll back. A real app with users warrants the full set. The honest output for an early app is usually "get secrets out of the repo, get a one-click rollback, validate config at startup, and you're safe to ship; the rest comes as you grow."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `OPS`, category `ops` — or `security` where the consequence is exposure rather than operations. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `ai-saas-security`: the attacker-facing side of secrets and config; this skill owns the operational side, that one owns exposure/abuse
 - `testing-strategy`: the checks that gate a deploy in CI

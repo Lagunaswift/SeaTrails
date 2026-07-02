@@ -64,6 +64,10 @@ Order by impact: an accidental `noindex` or a crawler-blank client-rendered app 
 ## Scoping
 Match to whether and how the site needs to be found. A purely internal or auth-walled app does not need public SEO at all, say so, do not gold-plate. A public site whose success depends on being found needs the full set, with crawlability and indexing-control first. Even an app not chasing search rankings usually wants correct sharing previews (Open Graph) and no accidental `noindex`. The honest output for most public fast-built apps is "you have an accidental indexing block / your content is invisible to crawlers because it is client-rendered / your titles and sharing previews are missing, fix those and you are findable; finer optimisation comes after."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `SEO`, category `seo` (its only category). The finding's `lens` value is `seo-discoverability` — the schema's enum value and this skill's directory name — not this file's frontmatter name; the harness rejects the latter. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `performance`: page speed and Core Web Vitals are ranking factors, fast and findable overlap, though that skill is speed and this is discoverability
 - `anti-slop-writing`: the quality of the content and the copy in titles/descriptions (separate from the technical structure that surfaces it)
