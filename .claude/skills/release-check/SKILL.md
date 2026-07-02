@@ -23,7 +23,7 @@ Both must exit 0. The consistency checker cross-references:
 - dead `references/*.md` links inside production-audit;
 - dangling skill names in "Skills this leans on" / "Relationship to other skills" sections.
 
-Two standing warnings are expected (the UX-UI and seo-discoverability name mismatches — documented traps, see `CLAUDE.md`). Anything else needs fixing or an allowlist entry *with a comment saying why*. If the checker exits 2, a parse anchor disappeared: a doc changed shape, and either the doc or the checker needs a deliberate update — do not paper over it.
+No standing warnings are expected — a clean run is `0 failure(s), 0 warning(s)`. Any warning or failure needs fixing or an allowlist entry *with a comment saying why*. If the checker exits 2, a parse anchor disappeared: a doc changed shape, and either the doc or the checker needs a deliberate update — do not paper over it.
 
 ## 2. Judgement checks (a script cannot do these)
 

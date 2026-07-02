@@ -68,10 +68,9 @@ Changing the **harness** (`audit-check.mjs`) has its own discipline — attack-f
 - Severity honestly: critical = exploitable now / loses data / burns money uncapped; high = mild effort or a missing control; medium = weakens a defence. Rank by likely damage, not category alarm.
 - Checks record credential **types**, never values. No real app names, paths, or live findings anywhere in the repo.
 
-## Known traps (current at 2026-07-01 — details in docs/HANDOVER.md)
+## Known traps (current at 2026-07-02 — details in docs/HANDOVER.md)
 
-- `seo-discoverability/SKILL.md` frontmatter says `name: seo-and-discoverability`, but the lens enum value and directory are `seo-discoverability`. Findings must use the enum value or the harness rejects them. Documented in `lens-registry.md`; do not "fix" one side without the other.
-- `UX-UI/` directory ↔ frontmatter `name: ux-ui-patterns`; cross-references use `ux-ui-patterns`. Its supporting .md files sit flat in the skill root.
+- Every skill's directory name equals its frontmatter `name` (the two historical mismatches were resolved 2026-07-02); the consistency checker fails any new mismatch. `ux-ui-patterns`'s supporting .md files sit flat in the skill root, not in `references/`.
 - `scripts/fixtures/{pass,fail}/` are complete worked examples (ledger + report.json) run through the real harness by the last two suite cases — see `fixtures/README.md`. Changing a fixture or the harness can flip them; that is the point.
 - The orchestrator's SKILL.md description block is the *triggering surface* for the whole suite — edit its phrasing carefully.
 

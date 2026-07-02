@@ -58,7 +58,7 @@ House style either way: British English, two frontmatter keys only (`name`, `des
 
 Work through these top to bottom. After each group, the validation at the end catches what you missed.
 
-1. **The skill itself** — `skills/<lens-name>/SKILL.md`. Directory name must equal frontmatter `name` (the two legacy mismatches, `UX-UI`/`ux-ui-patterns` and `seo-discoverability`/`seo-and-discoverability`, are allowlisted traps, not precedent).
+1. **The skill itself** — `skills/<lens-name>/SKILL.md`. Directory name must equal frontmatter `name` — the consistency checker fails any mismatch (its allowlist is empty; a new entry needs a written reason).
 2. **The harness** — `skills/production-audit/scripts/audit-check.mjs`:
    - add the lens name to `LENSES`;
    - add the new category to `CATEGORIES` (if it introduces one);
@@ -86,4 +86,4 @@ The consistency check cross-references the harness enums, the schema enums and p
 
 ## Renaming a lens
 
-Same list, in reverse care: the lens enum value is load-bearing (it appears in every finding), so a rename touches every registration point *plus* any test case using the old name. Grep for the old name across `skills/` before declaring done. Do not rename `seo-discoverability` or `UX-UI` casually — their mismatches are documented in `lens-registry.md` and `CLAUDE.md`; fixing them is a deliberate task (see the handover backlog), not a drive-by.
+Same list, in reverse care: the lens enum value is load-bearing (it appears in every finding), so a rename touches every registration point *plus* any test case using the old name. Grep for the old name across the whole repo — including `docs/` and `.claude/` — before declaring done, and run the consistency checker: its registry-path, frontmatter, and contract checks each catch a different class of missed reference. (The suite's two legacy mismatches were resolved this way on 2026-07-02: seo-discoverability's frontmatter aligned to its directory, and the `UX-UI` directory renamed to `ux-ui-patterns` with a full reference sweep.)

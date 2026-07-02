@@ -1,5 +1,5 @@
 ---
-name: seo-and-discoverability
+name: seo-discoverability
 description: "Use this skill to make a web app findable and correctly represented by search engines and when shared: crawlability and indexing, metadata and title tags, structured data, sitemaps and robots rules, canonical URLs, Open Graph / social sharing previews, and the technical SEO that determines whether content can be discovered at all. Trigger on phrases like 'SEO', 'search engine', 'not showing in Google', 'meta tags', 'title tag', 'meta description', 'structured data', 'schema.org', 'sitemap', 'robots.txt', 'canonical', 'Open Graph', 'OG tags', 'social preview', 'link preview', 'crawlable', 'indexing', 'discoverability', or when a public site should be found by search or look right when shared. This is the can-it-be-found lens, the technical and structural side of SEO. It does not cover copywriting (use anti-slop-writing) or page speed (use performance, though speed affects ranking). Defaults to a prioritised assessment of discoverability gaps and the fixes. Applies to any public web app or site."
 ---
 
@@ -66,7 +66,7 @@ Match to whether and how the site needs to be found. A purely internal or auth-w
 
 ## What to produce under a production-audit
 
-Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `SEO`, category `seo` (its only category). The finding's `lens` value is `seo-discoverability` — the schema's enum value and this skill's directory name — not this file's frontmatter name; the harness rejects the latter. The schema overrides the prose format above.
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `SEO`, category `seo` (its only category), `lens` value `seo-discoverability`. The schema overrides the prose format above.
 
 ## Skills this leans on
 - `performance`: page speed and Core Web Vitals are ranking factors, fast and findable overlap, though that skill is speed and this is discoverability
