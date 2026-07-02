@@ -1,6 +1,8 @@
-# Never commit real audit output or anything that names a live app
+# Never commit real audit output or anything that names a live app.
+# The one exception: the report *format contract* is product documentation.
 *report*.json
 *report*.md
+!skills/production-audit/references/report-format.md
 /reports/
 /runs/
 /output/
@@ -13,11 +15,20 @@
 *serviceAccount*.json
 *credentials*.json
 
-# Claude Code local config (per-machine, not repo state)
-.claude/
+# Claude Code local state stays per-machine, but the repo's own maintenance
+# skills (.claude/skills/) are tracked — they are part of the repo.
+.claude/*
+!.claude/skills/
 
-# Internal packaging docs (not for the public repo)
-docs/
+# Internal packaging docs stay local. Tracked maintainer docs are re-included
+# below: the decision log, the handover doc, and the operator guide.
+# (The extra *.md negation matters: a decision file with "report" in its name
+# would otherwise be re-caught by *report*.md above.)
+docs/*
+!docs/decisions/
+!docs/decisions/*.md
+!docs/HANDOVER.md
+!docs/OPERATORS-GUIDE.md
 
 # Noise
 node_modules/

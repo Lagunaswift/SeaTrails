@@ -1,0 +1,18 @@
+# The harness's adversarial suite and the repo consistency check, on every push
+# and PR. "Weakening the harness flips a test" is only true if the tests run.
+name: tests
+on:
+  push:
+  pull_request:
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Harness regression suite (adversarial cases)
+        run: node skills/production-audit/scripts/run-tests.mjs
+      - name: Repo consistency check (registration-point drift)
+        run: node .claude/skills/release-check/scripts/check-consistency.mjs
