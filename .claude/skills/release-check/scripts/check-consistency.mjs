@@ -32,9 +32,10 @@ const fail = (m) => failures.push(m);
 const warn = (m) => warnings.push(m);
 const anchorFail = (m) => { console.error(`ANCHOR LOST: ${m}`); process.exit(2); };
 
-// Known, documented name mismatches (see CLAUDE.md "Known traps" and
-// lens-registry.md). New mismatches are failures; these two warn.
-const NAME_MISMATCH_ALLOWLIST = { 'UX-UI': 'ux-ui-patterns', 'seo-discoverability': 'seo-and-discoverability' };
+// Documented name-mismatch exceptions ({dir: frontmatterName}). Empty since
+// 2026-07-02 (seo frontmatter aligned; UX-UI dir renamed to ux-ui-patterns).
+// A new entry needs a comment saying why the mismatch is deliberate.
+const NAME_MISMATCH_ALLOWLIST = {};
 // The two synthesis lenses (used to derive the atomic count).
 const SYNTHESIS = new Set(['soc2-compliance', 'adversary-emulation']);
 
@@ -249,10 +250,13 @@ for (const lens of harnessLenses) {
 import { spawnSync } from 'node:child_process';
 const trackedTrees = [SKILLS, join(ROOT, 'docs', 'decisions'), join(ROOT, '.claude', 'skills'), join(ROOT, '.github')];
 const trackedFiles = [join(ROOT, 'docs', 'HANDOVER.md'), join(ROOT, 'docs', 'OPERATORS-GUIDE.md'), join(ROOT, 'CLAUDE.md'), join(ROOT, 'README.md')];
+// Build artifacts are legitimately ignored — the sweep is for source files.
+const SWEEP_SKIP = new Set(['__pycache__', 'node_modules', '.DS_Store']);
 const sweep = [];
 for (const t of trackedTrees) (function walk(dir) {
   if (!existsSync(dir)) return;
   for (const e of readdirSync(dir)) {
+    if (SWEEP_SKIP.has(e) || e.endsWith('.pyc')) continue;
     const p = join(dir, e);
     if (statSync(p).isDirectory()) walk(p);
     else sweep.push(p.replace(ROOT + '/', ''));
@@ -263,6 +267,20 @@ const ci = spawnSync('git', ['check-ignore', '--stdin'], { cwd: ROOT, input: swe
 if (ci.error) warn('git not available; skipped the gitignore sweep');
 else for (const ignored of ci.stdout.split('\n').filter(Boolean)) {
   fail(`${ignored} is caught by .gitignore — a repo file that would ship untracked; add a negation`);
+}
+
+// ---- 12. the vendored ui-ux-pro-max toolkit still runs ------------------------
+// Stdlib-only Python driving BM25 search over the CSVs. A broken CSV, a bad
+// import, or a Python regression should fail the release check, not a design
+// session. Skipped with a warning when python3 is absent. Intake decisions:
+// skills/ui-ux-pro-max/INTAKE.md.
+const uipmCli = join(SKILLS, 'ui-ux-pro-max', 'scripts', 'search.py');
+if (existsSync(uipmCli)) {
+  // -B: no __pycache__ bytecode dropped into the skills tree by this check.
+  const py = spawnSync('python3', ['-B', uipmCli, 'saas dashboard', '--design-system'], { cwd: ROOT, encoding: 'utf8', timeout: 60000 });
+  if (py.error) warn('python3 not available; skipped the ui-ux-pro-max smoke test');
+  else if (py.status !== 0) fail(`ui-ux-pro-max smoke test failed (exit ${py.status}): ${String(py.stderr || '').split('\n').filter(Boolean)[0] || 'no stderr'}`);
+  else if (!/DESIGN SYSTEM/i.test(py.stdout || '')) fail('ui-ux-pro-max smoke test exited 0 but produced no design-system output');
 }
 
 // ---- report ------------------------------------------------------------------
