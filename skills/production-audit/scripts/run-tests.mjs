@@ -131,6 +131,33 @@ const cases = [
     }),
   },
   {
+    // CONSEQUENCE ROUTING: code-audit's UI/UX pass surfaces real access barriers
+    // (keyboard traps, unlabelled controls). Categorised by consequence they are
+    // `accessibility` and keep their severity — the same grant frontend-robustness
+    // and mobile-and-responsive already have. The registry has promised this
+    // routing since the initial release; this case makes the harness honour it.
+    name: 'code-audit access barrier at category accessibility (consequence routing) PASSES',
+    expect: 'pass',
+    ledger: [finding({ id: 'UIUX-003', category: 'accessibility', severity: 'high', title: 'Keyboard trap in the payment modal', issue: 'Focus cannot leave the modal via keyboard', consequence: 'Keyboard-only users cannot complete checkout', verification: { status: 'verified', evidence: 'modal.tsx:44 — `onKeyDown` swallows Tab; no focus release' } })],
+    report: report({
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'UIUX-003', category: 'accessibility', severity: 'high', title: 'Keyboard trap in the payment modal', issue: 'Focus cannot leave the modal via keyboard', consequence: 'Keyboard-only users cannot complete checkout', verification: { status: 'verified', evidence: 'modal.tsx:44 — `onKeyDown` swallows Tab; no focus release' } })],
+      remediation_order: [{ id: 'UIUX-003', reason: 'blocks checkout for keyboard users; small focused fix' }],
+    }),
+  },
+  {
+    // The grant is per-lens, not global: a lens that does not own accessibility
+    // still cannot file under it.
+    name: 'wrong category: a performance finding under category accessibility FAILS',
+    expect: 'fail',
+    ledger: [finding({ id: 'PERF-002', lens: 'performance', category: 'accessibility', severity: 'low' })],
+    report: report({
+      scope: { app: 't', lenses_selected: ['performance'], lenses_run: ['performance'] },
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'PERF-002', lens: 'performance', category: 'accessibility', severity: 'low' })],
+    }),
+  },
+  {
     name: 'design-aesthetic at high must cap (cosmetic → max medium)',
     expect: 'fail',
     ledger: [finding({ id: 'UIUX-001', category: 'design-aesthetic', severity: 'high', verification: { status: 'verified', evidence: GOOD_EVIDENCE } })],

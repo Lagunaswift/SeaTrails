@@ -74,10 +74,10 @@ The code's shape, where bad structure makes it hard to understand, change, or sa
 
 For code with a user interface, apply two complementary lenses. Skip entirely for non-UI code.
 
-- **`UX-UI`** for usability and interaction patterns: form design, navigation structure, accessibility, responsive behaviour, data display, error states, empty states, loading states, and microcopy. This lens asks "can the user accomplish their task correctly and efficiently?"
+- **`ux-ui-patterns`** for usability and interaction patterns: form design, navigation structure, accessibility, responsive behaviour, data display, error states, empty states, loading states, and microcopy. This lens asks "can the user accomplish their task correctly and efficiently?"
 - **`frontend-design`** for visual design quality and distinctiveness: typography choices, colour and theme coherence, spatial composition, motion and micro-interactions, depth and surface treatment, and whether the interface has a clear aesthetic point of view or defaults to generic AI-generated patterns. This lens asks "does this look like it was designed by a human with taste, or like it was generated from a template?" Apply the AI anti-pattern checklist from `frontend-design` — the landing-page formula, the default dashboard skeleton, uniform spacing, one-radius-for-everything, the purple-to-blue gradient, generic fonts, pill-shaped everything, and the other tells. An interface that functions perfectly but looks generated still undermines user trust and product credibility.
 
-The two lenses are complementary: UX-UI catches a form with no error states; frontend-design catches a form that works perfectly but looks like every other AI-generated SaaS page. Both matter for production-grade user-facing code.
+The two lenses are complementary: ux-ui-patterns catches a form with no error states; frontend-design catches a form that works perfectly but looks like every other AI-generated SaaS page. Both matter for production-grade user-facing code.
 
 ## How to remediate (fix mode)
 
@@ -117,9 +117,9 @@ For reference, the lenses and what each covers:
 - `refactoring`: structural problems and the remediation discipline (pass 5, governs all fixes)
 - `api-and-interface-design`: interface and contract issues (pass 5)
 - `data-modelling`: persisted data shape (pass 5)
-- `UX-UI`: usability, interaction patterns, accessibility (pass 6, UI code only)
+- `ux-ui-patterns`: usability, interaction patterns, accessibility (pass 6, UI code only)
 - `frontend-design`: visual design quality, AI-pattern avoidance, aesthetic distinctiveness (pass 6, UI code only)
 
 ## What to produce under a production-audit
 
-Standalone, report per "How to report findings". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered, with prefixes `SEC`/`COR`/`DBG`/`TST`/`STR`/`UIUX` by pass. Category follows the consequence: `security` or `correctness` for passes 1–5, `performance` where that is the cost, and for pass 6 `frontend` when an interaction failure has real impact (keeping its real severity) or `design-aesthetic` only when the worst case is "it looks generic" (hard-capped at medium). Access barriers surfaced in pass 6 belong to the `accessibility` lens's category — record them via `dedup.also_seen_by_lenses` rather than filing them under this lens. The schema overrides the prose format.
+Standalone, report per "How to report findings". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered, with prefixes `SEC`/`COR`/`DBG`/`TST`/`STR`/`UIUX` by pass. Category follows the consequence: `security` or `correctness` for passes 1–5, `performance` where that is the cost, and for pass 6 `frontend` when an interaction failure has real impact, `accessibility` when the barrier locks someone out (both keep their real severity), or `design-aesthetic` only when the worst case is "it looks generic" (hard-capped at medium). The schema overrides the prose format.

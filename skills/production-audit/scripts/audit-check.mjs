@@ -53,7 +53,11 @@ const EVIDENCE_CODE = /`[^`]+`/;
 // whose category falls outside its lens's set is a mis-binning — the channel an
 // adversary used to hide a critical IDOR under category "analytics".
 const LENS_CATEGORIES = {
-  'code-audit': ['security', 'correctness', 'frontend', 'performance', 'design-aesthetic'],
+  // accessibility: pass 6 surfaces real access barriers (keyboard traps,
+  // unlabelled controls); by consequence routing they are `accessibility` at
+  // full severity — the same grant frontend-robustness and mobile-and-responsive
+  // carry. lens-registry.md's code-audit entry promises this routing.
+  'code-audit': ['security', 'correctness', 'frontend', 'performance', 'design-aesthetic', 'accessibility'],
   'ai-saas-security': ['security', 'privacy'],
   'scaling-audit': ['scaling', 'ops', 'performance', 'correctness'],
   'release-and-ops': ['ops', 'security'],
