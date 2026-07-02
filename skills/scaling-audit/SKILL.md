@@ -70,6 +70,10 @@ Order by severity (catastrophic-and-likely first: data loss, total outage), and 
 ## Scoping
 Match depth to stakes and stage. A prototype with no users does not need a multi-region disaster-recovery plan; tell them so rather than gold-plating. An app about to get real traffic, or already straining, warrants the full sweep. The honest output for an early app is often "you're fine for now; these three things break around when you hit real users, fix them before then" not a panic list.
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `SCALE`, category `scaling` — or `ops`, `performance`, or `correctness` where the consequence lands there. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `error-handling-patterns`: resilience (timeouts, retry, backoff, circuit breaker, idempotency) for pass 4
 - `state-management`: concurrency and shared-state hazards for pass 3

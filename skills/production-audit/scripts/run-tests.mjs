@@ -37,12 +37,19 @@ function finding(over = {}) {
 }
 const GOOD_EVIDENCE = 'a.ts:1 — `const x = req.query.id` no guard in handler';
 function report(over = {}) {
-  return {
+  const out = {
     scope: { app: 't', lenses_selected: ['code-audit'], lenses_run: ['code-audit'] },
-    coverage: { files_total: 1, files_examined: 1, matrix: [] },
     reconciliation: { raw: 0, reported: 0, merged: 0, dropped: 0 },
     dropped: [], findings: [], ...over,
   };
+  // Default coverage conforms to the matrix rules (a row per run lens, an
+  // areas_total), derived from whatever scope the case set. Cases attacking
+  // coverage itself pass their own block explicitly.
+  if (!Object.prototype.hasOwnProperty.call(over, 'coverage')) {
+    const runLenses = (out.scope && out.scope.lenses_run) || [];
+    out.coverage = { files_total: 1, files_examined: 1, areas_total: 1, matrix: runLenses.map((l) => `${l}: all areas examined`) };
+  }
+  return out;
 }
 
 // ---- the cases --------------------------------------------------------------
@@ -121,6 +128,33 @@ const cases = [
     report: report({
       reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
       findings: [finding({ id: 'SEC-001', severity: 'critical', category: 'analytics', verification: { status: 'verified', evidence: GOOD_EVIDENCE } })],
+    }),
+  },
+  {
+    // CONSEQUENCE ROUTING: code-audit's UI/UX pass surfaces real access barriers
+    // (keyboard traps, unlabelled controls). Categorised by consequence they are
+    // `accessibility` and keep their severity — the same grant frontend-robustness
+    // and mobile-and-responsive already have. The registry has promised this
+    // routing since the initial release; this case makes the harness honour it.
+    name: 'code-audit access barrier at category accessibility (consequence routing) PASSES',
+    expect: 'pass',
+    ledger: [finding({ id: 'UIUX-003', category: 'accessibility', severity: 'high', title: 'Keyboard trap in the payment modal', issue: 'Focus cannot leave the modal via keyboard', consequence: 'Keyboard-only users cannot complete checkout', verification: { status: 'verified', evidence: 'modal.tsx:44 — `onKeyDown` swallows Tab; no focus release' } })],
+    report: report({
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'UIUX-003', category: 'accessibility', severity: 'high', title: 'Keyboard trap in the payment modal', issue: 'Focus cannot leave the modal via keyboard', consequence: 'Keyboard-only users cannot complete checkout', verification: { status: 'verified', evidence: 'modal.tsx:44 — `onKeyDown` swallows Tab; no focus release' } })],
+      remediation_order: [{ id: 'UIUX-003', reason: 'blocks checkout for keyboard users; small focused fix' }],
+    }),
+  },
+  {
+    // The grant is per-lens, not global: a lens that does not own accessibility
+    // still cannot file under it.
+    name: 'wrong category: a performance finding under category accessibility FAILS',
+    expect: 'fail',
+    ledger: [finding({ id: 'PERF-002', lens: 'performance', category: 'accessibility', severity: 'low' })],
+    report: report({
+      scope: { app: 't', lenses_selected: ['performance'], lenses_run: ['performance'] },
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'PERF-002', lens: 'performance', category: 'accessibility', severity: 'low' })],
     }),
   },
   {
@@ -392,6 +426,38 @@ const cases = [
         finding({ id: 'SEC-001', severity: 'high', verification: { status: 'verified', evidence: GOOD_EVIDENCE } }),
         finding({ id: 'CHAIN-001', lens: 'adversary-emulation', category: 'attack-path', severity: 'high', confidence_type: 'reasoning', verification: { status: 'verified', evidence: GOOD_EVIDENCE, note: 'traced' }, chain: { objective: 'exfil', steps: ['SEC-001 — entry', 'If SEC-002 also holds, blast radius widens'], component_findings: ['SEC-001'] } }),
       ],
+      // remediation_order supplied so the dropped-id-in-prose reference is this
+      // case's only possible failure (mirrors the A11Y variant below).
+      remediation_order: [
+        { id: 'SEC-001', reason: 'the entry point; closing it breaks the chain' },
+        { id: 'CHAIN-001', reason: 'chain persists until the entry point is closed' },
+      ],
+    }),
+  },
+  {
+    // CHAIN TEXT ORPHAN, digit-bearing prefix: same attack as above but the dropped
+    // id's prefix contains digits (A11Y). The prose scanner must extract these too —
+    // a pure-letter-only regex lets A11Y/SOC2/I18N references evade the check.
+    // remediation_order is supplied so the ONLY possible failure is the prose reference.
+    name: 'chain step text references a DROPPED A11Y finding (digit-bearing prefix) FAILS',
+    expect: 'fail',
+    ledger: [
+      finding({ id: 'SEC-001', severity: 'high', verification: { status: 'verified', evidence: GOOD_EVIDENCE } }),
+      finding({ id: 'A11Y-001', lens: 'accessibility', category: 'accessibility', severity: 'medium' }),
+      finding({ id: 'CHAIN-001', lens: 'adversary-emulation', category: 'attack-path', severity: 'high', confidence_type: 'reasoning', verification: { status: 'verified', evidence: GOOD_EVIDENCE, note: 'traced' }, chain: { objective: 'exfil', steps: ['SEC-001 — entry', 'A11Y-001 keeps the victim from noticing the prompt'], component_findings: ['SEC-001'] } }),
+    ],
+    report: report({
+      scope: { app: 't', lenses_selected: ['code-audit', 'accessibility', 'adversary-emulation'], lenses_run: ['code-audit', 'accessibility', 'adversary-emulation'] },
+      reconciliation: { raw: 3, reported: 2, merged: 0, dropped: 1 },
+      dropped: [{ id: 'A11Y-001', reason: 'focus trap not reproducible; modal releases focus' }],
+      findings: [
+        finding({ id: 'SEC-001', severity: 'high', verification: { status: 'verified', evidence: GOOD_EVIDENCE } }),
+        finding({ id: 'CHAIN-001', lens: 'adversary-emulation', category: 'attack-path', severity: 'high', confidence_type: 'reasoning', verification: { status: 'verified', evidence: GOOD_EVIDENCE, note: 'traced' }, chain: { objective: 'exfil', steps: ['SEC-001 — entry', 'A11Y-001 keeps the victim from noticing the prompt'], component_findings: ['SEC-001'] } }),
+      ],
+      remediation_order: [
+        { id: 'SEC-001', reason: 'the entry point; closing it breaks the chain' },
+        { id: 'CHAIN-001', reason: 'chain persists until the entry point is closed' },
+      ],
     }),
   },
   {
@@ -444,11 +510,13 @@ const cases = [
     report: { ...report({ reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 }, findings: [finding({ id: 'SEC-001', severity: 'low' })] }), coverage: undefined },
   },
   {
+    // A conforming matrix is supplied so the files shortfall is this case's
+    // only possible failure (the matrix rules have their own cases below).
     name: 'coverage: incomplete without scope.partial FAILS',
     expect: 'fail',
     ledger: [finding({ id: 'SEC-001', severity: 'low' })],
     report: report({
-      coverage: { files_total: 100, files_examined: 30, matrix: [] },
+      coverage: { files_total: 100, files_examined: 30, areas_total: 1, matrix: ['code-audit: all areas examined'] },
       reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
       findings: [finding({ id: 'SEC-001', severity: 'low' })],
     }),
@@ -459,7 +527,72 @@ const cases = [
     ledger: [finding({ id: 'SEC-001', severity: 'low' })],
     report: report({
       scope: { app: 't', lenses_selected: ['code-audit'], lenses_run: ['code-audit'], partial: true },
-      coverage: { files_total: 100, files_examined: 30, matrix: [] },
+      coverage: { files_total: 100, files_examined: 30, areas_total: 1, matrix: ['code-audit: all areas examined'] },
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'SEC-001', severity: 'low' })],
+    }),
+  },
+  {
+    // HOLLOW LENS COVERAGE: files add up, but nothing states which lens covered
+    // what — per-lens coverage is implied, not measured (coverage-matrix.md).
+    name: 'coverage matrix: lenses ran but no matrix at all FAILS',
+    expect: 'fail',
+    ledger: [finding({ id: 'SEC-001', severity: 'low' })],
+    report: report({
+      coverage: { files_total: 1, files_examined: 1 },
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'SEC-001', severity: 'low' })],
+    }),
+  },
+  {
+    name: 'coverage matrix: a run lens has no row in the matrix FAILS',
+    expect: 'fail',
+    ledger: [
+      finding({ id: 'SEC-001', severity: 'low' }),
+      finding({ id: 'PERF-001', lens: 'performance', category: 'performance', severity: 'low' }),
+    ],
+    report: report({
+      scope: { app: 't', lenses_selected: ['code-audit', 'performance'], lenses_run: ['code-audit', 'performance'] },
+      coverage: { files_total: 2, files_examined: 2, areas_total: 1, matrix: ['code-audit: all areas examined'] },
+      reconciliation: { raw: 2, reported: 2, merged: 0, dropped: 0 },
+      findings: [
+        finding({ id: 'SEC-001', severity: 'low' }),
+        finding({ id: 'PERF-001', lens: 'performance', category: 'performance', severity: 'low' }),
+      ],
+    }),
+  },
+  {
+    // COVERAGE PADDING: the matrix claims a lens that never ran, inflating the
+    // apparent breadth of the audit.
+    name: 'coverage matrix: row claims a lens that neither ran nor was deferred FAILS',
+    expect: 'fail',
+    ledger: [finding({ id: 'SEC-001', severity: 'low' })],
+    report: report({
+      coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['code-audit: all areas examined', 'scaling-audit: all areas examined'] },
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'SEC-001', severity: 'low' })],
+    }),
+  },
+  {
+    name: 'coverage matrix: matrix present but areas_total missing FAILS',
+    expect: 'fail',
+    ledger: [finding({ id: 'SEC-001', severity: 'low' })],
+    report: report({
+      coverage: { files_total: 1, files_examined: 1, matrix: ['code-audit: all areas examined'] },
+      reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+      findings: [finding({ id: 'SEC-001', severity: 'low' })],
+    }),
+  },
+  {
+    // THE BOUNDARY: a deferred lens may sit in the matrix as an empty row — that
+    // is exactly how a staged run stays honest (coverage-matrix.md). Only rows
+    // for lenses that neither ran nor were deferred are illegal.
+    name: 'coverage matrix: rows for every run lens plus a deferred lens\'s row PASSES',
+    expect: 'pass',
+    ledger: [finding({ id: 'SEC-001', severity: 'low' })],
+    report: report({
+      scope: { app: 't', lenses_selected: ['code-audit', 'performance'], lenses_run: ['code-audit'], lenses_deferred: ['performance'], partial: true },
+      coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['code-audit: all areas examined', 'performance: deferred — not yet run'] },
       reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
       findings: [finding({ id: 'SEC-001', severity: 'low' })],
     }),
@@ -550,27 +683,47 @@ const cases = [
       findings: [finding({ id: 'SEC-001', severity: 'low', title: 'Missing CSRF token on POST /api/users', issue: 'The handler accepts mutations without a CSRF token', consequence: 'An attacker can forge requests from an authenticated session', fix: 'Add CSRF middleware to all state-changing routes' })],
     }),
   },
+  // ---- the worked examples: the committed fixtures run end-to-end -------------
+  // These lock the fixtures themselves: fixtures/pass is a complete valid audit
+  // (gates clean), fixtures/fail is a broken one (rejected with exit 1 — a
+  // gate failure, not an input error). If either fixture rots, this flips.
+  {
+    name: 'fixtures/pass: the complete worked example gates clean PASSES',
+    expect: 'pass',
+    fixtureDir: 'fixtures/pass',
+  },
+  {
+    name: 'fixtures/fail: the broken worked example is rejected as untrustworthy (exit 1) FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    fixtureDir: 'fixtures/fail',
+  },
 ];
 
 // ---- run --------------------------------------------------------------------
 let passed = 0, failed = 0;
 for (const c of cases) {
-  const dir = mkdtempSync(join(tmpdir(), 'audit-test-'));
+  // fixtureDir cases run the harness against a committed directory verbatim;
+  // all other cases build their inputs in a temp dir.
+  const dir = c.fixtureDir ? join(HERE, c.fixtureDir) : mkdtempSync(join(tmpdir(), 'audit-test-'));
   try {
-    const ledgerText = (c.ledger || []).map((f) => JSON.stringify(f)).join('\n');
-    writeFileSync(join(dir, 'raw-findings.jsonl'), ledgerText);
-    writeFileSync(join(dir, 'report.json'), c.rawReport != null ? c.rawReport : JSON.stringify(c.report));
+    if (!c.fixtureDir) {
+      const ledgerText = (c.ledger || []).map((f) => JSON.stringify(f)).join('\n');
+      writeFileSync(join(dir, 'raw-findings.jsonl'), ledgerText);
+      writeFileSync(join(dir, 'report.json'), c.rawReport != null ? c.rawReport : JSON.stringify(c.report));
+    }
     const res = spawnSync(process.execPath, [HARNESS, dir], { encoding: 'utf8' });
     const got = res.status === 0 ? 'pass' : 'fail';
-    const ok = got === c.expect;
-    if (ok) { passed++; console.log(`✔  ${c.name}  (expected ${c.expect})`); }
+    const exitOk = c.expectExit == null || res.status === c.expectExit;
+    const ok = got === c.expect && exitOk;
+    if (ok) { passed++; console.log(`✔  ${c.name}  (expected ${c.expect}${c.expectExit != null ? `, exit ${c.expectExit}` : ''})`); }
     else {
       failed++;
-      console.log(`✖  ${c.name}  — expected ${c.expect}, got ${got}`);
+      console.log(`✖  ${c.name}  — expected ${c.expect}${c.expectExit != null ? ` (exit ${c.expectExit})` : ''}, got ${got} (exit ${res.status})`);
       console.log(res.stdout.split('\n').filter((l) => l.includes('-') || l.includes('✖')).slice(0, 6).map((l) => `       ${l}`).join('\n'));
     }
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    if (!c.fixtureDir) rmSync(dir, { recursive: true, force: true });
   }
 }
 

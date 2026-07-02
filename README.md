@@ -50,12 +50,14 @@ What it catches:
 - **Category hiding.** Each lens can only file findings under categories it
   legitimately owns. A security IDOR filed under category "analytics" fails.
 - **Coverage gaps.** An audit that examined a fraction of the source files fails
-  unless it declares itself partial and names what it skipped.
+  unless it declares itself partial and names what it skipped. Per-lens coverage
+  is gated too: a lens that ran with no row in the coverage matrix, or a matrix
+  row for a lens that never ran, fails the build.
 - **AI slop in the report.** 50 regex patterns for unambiguous AI writing
   ("delve", "game-changer", "experts agree") hard-fail the build. 10 borderline
   terms warn. Plain deterministic code with no model in the loop.
 
-42 adversarial test cases lock the harness. Each is a way a past audit tried to
+52 adversarial test cases lock the harness. Each is a way a past audit tried to
 look clean while hiding something. They are not happy-path tests; they are
 attacks. A few of the actual case names from `run-tests.mjs`:
 
@@ -101,7 +103,7 @@ is reported as fact. The harness gates the final output.
 
 **12 craft skills** for the fix phase: refactoring, testing-strategy,
 debugging-methodology, data-modelling, error-handling-patterns,
-api-and-interface-design, state-management, frontend-design, UX-UI,
+api-and-interface-design, state-management, frontend-design, ux-ui-patterns,
 stripe-best-practices, saas-production-security, ui-ux-pro-max.
 
 32 skills total (19 lenses + 1 orchestrator + 12 craft).

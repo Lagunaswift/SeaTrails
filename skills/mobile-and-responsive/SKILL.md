@@ -67,6 +67,10 @@ Order by severity: things that make the interface unusable on mobile (horizontal
 ## Scoping
 Match to the actual audience. An internal tool used only on desktops has little mobile need, say so. A public consumer app, where mobile is likely the majority of traffic, must work well on phones, and there the small-screen, touch case is the primary one, not an afterthought. The honest output for most public fast-built apps is "it was built and tested on desktop; on a phone it has horizontal scroll / tiny tap targets / a missing viewport tag / hover-only menus, fix those and it becomes usable where most of your users actually are."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `MOB`, category `mobile` — or `frontend` or `accessibility` where the consequence lands there. The schema overrides the prose format above.
+
 ## Skills this leans on
 - `frontend-design`: the visual side; responsive behaviour is how that design adapts across sizes (the design must be conceived to flex)
 - `performance`: mobile is where performance constraints bite hardest, the two overlap heavily on mobile

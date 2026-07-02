@@ -1,6 +1,6 @@
 # Production-Audit — Architecture & Lens Map
 
-How the production-audit orchestrator is wired: the pipeline, every lens, the machinery that makes the output trustworthy, and how all 31 skills in `.claude/skills/` relate to it.
+How the production-audit orchestrator is wired: the pipeline, every lens, the machinery that makes the output trustworthy, and how all 32 skills in `.claude/skills/` relate to it.
 
 ---
 
@@ -86,7 +86,7 @@ code-audit  ──┬── Pass 1 Security      ── lens: saas-production-se
               ├── Pass 3 Debug probe    ── lens: debugging-methodology
               ├── Pass 4 Tests          ── lens: testing-strategy
               ├── Pass 5 Structure      ── lens: refactoring (code smells)
-              └── Pass 6 UI/UX          ── lens: UX-UI (functional → frontend/correctness findings)
+              └── Pass 6 UI/UX          ── lens: ux-ui-patterns (functional → frontend/correctness findings)
                                         ── lens: frontend-design (visual/anti-slop → category:design-aesthetic)
 ```
 
@@ -136,9 +136,10 @@ code-audit  ──┬── Pass 1 Security      ── lens: saas-production-se
 | Role | Skills |
 |------|--------|
 | **Lens (19)** | code-audit, ai-saas-security, scaling-audit, release-and-ops, data-privacy, frontend-robustness, performance, accessibility, mobile-and-responsive, email-deliverability, seo-discoverability, analytics-and-instrumentation, internationalisation, soc2-compliance, adversary-emulation, anti-slop-writing, code-quality, dependency-audit, infrastructure-config |
-| **Craft sub-skill** (applied inside code-audit's passes) | saas-production-security, debugging-methodology, testing-strategy, refactoring, UX-UI, frontend-design |
+| **Craft sub-skill** (applied inside code-audit's passes) | saas-production-security, debugging-methodology, testing-strategy, refactoring, ux-ui-patterns, frontend-design |
 | **Fix-phase craft skill** (handoff after the report, if fixing) | error-handling-patterns, data-modelling, api-and-interface-design, state-management (+ debugging-methodology, refactoring, testing-strategy reused) |
 | **Conditional deepener** | stripe-best-practices (Stripe apps only) |
+| **Design-data toolkit** (fix/design phase) | ui-ux-pro-max (searchable design databases + BM25 generator, Python 3; the data layer behind fixing `design-aesthetic`/`content` findings) |
 | **The orchestrator** | production-audit |
 
 

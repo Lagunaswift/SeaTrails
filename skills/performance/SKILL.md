@@ -81,6 +81,10 @@ Lead with the measurement and the single biggest contributor. Order fixes by imp
 ## Scoping
 Match to the app and its users. A tiny internal tool does not need Core Web Vitals tuning; a public, consumer-facing app where load speed affects retention and conversion warrants the full pass. Mobile and slow-network users feel all of this far more than a developer on a fast machine, so measure under realistic conditions, not just on localhost. The honest output is often "your load is dominated by one unoptimised image and an oversized bundle; fix those two and you have most of the win."
 
+## What to produce under a production-audit
+
+Standalone, report as prose per "How to report". As a lens under `production-audit`, emit findings in the canonical schema (`production-audit/references/finding-schema.md`) instead, appended to the run's `raw-findings.jsonl` as discovered: prefix `PERF`, category `performance` (its only category). The schema overrides the prose format above.
+
 ## Skills this leans on
 - `scaling-audit`: the backend/many-users counterpart; caching and cost overlap, but this skill is single-user perceived speed
 - `frontend-design`: the visual/UX side; performance is how fast that experience arrives

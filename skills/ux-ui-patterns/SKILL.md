@@ -9,13 +9,13 @@ This skill covers interaction design, usability, and user experience decisions. 
 
 Before building any interface, read the relevant reference files:
 
-- `references/states-and-feedback.md` — Loading, empty, error, success, partial, offline states. Skeleton screens, progress indicators, toast/notification patterns, confirmation dialogs, optimistic updates, double-click prevention, button loading states, form submission guards, debouncing, drag-and-drop feedback, animation as feedback, perceived responsiveness thresholds
-- `references/forms-and-input.md` — Form layout, validation, multi-step forms, inline editing, search, filtering, sorting, autocomplete, date/time pickers, file uploads
-- `references/navigation-and-structure.md` — Information architecture, nav patterns, tabs, sidebars, command palettes, breadcrumbs, pagination, infinite scroll, deep linking, back button behaviour
-- `references/data-display.md` — Tables, lists, cards, dashboards, charts, detail views, comparison views, master-detail, timelines, real-time data
-- `references/accessibility.md` — WCAG compliance, keyboard navigation, screen readers, colour contrast, touch targets, focus management, reduced motion, ARIA, semantic HTML
-- `references/responsive-and-mobile.md` — Breakpoints, touch targets, mobile navigation, bottom sheets, gestures, adaptive content, viewport considerations, thumb zones
-- `references/microcopy.md` — Button labels, error messages, empty state copy, onboarding text, tooltips, confirmation dialogs, placeholder text, success messages
+- `states-and-feedback.md` — Loading, empty, error, success, partial, offline states. Skeleton screens, progress indicators, toast/notification patterns, confirmation dialogs, optimistic updates, double-click prevention, button loading states, form submission guards, debouncing, drag-and-drop feedback, animation as feedback, perceived responsiveness thresholds
+- `forms-and-input.md` — Form layout, validation, multi-step forms, inline editing, search, filtering, sorting, autocomplete, date/time pickers, file uploads
+- `navigation-and-structure.md` — Information architecture, nav patterns, tabs, sidebars, command palettes, breadcrumbs, pagination, infinite scroll, deep linking, back button behaviour
+- `data-display.md` — Tables, lists, cards, dashboards, charts, detail views, comparison views, master-detail, timelines, real-time data
+- `accessibility.md` — WCAG compliance, keyboard navigation, screen readers, colour contrast, touch targets, focus management, reduced motion, ARIA, semantic HTML
+- `responsive-and-mobile.md` — Breakpoints, touch targets, mobile navigation, bottom sheets, gestures, adaptive content, viewport considerations, thumb zones
+- `microcopy.md` — Button labels, error messages, empty state copy, onboarding text, tooltips, confirmation dialogs, placeholder text, success messages
 
 ---
 

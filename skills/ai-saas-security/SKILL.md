@@ -169,3 +169,7 @@ If adding AI features to an existing application (which already has general secu
 **No timeout on streaming responses.** A streaming response accumulating tokens for 120 seconds costs the entire time. Set absolute timeouts on all AI calls.
 
 **Constructing prompts client-side.** If the mobile app or SPA builds the full prompt including system instructions, an attacker modifies it. The server constructs prompts. The client sends user input only.
+
+## What to produce under a production-audit
+
+Standalone, this is a build and hardening guide. As a lens under `production-audit`, turn each unmet checklist item into a finding in the canonical schema (`production-audit/references/finding-schema.md`), appended to the run's `raw-findings.jsonl` as discovered: prefix `AI`, category `security` — or `privacy` where the consequence is data exposure rather than abuse or cost. The schema overrides the checklist format.
