@@ -17,7 +17,7 @@ One JSON object with these top-level keys (the harness and renderer read exactly
 |---|---|---|
 | `scope` | yes | `app` (name), `lenses_selected[]`, `lenses_run[]`, `lenses_deferred[]`, `partial` (bool), `excluded_not_applicable` (`{lens: reason}`), `compliance_duty_in_scope` (bool, when relevant). Every selected lens must end in run or deferred — a lens in neither fails the roll-call. |
 | `stack_profile` | yes (Stage 0) | `language`, `framework`, `datastore`, plus `data_classes[]` — the field the compliance-duty gate keys off. |
-| `coverage` | yes | `files_total`, `files_examined` (both numbers — the denominator), optional lens×area `matrix[]` (see `coverage-matrix.md`). Any shortfall requires `scope.partial: true`. |
+| `coverage` | yes | `files_total`, `files_examined` (both numbers — the denominator), `areas_total`, and the lens×area `matrix[]` with a row per run lens (see `coverage-matrix.md`). Any file shortfall requires `scope.partial: true`; a run lens without a matrix row, or a row for a lens that never ran, fails the gate. |
 | `reconciliation` | yes | `{raw, reported, merged, dropped}` — must match the actual counts and satisfy `raw = reported + merged + dropped`. |
 | `findings` | yes | The reported set: full canonical-schema records (`finding-schema.md`) with `verification` filled. |
 | `dropped` | yes | `[{id, reason}]` — reasons ≥ 8 characters; dropping a ledger critical/high additionally requires a `refuted` verification with real evidence. |

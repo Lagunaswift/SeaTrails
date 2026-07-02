@@ -1,8 +1,10 @@
 # Never commit real audit output or anything that names a live app.
-# The one exception: the report *format contract* is product documentation.
+# Exceptions: the report *format contract* is product documentation, and the
+# two fixture reports are invented worked examples run by the test suite.
 *report*.json
 *report*.md
 !skills/production-audit/references/report-format.md
+!skills/production-audit/scripts/fixtures/*/report.json
 /reports/
 /runs/
 /output/

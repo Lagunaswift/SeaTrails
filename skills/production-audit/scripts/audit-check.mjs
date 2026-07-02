@@ -449,6 +449,35 @@ function checkCoverage(report, ledger) {
   } else {
     fail('coverage: files_total/files_examined not reported — coverage has no denominator');
   }
+  // The lens × area matrix (coverage-matrix.md): when lenses ran, per-lens
+  // coverage must be stated, not implied. A run lens with no row is unmeasured;
+  // a row for a lens that neither ran nor was deferred is coverage padding.
+  const run = (report.scope && report.scope.lenses_run) || [];
+  const deferred = (report.scope && report.scope.lenses_deferred) || [];
+  if (run.length === 0) return;
+  const rows = Array.isArray(c.matrix) ? c.matrix : null;
+  if (!rows || rows.length === 0) {
+    fail(`coverage: lenses ran (${run.join(', ')}) but coverage.matrix is ${rows ? 'empty' : 'missing'} — state each lens's coverage per area (coverage-matrix.md)`);
+    return;
+  }
+  // Object rows are matched on their lens field; string rows on their text.
+  const rowTexts = rows.map((r) => (typeof r === 'string' ? r : (r && typeof r.lens === 'string' ? r.lens : JSON.stringify(r))));
+  for (const lens of run) {
+    if (!rowTexts.some((t) => t.includes(lens))) {
+      fail(`coverage: lens "${lens}" ran but has no row in coverage.matrix — its coverage is unmeasured`);
+    }
+  }
+  const inScope = new Set([...run, ...deferred]);
+  for (const t of rowTexts) {
+    for (const lens of LENSES) {
+      if (t.includes(lens) && !inScope.has(lens)) {
+        fail(`coverage: matrix row mentions "${lens}", which neither ran nor was deferred — coverage claimed for a lens that did not run`);
+      }
+    }
+  }
+  if (!(typeof c.areas_total === 'number' && c.areas_total > 0)) {
+    fail('coverage: matrix present but areas_total is missing or not a positive number — the area denominator (coverage-matrix.md)');
+  }
 }
 
 // ---- INVARIANT 10: remediation order — every gating finding has a fix position

@@ -66,6 +66,7 @@ The failure messages name the invariant. The common ones:
 | chain references dropped/merged id | chain built pre-reconciliation | re-synthesise (refute-orphan) or rewrite to the survivor id (merge-orphan) — the message says which |
 | compliance duty | regulated `data_classes` with no compliance coverage | run the soc2-compliance duty pass, or record a `category: compliance` finding |
 | coverage | files examined < total without `scope.partial` | declare the partial honestly, and name the gap in "what could not be assessed" |
+| coverage matrix | a run lens has no matrix row, `areas_total` missing, or a row names a lens that never ran | state each run lens's per-area coverage; deferred lenses get empty rows, never-selected lenses get none |
 | slop prose | a banned phrase in the deliverable | rewrite the sentence; the message quotes the match |
 
 The one thing never to do: weaken the check that fired. In this repo that flips a regression test; in a target repo it silently unmakes the guarantee the report ships under.

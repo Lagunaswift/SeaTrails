@@ -35,6 +35,7 @@ The cells that matter most are `✗`: a lens that *should* have covered an area 
 ## How this connects to the harness and the report
 
 - The harness (`audit-check.mjs`) **hard-fails** when `coverage` is missing, when `files_total`/`files_examined` are absent, or when `files_examined < files_total` without `scope.partial=true` — under-coverage that is neither complete nor acknowledged as partial blocks the audit.
+- The matrix itself is gated too: when lenses ran, `coverage.matrix` must be present and non-empty, **every run lens must have a row** (a run lens with no row is unmeasured coverage), `areas_total` must be a positive number, and a row naming a lens that neither ran nor was deferred hard-fails — that is coverage claimed for a lens that did not run. Deferred lenses may (and should) appear as empty rows; that is how a staged run stays honest.
 - The report (`report-format.md`) renders the matrix and derives the "what could not be assessed" section from the `✗` and `partial` cells, so honesty about gaps is generated from data, not from the author remembering to be honest.
 
 ## On staged / interrupted runs

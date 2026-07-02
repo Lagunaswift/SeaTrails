@@ -19,7 +19,7 @@ Staging is the *recommended* pattern, not a failure mode: a full sweep rarely fi
 
 - A partial audit that says so plainly is useful; the one that looks complete can no longer ship. Interruption becomes a labelled state instead of a silent corruption.
 - File-count coverage is a crude metric — examined ≠ understood — but it is honest about the one thing it measures, and it gives "what could not be assessed" a number.
-- The lens×area coverage matrix (`coverage-matrix.md`) is specified but not yet machine-enforced beyond presence of the file counts; that looseness is a known gap (see the handover backlog).
+- The lens×area matrix is enforced at lens granularity (added after this record was first written, closing its stated gap): when lenses ran, the matrix must exist with a row per run lens and an `areas_total`, and a row naming a lens that neither ran nor was deferred fails — coverage claimed for a lens that did not run. Cell contents (`✓`/`partial`/`✗`) remain free-form prose; only presence and lens attribution are machine-checked.
 
 ## Enforced by
 
