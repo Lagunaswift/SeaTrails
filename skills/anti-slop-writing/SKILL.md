@@ -9,6 +9,8 @@ description: "Use this skill whenever you are writing, drafting, editing, or pro
 
 These rules eliminate the patterns that make AI-generated text identifiable and low-quality. They apply to ALL written output regardless of topic, industry, or format. Read and apply every rule below before producing any written content.
 
+The rules operate at two depths. The banned words, banned sentence patterns, and formatting defaults below are **surface tells** — catchable by scanning, and increasingly trained away by newer models. **The Shape of the Piece** section covers **discourse-level tells**: structural habits that survive sentence-by-sentence cleanup and give a piece away even when every banned word is gone. Research on AI fiction found the shape alone identifies AI authorship with 93% accuracy, and that editing out surface artifacts barely dents it — fixing shape requires restructuring, not rewording. Clean the sentences AND the shape.
+
 ## Banned Words and Phrases
 
 Never use any of the following. No exceptions.
@@ -196,12 +198,62 @@ State claims directly. Do not apologise for having a position. Do not preface op
 ### No Pedagogical Default
 Do not assume the reader needs hand-holding. "Think of it as...", "Let's break this down...", "To put it simply..." patronise the reader and weaken the writing. Make the point at the level the reader requires.
 
+## The Shape of the Piece (discourse-level tells)
+
+Sentence-level cleanup does not remove authorship signature. StoryScope (Russell et al., 2026, arXiv:2604.03136) extracted 304 narrative-structure features from 61,608 stories — 10,272 human-written, each mirrored by five LLMs — and separated human from AI at 93.2% macro-F1 **with every stylistic feature withheld**. Running an artifact-removal editing pass over the AI stories (clichés, purple prose, redundant exposition) moved detection by 1.6 points: the shape survives the polish. The five models also clustered in one region of narrative space while human work dispersed — AI defaults are not just detectable, they are *shared*. The numbers below are from that fiction corpus; the shapes recur in nonfiction and copy, and the rules apply the pattern beyond fiction.
+
+No regex catches these. The harness's slop gate cannot see shape; only a reader (or a reviser) hunting for it can.
+
+### Over-explanation — trust the reader once
+
+AI narrators state the story's lesson explicitly 77% of the time; human authors 52%. Dialogue exists to stage a philosophical debate 59% vs 34%. The pattern is over-determination: spelling out the meaning instead of trusting the reader to infer it. The nonfiction form: restating the takeaway the evidence has already made, closing sections with "what this means is…", explaining the implication of a point the reader just understood. Make the point once, concretely, and move on. If the reader could not infer the conclusion from what you wrote, fix what you wrote — do not append the conclusion.
+
+### Forced tidiness — one earned tangent beats total closure
+
+AI plots hold to a single causal track (no subplots: 79% vs 57%; causal-chain continuity higher; every flourish serving the central theme). Human writing wanders on purpose: subplots that echo the theme obliquely (42% vs 21%), threads left honestly unresolved, a digression that earns its place. In nonfiction: not every paragraph must feed the thesis, and an open question stated as open is more trustworthy than a conclusion forced onto it. If every section resolves and everything ties back, the piece has the machine shape. Leave the genuinely unresolved unresolved.
+
+### Performed feeling — name it or drop it
+
+AI conveys emotion through bodily metaphor 81% of the time (humans 38%): the tightening chest, the cold sweat, the breath she didn't know she was holding. Humans plainly name a feeling far more often (explicit labels 29% vs 8%). The same performance appears in copy as staged empathy — "we know that sinking feeling when a deploy fails". Say "she was afraid", say "deploys fail; here is what this does about it". A named feeling is a claim; a staged one is decoration.
+
+### Sensory and scenery quota — description must carry information
+
+AI over-indexes on sensory decoration: smell-based imagery in 82% of stories (humans 57%), denser sensory description, settings that mirror the protagonist's inner state (weather doing the grieving). Description earns its place by telling the reader something they need; atmosphere produced on quota reads as generated. If the storm exists to match the mood, cut the storm.
+
+### Vague allusion — name the specific thing or cut the gesture
+
+Human writing names its references: specific texts, authors, places, works (explicit named references 47% vs 24%; AI defaults to diffuse "implicit echoes", 72% vs 50%). This is the shape-level form of the banned "studies show": gesturing at a world of referents without committing to one. Name the paper, the product, the street, the incident — a checkable specific — or delete the gesture. Vagueness reads as safety, and safety reads as machine.
+
+### An audience and a world — write like someone is watching
+
+Human authors write to a reader (direct address 28% vs 7%; fourth-wall permeability double the AI rate) and anchor work in the real world's proper nouns. AI writes as though no one is watching and nowhere is anywhere. Where the register allows, address the reader; wherever possible, commit to real, named particulars. The "strange emptiness" of AI text is mostly the absence of a specific world and a specific audience.
+
+### Convergent sameness — break your own skeleton
+
+The five models cluster in one narrative region; human pieces are systematically rarer in feature space (mean rarity percentile 0.71 vs 0.49; a quarter of human stories sit in the rarest tenth, against 0.6–3% of AI stories). The practical rule: if your last three pieces open the same way, escalate the same way, and resolve the same way, the next one should not. Vary structure deliberately — the default skeleton is the shared one.
+
+### Fiction specifically
+
+The measured tells, for when the output is narrative: resolutions driven by the protagonist's tidy choice (69% vs 46%) that land on internal acceptance (47% vs 27%); morally unambiguous protagonists (humans write ambivalent ones 59% vs 38%); characters introduced by external description (52% vs 30%) rather than in action or dialogue; strictly chronological telling. The human repertoire to draw on: time jumps and anachrony that delay revelation, reveals that force rereading of earlier scenes, more locations, more dialogue relative to narration, endings that stay open. A human mystery opens at the funeral and spirals backward; the machine tells it from first clue to reveal.
+
+### Model signatures
+
+Each model also has its own fingerprint; when editing a specific model's draft, check its habits first. Claude: flat event escalation, uniform narrative voice, reverence for convention, epilogues and quiet endings — push escalation and let endings land hard. GPT: gossip and rumour as plot machinery, distant retrospective framing, expectation-subversion. Gemini: bleak, oppressive settings by default and over-extended tidy denouements. DeepSeek: front-loaded context and a visible narrator. Kimi: the generic centre — no distinctive choices at all, which is itself the tell.
+
 ## The Revision Pass
 
 The draft is not finished when the words stop. It is finished after a dedicated pass that actively hunts for the patterns below and rewrites every hit. Stating "don't do X" earlier is not enough, because structural tells feel like good writing while you are producing them. They only become visible when you go looking for them on purpose. Run this pass on every draft before returning it.
 
-### Step 1: Structural sweep (do this first, it catches the invisible tells)
-Re-read the draft hunting specifically for:
+### Step 1: Shape and structural sweep (do this first, it catches the invisible tells)
+Judge the piece's shape before its sentences:
+- Does the piece explain a point the reader already got, or state the takeaway after the evidence made it? Cut the explanation.
+- Does everything resolve and tie back to one thesis with no loose ends? Loosen it: keep the earned tangent, leave the open question open.
+- Is feeling performed through staged physical detail or staged empathy instead of being named plainly? Name it or cut it.
+- Are references diffuse gestures instead of named specifics? Name the thing or delete the gesture.
+- Is there a single checkable, real-world particular in the piece? If not, the emptiness is the tell.
+- Is this piece built on the same skeleton as the last ones? Restructure deliberately.
+
+Then re-read hunting for the sentence-level tells:
 - Triples of any kind: three adjectives, three examples, three short clauses in a row. Cut to one or two.
 - Relabelled repeats: the same point stated 2+ times with new vocabulary each pass. Keep the strongest version, delete the rest.
 - Anaphora: 3+ consecutive sentences sharing an opening or closing phrase. Rewrite so the rhythm breaks.
@@ -226,10 +278,10 @@ Scan for every entry in the Banned Words and Phrases section. Replace each hit.
 5. Is there a historical analogy stack? Cut it to one example or none.
 
 ### Step 4: Final read
-Read the whole thing once more and ask: does this read like a specific human wrote it, or like a model padding toward a word count? If the latter, the most likely cause is a structural tell that survived Step 1. Go back and find it.
+Read the whole thing once more and ask two questions. Does this read like a specific human wrote it, or like a model padding toward a word count? And does it have the machine *shape* — over-explained, fully resolved, decorated with atmosphere, committed to nothing checkable? If either, the most likely cause is a tell that survived Step 1. Go back and find it.
 
 Do not return the draft until all four steps have run.
 
 ## What to produce under a production-audit
 
-Standalone, this skill is a writing standard applied to drafts. As a lens under `production-audit` it audits the app's own user-facing copy — landing and marketing pages, onboarding, microcopy, button labels, empty/error-state wording, notification and transactional-email copy; never code comments, logs, or machine-to-machine output — and emits findings in the canonical schema (`production-audit/references/finding-schema.md`), appended to the run's `raw-findings.jsonl` as discovered: prefix `COPY`, category `content`, hard-capped at medium by the harness and reported in the "Design & copy quality" section, never the readiness tiers. Copy whose worst case is a real failure (a misleading legal disclaimer, instructions that lose data) is categorised by that consequence and owned by the relevant lens; reserve `content` for "the worst case is it reads badly". The same standard also governs the audit report's own prose — the harness hard-fails the report on the banned-word tells.
+Standalone, this skill is a writing standard applied to drafts. As a lens under `production-audit` it audits the app's own user-facing copy — landing and marketing pages, onboarding, microcopy, button labels, empty/error-state wording, notification and transactional-email copy; never code comments, logs, or machine-to-machine output — and emits findings in the canonical schema (`production-audit/references/finding-schema.md`), appended to the run's `raw-findings.jsonl` as discovered: prefix `COPY`, category `content`, hard-capped at medium by the harness and reported in the "Design & copy quality" section, never the readiness tiers. On long-form surfaces (landing, about, blog, onboarding sequences, email bodies) audit the shape as well as the sentences: staged empathy, benefits explained twice, authority gestured at without a named customer/number/source, and copy with no checkable real-world particular are findings even when no banned word appears. Copy whose worst case is a real failure (a misleading legal disclaimer, instructions that lose data) is categorised by that consequence and owned by the relevant lens; reserve `content` for "the worst case is it reads badly". The same standard also governs the audit report's own prose — the harness hard-fails the report on the banned-word tells; the shape tells need the reviser's eye.
