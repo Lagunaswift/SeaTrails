@@ -27,7 +27,7 @@ No standing warnings are expected — a clean run is `0 failure(s), 0 warning(s)
 
 ## 2. Judgement checks (a script cannot do these)
 
-- **Prose quality.** Reread everything you wrote against `skills/anti-slop-writing/SKILL.md` — the banned words, the banned sentence patterns, the formatting tells (bolded-phrase bullet openers, em-dash overuse). This repo's product is judgement expressed in prose; slop in the repo undercuts the pitch.
+- **Prose quality.** Reread everything you wrote against `skills/anti-slop-writing/SKILL.md` — the banned words, the banned sentence patterns, the formatting tells (bolded-phrase bullet openers, em-dash overuse), and the shape tells ("The Shape of the Piece": over-explained takeaways, everything tying back too neatly, vague gestures where a named specific belongs). This repo's product is judgement expressed in prose; slop in the repo undercuts the pitch.
 - **British English** in repo-authored files (the vendored `ui-ux-pro-max` and `stripe-best-practices` keep their upstream voice).
 - **No leakage.** No real app names, live findings, secrets, or credential values anywhere — the `.gitignore` blocks audit artifacts, but prose can leak too. Check examples you invented are generic.
 - **Detection precision** for any new check: would two people flag the same lines from your wording? Vague detection is the one thing `CONTRIBUTING.md` promises to bounce.
