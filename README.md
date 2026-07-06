@@ -10,7 +10,7 @@ An audit skill set for codebases, built on Claude skills.
 
 You build something fast, often with AI. It works, and you have no idea whether
 it survives users or someone poking at it. seatrial runs a codebase through
-19 audit lenses (security, privacy, scaling, compliance, accessibility,
+audit lenses (security, privacy, scaling, compliance, accessibility,
 AI-specific risks, code quality, dependencies, infrastructure, and more), each
 reading for one kind of problem. An
 orchestrator collates, de-duplicates, and ranks the findings.
