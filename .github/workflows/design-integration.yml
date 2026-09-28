@@ -1,0 +1,26 @@
+name: design integration validation
+on:
+  push:
+    branches: [feat/design-audits-and-integrity]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Harness regression suite
+        run: node skills/production-audit/scripts/run-tests.mjs
+      - name: Registration consistency
+        run: node .claude/skills/release-check/scripts/check-consistency.mjs
+      - name: Export tracked review snapshot
+        run: git archive --format=tar HEAD > /tmp/seatrails-review.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seatrails-review
+          path: /tmp/seatrails-review.tar
+          retention-days: 1
