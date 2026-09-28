@@ -57,7 +57,7 @@ What it catches:
   ("delve", "game-changer", "experts agree") hard-fail the build. 10 borderline
   terms warn. Plain deterministic code with no model in the loop.
 
-52 adversarial test cases lock the harness. Each is a way a past audit tried to
+94 adversarial test cases lock the harness. Each is a way a past audit tried to
 look clean while hiding something. They are not happy-path tests; they are
 attacks. A few of the actual case names from `run-tests.mjs`:
 
@@ -77,7 +77,7 @@ Weakening the harness flips a test.
 share a root cause, ranks by likely damage, and demands evidence before anything
 is reported as fact. The harness gates the final output.
 
-**19 audit lenses**, one per concern:
+**21 audit lenses**, one per concern:
 
 | Lens | Concern |
 |---|---|
@@ -100,18 +100,34 @@ is reported as fact. The harness gates the final output.
 | dependency-audit | lock files, version pinning, supply chain, postinstall scripts |
 | infrastructure-config | Docker, Terraform, K8s, CI/CD, nginx, secrets in config |
 | adversary-emulation | attack chains from atomic findings (synthesis, runs last) |
+| impeccable-audit | design-system coherence, themes, hierarchy, state presentation |
+| taste-audit | brand/brief fit and visual direction on marketing, portfolio and editorial surfaces |
 
 **12 craft skills** for the fix phase: refactoring, testing-strategy,
 debugging-methodology, data-modelling, error-handling-patterns,
 api-and-interface-design, state-management, frontend-design, ux-ui-patterns,
 stripe-best-practices, saas-production-security, ui-ux-pro-max.
 
-32 skills total (19 lenses + 1 orchestrator + 12 craft).
+34 skills total (21 lenses + 1 orchestrator + 12 craft).
 
 `ui-ux-pro-max` is a data-driven design intelligence toolkit with searchable
 CSV databases (161 color palettes, 57 font pairings, 67+ UI styles, 25 chart
 types, 99 UX guidelines) and a BM25 search engine that generates complete
 design systems from product-type queries. Requires Python 3.
+
+## Design audits
+
+`impeccable-audit` and `taste-audit` are self-contained, read-only adaptations of the Impeccable audit/critique methods and Taste Skill's context-first design review. They preserve existing brand rules and use the same ledger, verification and deduplication as the other lenses. Their intake notes identify the reviewed upstream revisions; no upstream CLI, detector, hook or runtime is installed.
+
+Ask for `production-audit` as usual; it selects the relevant design lenses for the surfaces present. Or request an `impeccable audit` / `taste audit` on a named route. Taste is for marketing, portfolio and editorial surfaces, not operational dashboards. Cosmetic findings cap at medium; genuine task blockers keep their functional severity. Without browser evidence, the report explicitly limits its visual claims.
+
+## Machine-readable gate
+
+```bash
+node skills/production-audit/scripts/audit-check.mjs <audit-dir> --repo <target-repo> --json
+```
+
+`--json` emits one result object with `format_version`, `ok`, `exit_code`, `failures`, `warnings` and counts when validation ran. Exit codes stay 0 (gate passed), 1 (gate failed), 2 (bad command arguments). Text output remains the default. A supplied invalid repository path fails; evidence checking is never silently skipped. Evidence paths must stay inside the repository, and secondary/refutation citations are checked too.
 
 ## How it works
 

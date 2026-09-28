@@ -6,16 +6,22 @@ Written 2026-07-01 on branch `claude/opus-4.8-documentation-gy6nfh`, after a ful
 
 ## What this repo is
 
-seatrial (repo name SeaTrails): 32 Claude skills — 19 audit lenses, the `production-audit` orchestrator, 12 craft skills — plus a zero-dependency integrity harness (`audit-check.mjs`) that gates every audit report, its adversarial regression suite (`run-tests.mjs`, 52 cases), and a renderer (`render-report.mjs`) that generates the human report from gated data. The audit is executed by an agent reading prose; the scripts make its output's *integrity* machine-checked. ADRs 0001–0014 record why.
+seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The suite now contains 94 tests.
 
-## Verify this handover's claims
+## Current integration
+
+Added `impeccable-audit` and `taste-audit` with shared design context, upstream provenance, audit-only execution and explicit surface boundaries. Every registration point includes both lenses. No upstream CLI or detector is installed.
+
+Closed reproduced gate bypasses: invalid `--repo` skipping checks; traversal/symlink evidence escapes; ignored secondary and refutation citations; duplicate dispositions; absent reconciliation counts; negative/fractional/impossible coverage; substring matrix matching; unknown or ambiguously deferred lenses. Added strict argument handling, `--json` output and validated `limitations` that survive report rendering. No original regression case was removed or relaxed.
+
+Validation:
 
 ```bash
-node skills/production-audit/scripts/run-tests.mjs                    # 52 passed, 0 failed
-node .claude/skills/release-check/scripts/check-consistency.mjs      # 0 failures, 0 warnings
+node skills/production-audit/scripts/run-tests.mjs
+node .claude/skills/release-check/scripts/check-consistency.mjs
 ```
 
-A clean checker run has zero warnings since 2026-07-02 (the two historical name-mismatch warnings were resolved, not suppressed — see the third pass below).
+Expected: 94 passed, 0 failed; 0 consistency failures and warnings. ADR 0015 records the additions. Earlier pass descriptions below are historical, not the current inventory.
 
 ## History
 
@@ -89,7 +95,7 @@ The top three backlog items, each done under the harness-dev discipline:
 Each entry: why it matters, then the sketch. Ordered by value-to-effort for an agent picking up the repo. (From the 2026-07-01 list: items 1, 2, 3 and 6 were executed in the second pass; the next three in the third pass — see above.)
 
 1. **Reshape `ai-saas-security` into lens form.** It is registered as a priority-1 lens but written as a build guide (implementation checklists, no numbered passes); the registry's pass list re-labels its sections. Its new What-to-produce block covers the output contract, but the body still reads build-first. Rewrite into detection-oriented passes without losing its content, or accept and document the genre exception.
-2. **Harness `--json` output.** A machine-readable failure list would let CI annotate PRs and let orchestrating agents branch on specific invariants instead of parsing prose. Additive flag; attack-first cases for the flag's own shape.
+2. **Structured-output follow-through.** `--json` is implemented and tested. Future work: stable per-invariant diagnostic codes and optional CI annotations, without changing the existing gate exit semantics.
 3. **Distribution.** Installation is "copy skills/ into .claude/skills/" (now documented in the operator guide), but there is no install script, no versioning, no update path. Options: a `schema_version` field in `report.json` (gate warns on mismatch), a tagged-release convention, or packaging as a Claude Code plugin. Decide when there are external users to serve.
 4. **`stripe-best-practices` staleness.** Vendored with a pinned API version string ("2026-04-22.dahlia"). Add a check-against-current-docs note in the skill, or a refresh cadence.
 5. **Naming.** The product calls itself seatrial; the repo is SeaTrails. Cosmetic, author's call — but pick one before external users cite it.

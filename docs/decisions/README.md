@@ -24,6 +24,7 @@ The first four are the spine; the rest hang off them.
 | [0012](0012-adversarial-regression-suite.md) | Adversarial regression suite | Every test case is a closed bypass; weakening the harness flips a test |
 | [0013](0013-report-rendered-from-gated-data.md) | Report rendered from gated data | Counts the reader trusts are computed from report.json, and the headline is the gating set |
 | [0014](0014-ai-slop-prose-gate.md) | AI-slop prose gate | Deterministic regexes hard-fail slop phrases in the deliverable |
+| [0015](0015-design-audits-and-evidence-boundaries.md) | Design audits and evidence boundaries | Read-only design integrations, contained evidence, exact coverage and machine-readable gate results |
 
 ## Format
 
