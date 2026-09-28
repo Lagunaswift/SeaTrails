@@ -243,6 +243,7 @@ if (typeof cov.files_examined === 'number' && typeof cov.files_total === 'number
   gaps.push(`**${cov.files_total - cov.files_examined} source file(s) not examined.**`);
 }
 gaps.push(`**Live/runtime state** (deployed env vars, infra state, runtime behaviour) is not determinable from the repository.`);
+for (const limitation of R.limitations || []) gaps.push(limitation);
 for (const g of gaps) w(`- ${g}`);
 w();
 
