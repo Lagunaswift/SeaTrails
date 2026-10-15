@@ -46,3 +46,7 @@ A full sweep often will not finish in one session (see the budgeting section in 
 ## Machine-checked count and identity rules
 
 File counts are non-negative integers, examined cannot exceed total, and areas_total is a positive integer when lenses ran. A row is either an object with an exact registered `lens` field or a string beginning `lens-name:` followed by its detail. Each lens has at most one row. Substring mentions do not establish coverage. The selected lens list is required. Selected, run and deferred ids must be registered and non-duplicated; a lens cannot be both run and deferred. Deferred work requires `scope.partial=true`.
+
+## Captured evidence for new audits
+
+Follow `evidence-assurance.md` for source delivery receipts, exact quotation checks, finding-bound independent review records and the combined delivery gate. Coverage counts come from captured deliveries. Semantic support remains a review judgement and must include counterevidence.

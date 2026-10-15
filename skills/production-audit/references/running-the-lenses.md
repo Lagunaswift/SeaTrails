@@ -89,3 +89,7 @@ Run every applicable lens under its own real discipline (read each skill, do not
 
 ## Connection to other stages
 The file:line citations enable Stage 4's verification. The per-finding lens tags enable Stage 3's cross-lens merge. The atomic findings enable severity calibration and ranking. Run thoroughly here so consolidation has everything it needs.
+
+## Captured evidence for new audits
+
+Follow `evidence-assurance.md` for source delivery receipts, exact quotation checks, finding-bound independent review records and the combined delivery gate. Coverage counts come from captured deliveries. Semantic support remains a review judgement and must include counterevidence.

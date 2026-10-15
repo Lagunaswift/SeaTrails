@@ -14,5 +14,9 @@ jobs:
           node-version: '20'
       - name: Harness regression suite (adversarial cases)
         run: node skills/production-audit/scripts/run-tests.mjs
+      - name: Evidence capture and delivery integration
+        run: node skills/production-audit/scripts/test-assurance.mjs
+      - name: Benchmark corpus and scorer (not detector accuracy)
+        run: node skills/production-audit/scripts/test-benchmark.mjs
       - name: Repo consistency check (registration-point drift)
         run: node .claude/skills/release-check/scripts/check-consistency.mjs

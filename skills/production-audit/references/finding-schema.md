@@ -144,3 +144,7 @@ The harness does not auto-cap reasoning findings, but the report must visibly di
 `location.line` is a positive integer or null; `location.others` contains repo-relative `file:line` strings (or a file without a line). With `--repo`, every primary and secondary citation and every refutation-evidence citation must resolve to an existing regular file within the repository. Absolute paths, traversal and symlink escapes fail. For missing-file findings, cite an existing caller/configuration and identify the absent path in `issue`.
 
 The design lenses also read `design-review-context.md`. Rendered evidence supplements source citations through `verification.note`; it never replaces the source-location contract. Taste owns only `design-aesthetic`. Impeccable owns that primary category plus demonstrated `frontend`/`accessibility` consequences. Purely visual judgements remain capped at medium.
+
+## Captured evidence for new audits
+
+Follow `evidence-assurance.md` for source delivery receipts, exact quotation checks, finding-bound independent review records and the combined delivery gate. Coverage counts come from captured deliveries. Semantic support remains a review judgement and must include counterevidence.

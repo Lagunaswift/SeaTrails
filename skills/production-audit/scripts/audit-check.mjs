@@ -27,6 +27,7 @@
 import { readFileSync, existsSync, realpathSync, statSync } from 'node:fs';
 import { join, resolve, relative, isAbsolute, win32 } from 'node:path';
 import process from 'node:process';
+import { checkAssurance } from './assurance.mjs';
 
 const LENSES = new Set([
   'code-audit', 'ai-saas-security', 'scaling-audit', 'release-and-ops', 'data-privacy',
@@ -125,7 +126,7 @@ function parseArgs(argv) {
   let positional = null;
   for (let i = 0; i < a.length; i++) {
     if (a[i] === '--json') continue;
-    if (['--ledger', '--report', '--repo'].includes(a[i])) {
+    if (['--ledger', '--report', '--repo', '--assurance'].includes(a[i])) {
       const key = a[i].slice(2);
       if (!a[i + 1] || a[i + 1].startsWith('--')) throw new Error(`${a[i]} requires a path`);
       if (out[key]) throw new Error(`duplicate option ${a[i]}`);
@@ -742,7 +743,7 @@ catch (e) {
   process.exit(2);
 }
 
-let ledger = [], report = null;
+let ledger = [], report = null, assurance = null;
 try {
 ledger = readLedger(args.ledger);
 report = readReport(args.report);
@@ -768,6 +769,10 @@ checkCoverage(report, ledger);
 checkRemediationOrder(report);
 checkEvidenceFiles(report, args.repo, ledgerById);
 checkProse(report);
+if (args.assurance || report?.assurance_version != null) {
+  try { assurance = checkAssurance(report, ledger, args.repo, args.assurance); }
+  catch (e) { fail(`assurance: ${e.message}`); }
+} else warn('legacy audit: source delivery and semantic review evidence were not independently checked');
 
 } catch (e) {
   // Malformed optional blocks must fail closed, with a machine-readable result.
@@ -778,7 +783,7 @@ checkProse(report);
 if (args.json) {
   const exitCode = failures.length ? 1 : 0;
   console.log(JSON.stringify({ format_version: 1, ok: exitCode === 0, exit_code: exitCode,
-    failures, warnings, counts: { raw: ledger.length, reported: report?.findings?.length ?? 0 } }));
+    failures, warnings, assurance, counts: { raw: ledger.length, reported: report?.findings?.length ?? 0 } }));
   process.exit(exitCode);
 }
 const line = '─'.repeat(70);

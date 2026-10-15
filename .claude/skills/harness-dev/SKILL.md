@@ -39,7 +39,7 @@ Name cases the house way: `<attack>: <what the bad audit did> FAILS` / `<legitim
 
 ## render-report.mjs changes
 
-The renderer computes everything from `report.json` — keep it that way: no new hand-written inputs, no reading the ledger or repo, nothing that lets prose diverge from gated data (ADR 0013). Structure changes must be mirrored in `references/report-format.md` (the contract doc; the renderer governs on disagreement, so update the doc, not just the code).
+The renderer computes everything from `report.json` — keep it that way: no new hand-written inputs, validate a private snapshot of report and ledger before rendering those same report bytes (ADR 0016); no report output before validation succeeds. Structure changes must be mirrored in `references/report-format.md` (the contract doc; the renderer governs on disagreement, so update the doc, not just the code).
 
 ## Validate
 

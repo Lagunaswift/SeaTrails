@@ -57,7 +57,7 @@ What it catches:
   ("delve", "game-changer", "experts agree") hard-fail the build. 10 borderline
   terms warn. Plain deterministic code with no model in the loop.
 
-94 adversarial test cases lock the harness. Each is a way a past audit tried to
+97 adversarial test cases lock the harness. Each is a way a past audit tried to
 look clean while hiding something. They are not happy-path tests; they are
 attacks. A few of the actual case names from `run-tests.mjs`:
 
@@ -158,3 +158,11 @@ can focus on the hard stuff.
 ## Licence
 
 MIT.
+
+## Evidence and detection measurement
+
+New reports use captured source deliveries and exact, finding-bound review records. The renderer invokes validation before emitting the report. See [the evidence protocol](skills/production-audit/references/evidence-assurance.md) for controller isolation, capture, review and delivery commands. Legacy reports remain explicitly labelled as self-reported.
+
+The detection benchmark exports a label-free worker packet and scores precision, recall and false-positive rate separately from integrity regression tests. Its initial eight synthetic cases cover four security weaknesses; they do not establish production accuracy or coverage of every lens.
+
+The first fresh-agent security calibration found 4/4 seeded defects with 0 false positives across four fixed counterparts. The worker was given no evaluator labels, with prompt-level isolation only. Model version was unavailable. [Raw results and limitations](skills/production-audit/scripts/benchmark/baseline-2026-10-16.json) are committed so this limited result can be rescored.

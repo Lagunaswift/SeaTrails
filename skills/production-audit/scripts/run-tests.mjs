@@ -968,6 +968,16 @@ const cases = [
   },
 ];
 
+// Delivery must invoke the gate even when the caller skips it.
+cases.push({ name: 'renderer: invalid audit cannot claim a passed harness FAILS',
+  expect: 'fail', renderReject: true, ...single({}, { reconciliation: {} }) });
+cases.push({ name: 'renderer: report without ledger cannot claim a passed harness FAILS',
+  expect: 'pass', renderReject: true, removeLedgerBeforeRender: true, ...single() });
+
+cases.push({ name: 'assurance: versioned report without independent records FAILS',
+  expect: 'fail',
+  ...single({}, { assurance_version: 1 }) });
+
 // ---- run --------------------------------------------------------------------
 let passed = 0, failed = 0;
 for (const c of cases) {
@@ -996,8 +1006,13 @@ for (const c of cases) {
       } catch { jsonOk = false; }
     }
     let renderOk = true;
+    if (c.renderReject) {
+      if (c.removeLedgerBeforeRender) rmSync(join(dir, 'raw-findings.jsonl'));
+      const rendered = spawnSync(process.execPath, [join(HERE, 'render-report.mjs'), dir, '--legacy'], { encoding: 'utf8' });
+      renderOk = rendered.status !== 0 && rendered.stdout === '';
+    }
     if (c.renderIncludes && res.status === 0) {
-      const rendered = spawnSync(process.execPath, [join(HERE, 'render-report.mjs'), dir], { encoding: 'utf8', timeout: 10000 });
+      const rendered = spawnSync(process.execPath, [join(HERE, 'render-report.mjs'), dir, '--legacy'], { encoding: 'utf8', timeout: 10000 });
       renderOk = rendered.status === 0 && rendered.stdout.includes(c.renderIncludes);
     }
     const ok = got === c.expect && exitOk && jsonOk && renderOk && !res.error;

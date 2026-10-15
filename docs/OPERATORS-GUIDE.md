@@ -47,7 +47,7 @@ Cost intuition for a capable model: the lens sweep dominates (each subagent read
 
 ```bash
 node .claude/skills/production-audit/scripts/audit-check.mjs audit/ --repo .
-node .claude/skills/production-audit/scripts/render-report.mjs audit/ > audit/report.md
+node .claude/skills/production-audit/scripts/render-report.mjs audit/ --repo . --assurance /external/evidence/run-01 > audit/report.md
 ```
 
 Gate first, render second, always with `--repo`. Never hand-write or hand-edit `report.md` — every count in it is computed from the gated `report.json` so the prose cannot diverge. The report is not delivered until the gate exits 0.
@@ -92,3 +92,7 @@ Use the existing production-audit invocation; its applicability map now selects 
 Pass one shared product/brand context, reviewed source revision, routes, viewports and evidence limits to the reviewers. Preserve useful density on dashboards. Source-only review must state that rendered and interactive behaviour remain unassessed. Fixing is still a separate phase.
 
 For machine consumers run `node .claude/skills/production-audit/scripts/audit-check.mjs <audit-dir> --repo <target-repo> --json`. Check the process exit code as well as `ok`; retain the warnings and named gaps. Do not deliver the rendered report after a failed gate.
+
+## New audit evidence and detection calibration
+
+Before starting an audit, follow `skills/production-audit/references/evidence-assurance.md`. The controller must capture source deliveries and retain separate reviewer responses. New rendering requires those records. Use `--legacy` only for historical artifacts and retain the printed limitation. The same reference documents blinded benchmark preparation and scoring; regression counts are not detection accuracy.

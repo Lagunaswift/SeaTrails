@@ -6,7 +6,11 @@ Written 2026-07-01 on branch `claude/opus-4.8-documentation-gy6nfh`, after a ful
 
 ## What this repo is
 
-seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The suite now contains 94 tests.
+seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The core suite now contains 97 tests, with 20 evidence integration checks and 17 corpus/scorer checks.
+
+## Evidence assurance update
+
+The renderer now gates a private snapshot itself and requires captured evidence for new reports. `capture-source.mjs` records full-file deliveries against a tracked-file manifest; `assurance.mjs` validates coverage and independent review records with exact source quotations. Controller isolation is required for provenance; the scripts do not provision a sandbox or prove semantic truth. `benchmark.mjs` prepares and scores a separate eight-case detection corpus. ADR 0016 and `references/evidence-assurance.md` specify the contracts and limits.
 
 ## Current integration
 
@@ -21,7 +25,7 @@ node skills/production-audit/scripts/run-tests.mjs
 node .claude/skills/release-check/scripts/check-consistency.mjs
 ```
 
-Expected: 94 passed, 0 failed; 0 consistency failures and warnings. ADR 0015 records the additions. Earlier pass descriptions below are historical, not the current inventory.
+Expected: 97 passed, 0 failed; 0 consistency failures and warnings. ADR 0015 records the additions. Earlier pass descriptions below are historical, not the current inventory.
 
 ## History
 
