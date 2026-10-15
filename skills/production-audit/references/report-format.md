@@ -5,7 +5,7 @@ This file is the contract for the final deliverable. Stage 5 produces `report.js
 ## The two closing scripts, in order
 
 1. **Gate.** `node .claude/skills/production-audit/scripts/audit-check.mjs <audit-dir> [--repo <path>]` must exit zero. Pass `--repo` whenever the target repo is on disk — it validates every cited file and line against reality.
-2. **Render.** `node .claude/skills/production-audit/scripts/render-report.mjs <audit-dir> > report.md` generates the human-readable report *from* the validated `report.json`. Never hand-write `report.md`, and never edit the rendered file — every count a reader trusts is computed from the gated data so the prose cannot diverge. To change the report, change `report.json` (then re-gate) or the renderer (then see `run-tests.mjs`).
+2. **Render.** `node .claude/skills/production-audit/scripts/render-report.mjs <audit-dir> --repo <path> --assurance <evidence-dir> > report.md` generates the human-readable report *from* the validated `report.json`. Never hand-write `report.md`, and never edit the rendered file — every count a reader trusts is computed from the gated data so the prose cannot diverge. To change the report, change `report.json` (then re-gate) or the renderer (then see `run-tests.mjs`).
 
 The report is not delivered until the harness exits zero. There is no "mostly passed".
 
@@ -60,3 +60,7 @@ The audit-directory positional form and explicit `--ledger` / `--report` form ar
 ## Named assessment limits
 
 The optional `limitations` array contains non-empty strings naming unassessed routes, themes, states, evidence modes or scope assumptions. The gate validates the field and its prose; the renderer includes every entry in "What could not be assessed". Use it for source-only design reviews so missing browser evidence remains visible in the delivered report. It supplements the matrix and partial flag; it does not make missing coverage complete.
+
+## Evidence assurance
+
+New delivery requires the capture and semantic-review contract in `evidence-assurance.md`. The renderer invokes the gate itself on a private ledger/report snapshot. Historical `--legacy` delivery explicitly labels self-reported coverage and review. Gate warnings and manifest exclusions are printed; integrity success never implies measured detection accuracy.

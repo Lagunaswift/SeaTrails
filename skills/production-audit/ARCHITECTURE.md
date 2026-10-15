@@ -179,3 +179,7 @@ Every skill participates in an audit run or in the fix phase that follows it.
 The two design lenses share `references/design-review-context.md`. Their audit-only integrations carry their own provenance, preserve existing brand constraints and distinguish source, rendered and interactive evidence. They use existing categories and the existing cosmetic cap. They do not replace the functional specialists or execute upstream editing workflows.
 
 `audit-check.mjs --json` exposes gate results without parsing terminal prose. Evidence paths are contained by realpath, including secondary and refutation citations; reconciliation rejects duplicate dispositions; coverage uses integer denominators and exact lens ids. ADR 0015 records these additions.
+
+## Evidence-bound delivery
+
+ADR 0016 supersedes the sequencing-only delivery rule. New runs capture source deliveries, bind separate semantic review judgements to source/finding hashes, and render through an internally invoked gate. `references/evidence-assurance.md` defines the controller trust boundary. Detection scoring is a separate benchmark, never inferred from integrity tests.
