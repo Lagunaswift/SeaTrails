@@ -1,6 +1,6 @@
 ---
 name: anti-slop-writing
-description: "Use this skill whenever you are writing, drafting, editing, or producing any text content for the user. This includes blog posts, articles, emails, social media copy, website copy, ad copy, reports, documentation, newsletters, scripts, and any other written output. Always consult this skill before producing written content of any kind. It enforces writing quality standards that eliminate common AI-generated patterns and produce output that reads as if a human expert wrote it. Trigger on any request involving writing, drafting, editing, rewriting, or content creation."
+description: "Use this skill whenever you are writing, drafting, editing, or producing any text content for the user, including casual or off-the-cuff writing such as social posts, Reddit comments, Threads replies, forum rants, and replies drafted for the user to paste. This includes blog posts, articles, emails, social media copy, website copy, ad copy, reports, documentation, newsletters, scripts, and any other written output. Always consult this skill before producing or revising written content of any kind, and apply it when the writing feels conversational, because casual posts are where AI tells slip through most easily. It removes AI-generated patterns, including the current-model tells Claude itself produces, so output reads as if a specific human expert wrote it. Trigger on any request involving writing, drafting, editing, rewriting, polishing, de-slopping, or content creation."
 ---
 
 # Anti-Slop Writing Standards
@@ -9,11 +9,63 @@ description: "Use this skill whenever you are writing, drafting, editing, or pro
 
 These rules eliminate the patterns that make AI-generated text identifiable and low-quality. They apply to ALL written output regardless of topic, industry, or format. Read and apply every rule below before producing any written content.
 
-The rules operate at two depths. The banned words, banned sentence patterns, and formatting defaults below are **surface tells** — catchable by scanning, and increasingly trained away by newer models. **The Shape of the Piece** section covers **discourse-level tells**: structural habits that survive sentence-by-sentence cleanup and give a piece away even when every banned word is gone. Research on AI fiction found the shape alone identifies AI authorship with 93% accuracy, and that editing out surface artifacts barely dents it — fixing shape requires restructuring, not rewording. Clean the sentences AND the shape.
+## The Root Problem (read before the wordlists)
+
+The banned words and patterns below are symptoms. The underlying failure is text with the shape of a conclusion and no arrival behind it. A piece can contain zero banned patterns and still be dead. Wordlists also decay, because each model generation drops its known tells and grows new ones (see Current-Model Tells). The three tests below do not decay, so they run first.
+
+### Test 1: Provenance per claim
+For every claim, ask whether it came from contact with this specific case or is a received truism passed along intact. A claim that is true of everything came from nothing. Cut it, or replace it with the single concrete instance it came from.
+
+The operation is substitution. Keeping the truism and bolting a detail onto it ("connection matters, like when my friend went quiet") is slop with a garnish. Replace the abstraction with the instance and let the general claim disappear.
+
+BAD: "Onboarding is where a lot of products lose users. Getting it right is critical for retention."
+GOOD: "We lost people at the workspace-naming step. Naming a workspace implied a commitment they hadn't made yet, so we moved it to day three and activation went up."
+
+A truism survives if it gets interrogated. "Compound interest is powerful" passed along is slop. "The compound-interest pitch assumes a contribution stability a 23-year-old with three jobs doesn't have" puts the same truism under load.
+
+### Test 2: Forced asymmetry
+Slop weights everything equally because nothing is at stake for the writer. Real writing ranks: this point carries the argument and that one barely registers; the writer is sure here and lost there. Balanced both-sides phrasing is the texture of having no view. Find the ranking the writer holds and state it.
+
+BAD: "A good code review balances thoroughness with speed and gives feedback that's both honest and kind."
+GOOD: "Most review comments are noise. The ones worth writing flag something that will page someone at 3am, and everything else is taste dressed as standards."
+
+### Test 3: Friction
+Slop resolves into comfort. It names no cost and leaves nothing open. Real writing carries something the writer hasn't solved or a cost they admit to, and a draft with no friction anywhere is performing competence. Fluency makes this worse: smooth delivery of an empty claim promises an arrival that never happened, so roughness that tracks a real thought beats polish that tracks nothing.
+
+BAD: "Remote work has clear benefits but also real challenges. With the right tools, teams can thrive."
+GOOD: "Remote killed my ability to tell when a junior was drowning, and I haven't solved it. The standard async answer, 'write better updates', assumes the drowning person knows they're drowning."
+
+### Anti-forgery guard
+These tests invite a specific cheat: faking the signatures. First person plus a specific number plus an admitted flaw reads as authentic, so a model starts generating invented confessions with convenient details, such as the gym with exactly 40 clients or the anecdote that arrives exactly when the argument needs it. This is worse than ordinary slop because it is engineered to pass.
+
+When writing for the user, every specific must be real. If you do not have the detail, make the claim at the level you can support or leave a marked slot for the user to fill. When editing, flag any anecdote whose details are suspiciously convenient. Real contact is lumpy and often inconvenient to the point being made.
+
+## The Stop Rule
+
+Before rewriting, de-slopping, or improving any existing content, check whether a real claim survives once the patterns are stripped. Mentally delete the correctios, the triples, the relabelled repeats, the stakes inflation, and see what is left. If what remains is a genuine point, rewrite around it. If nothing remains, say so and stop. Do not return a cleaner version of nothing: a rewrite that passes every pattern check while still saying nothing is the most deceptive form of slop, because it launders emptiness into something that looks considered. Tell the user the source has no salvageable argument and ask what they actually want to say.
+
+### When a claim survives but the specifics are missing
+The usual request is "here is some AI text, make it sound human." The source is built from truisms, the human version needs specifics, and the source has none, so the pull is to invent them. A rewrite that invents the user's history is worse than the slop it replaced. You cannot supply contact the source does not contain. Pick one of these and say which you picked at the top of the reply:
+
+1. Rewrite to the supportable level. Keep only what the source can stand behind, stated once, even if the result is three lines. This is the default.
+2. Mark the slots. Where a specific is needed and missing, leave a bracketed placeholder ("[the thread that set you off]") and tell the user the piece is unfinished until they fill it.
+3. Label a demo. If showing the technique, invent specifics and say so in the same breath. Unlabelled invented detail presented as the user's voice is forgery.
+
+To decide, ask whether a reader would take the specifics as factual claims about the user. If yes and they are invented, the rewrite failed however human it reads.
+
+## What Replaces the Bans
+
+Stripping the banned patterns without replacing them produces a different tell: flat, gutless prose where every sentence is the same length and shape. The bans clear the ground; these habits fill it.
+
+Vary sentence length on purpose. A long sentence that carries a full chain of reasoning, followed by a short one that lands the consequence, is how humans build emphasis without dramatic stacks. Uniform medium-length sentences read as generated even when every individual sentence is clean.
+
+Prefer the concrete over the abstract. A named tool, a real number, a specific failure you have seen. "Costs rose 40% in the first month" does the work that "costs can escalate significantly" pretends to do. If you do not have the concrete detail, that is a research gap, and no phrasing fixes it.
+
+Commit to claims with content. A sentence that could appear in an article arguing the opposite position is filler. The test for any claim: could a reasonable person disagree with it? If not, it is either obvious or empty, and either way it goes.
 
 ## Banned Words and Phrases
 
-Never use any of the following. No exceptions.
+Never use any of the following in their rhetorical sense. Technical senses stay legal: a JavaScript framework is a framework, a package ecosystem is an ecosystem, a robust estimator is robust. Quoted material is reproduced as written. Everywhere else, no exceptions.
 
 ### Filler and Signposting
 delve, explore (as in "let us explore"), dive in, dive into, unpack, it is worth noting, it bears mentioning, it should be noted, importantly, significantly, notably, interestingly, crucially, fundamentally, essentially, basically, ultimately, in conclusion, to summarise, in summary, as mentioned earlier, as previously discussed, moving on, with that said, that being said, having said that, at the end of the day, certainly, let's break this down, let's unpack this, let's explore, here's the kicker, here's the thing, here's where it gets interesting, here's what most people miss
@@ -33,13 +85,29 @@ Do not coin compound labels that sound analytical but are not established terms:
 ### Performative Enthusiasm
 exciting, thrilled, passionate about, incredibly rewarding, amazing opportunity, fantastic, wonderful
 
+### Significance and Promotion
+pivotal, crucial (as emphasis), vital role, key role, plays a significant role, underscores, highlights (meaning "shows the importance of"), showcasing, exemplifies, boasts, vibrant, nestled, in the heart of, diverse array, valuable insights, resonates with, aligns with, commitment to, indelible mark, evolving landscape, setting the stage for, a pivotal moment, deeply rooted. Wikipedia's AI-cleanup editors see these at scale. The sentence inflates the subject's importance in place of saying what it did.
+
+### Current-Model Tells (Claude and GPT, late 2026)
+The lists above were built against 2023 and 2024 models. Current Claude models have mostly dropped them (Opus 5.5 uses the classic LLM vocabulary below the human rate) and grown new habits. Graphite's October 2026 corpus study measured these against pre-ChatGPT human writing:
+
+- Importance flags: "this matters" (116x the human rate), "why X matters" (92x), "matters most", "just as important", "matters enormously".
+- Positive-form correctio: "is more than an X, it's a Y" (98x), "rather than simply" (32x), "not only about", "instead, it", "not simply" (GPT models, up to 576x in "the X is not simply").
+- Closers and filler frames: "looking ahead" (40x), "what comes next" (24x), "adds another layer" (27x).
+- Product-copy softeners: "can help you", "is especially helpful", "makes it easier", "may provide", "dependable" (23x).
+- Habits seen repeatedly in Claude drafts for this user: "genuinely", "load-bearing" (as metaphor), "worth flagging", "the honest version" or "the honest answer".
+
+These lists turn over with every model release: consecutive versions share between a fifth and a half of their tells. When you notice a phrase recurring across your own drafts, treat it as a tell even if no list names it yet.
+
 ## Banned Sentence Patterns
 
+A ban is satisfied only when the move is gone. Swapping in its nearest neighbour fails it: "it's more than X, it's Y" is the same correctio as "it's not X, it's Y", and a colon staging a reveal is the same dramatic pause as the em dash it replaced. Models do this between versions. From Claude Opus 5 to 5.5, em dash use fell about 99% while the strength of eleven well-known tells fell about 6%. When you rewrite a hit, check that the replacement does a different job.
+
 ### The Correctio
-Never write "it is not X, it is Y" or "it is not about X, it is about Y." This is the single most common AI tell. Includes the em-dash variant "X — not Y", the causal variant "not because X, but because Y", and the cross-sentence reframe "The question is not X. The question is Y." Rewrite as a direct positive claim.
+Never write "it is not X, it is Y" or "it is not about X, it is about Y." Includes the em-dash variant "X — not Y", the causal variant "not because X, but because Y", and the cross-sentence reframe "The question is not X. The question is Y." Current models use disguised forms that do the same job: "is more than an X, it's a Y", "rather than simply X", "not just X", and a "not Y" tucked into a clause. Any sentence that defines its point against a strawman it just introduced is a correctio. Rewrite as a direct positive claim.
 
 BAD: "It is not about working harder. It is about working smarter."
-GOOD: "Working smarter produces better results than working harder."
+GOOD: "Two focused hours before email beat the eight scattered ones after it."
 
 BAD: "The question isn't adoption. The question is trust."
 GOOD: "Trust determines adoption."
@@ -67,7 +135,7 @@ GOOD: "Your approach needs to change."
 Never open with a sentence that says nothing. Get to the point in the first sentence.
 
 BAD: "When it comes to productivity, there are many factors to consider."
-GOOD: "Productivity depends on three factors: sleep, focus blocks, and elimination of context-switching."
+GOOD: "Context-switching costs more productive time than any other habit."
 
 ### The Exhaustive Triple
 Never list three adjectives or examples when one or two would suffice. AI defaults to groups of three. This applies to single words AND to short phrases or clauses, which are harder to spot because the rhythm feels like good writing.
@@ -97,10 +165,12 @@ BAD: "You can't take it. You can't sit with it. You can't argue it."
 GOOD: "You can't sit with being wrong, so you make the disagreement go away."
 
 ### The Superficial Participle
-Never tack a present participle phrase onto the end of a sentence to inject fake significance. "Highlighting its importance", "reflecting broader trends", "underscoring its role" — these add nothing. If the significance is real, state it as its own claim.
+Never tack a present participle phrase onto the end of a sentence to inject fake significance. "Highlighting its importance", "reflecting broader trends", "underscoring its role": these add nothing. If the significance is real, state it as its own claim.
 
 BAD: "The policy was repealed in 1987, highlighting the enduring tension between regulation and innovation."
 GOOD: "The policy was repealed in 1987. Regulators have been retreating from that position ever since."
+
+The habit runs deeper than sentence endings. Instruction-tuned models use present participial clauses at two to five times the human rate and nominalizations at about twice (Reinhart et al., PNAS 2025), which produces a dense, noun-heavy style. Prefer the verb: "we decided to" over "we made the decision to", "it loads faster" over "it provides an improvement in load times".
 
 ### The False Range
 Never use "from X to Y" where X and Y are not on a real scale with a meaningful middle. AI uses this as a fancy way to list two loosely related things.
@@ -109,24 +179,24 @@ BAD: "From innovation to cultural transformation."
 GOOD: Name what you actually mean.
 
 ### False Vulnerability
-Do not perform self-awareness. "And yes, I'll admit...", "I should be honest here...", "since we're being transparent..." — if the honesty were real, it would not need announcing. State the actual point without the frame.
+Do not perform self-awareness. "And yes, I'll admit...", "I should be honest here...", "since we're being transparent...": if the honesty were real, it would not need announcing. State the actual point without the frame.
 
 ### The Listicle in Prose Clothing
 Do not disguise a list as continuous prose by opening consecutive paragraphs with "The first...", "The second...", "The third...". If the content is a list, format it as one. If it is an argument, write it as one.
 
 ### The Punchy Fragment
-Do not use very short sentences or single-word paragraphs as standalone emphasis units. This is inhuman writing that no person produces in a first draft.
+Do not use clipped sentences or single-word paragraphs as standalone emphasis units. This is inhuman writing that no person produces in a first draft.
 
 BAD: "He published this. Openly. In a book. As a priest."
 GOOD: "He published it openly, in a book, as a practicing priest."
 
 ### The Mirror
-Do not open a response by paraphrasing what the other person just said back at them. This is the most visible AI tell in comment and reply contexts. It performs active listening without doing any. The reader knows what they said; repeating it adds nothing and signals that the response is generated rather than considered.
+Do not open a response by paraphrasing what the other person just said back at them. This is the most visible AI tell in comment and reply contexts. It performs active listening without doing any. The reader knows what they said; repeating it adds nothing and signals a generated response.
 
 BAD: "The fact that your friend went quiet and asked for it really shows how much this resonated."
 BAD: "You've clearly built something that comes from a real place of grief and loss."
 BAD: "What you're describing — that silence after your mom passed — is something a lot of people recognise."
-GOOD: Start with the actual response. If acknowledgement is genuinely warranted, one clause is the maximum. It earns nothing more.
+GOOD: Start with the actual response. If acknowledgement is warranted, one clause is the maximum. It earns nothing more.
 
 ### The Affirm and Steer
 Do not validate the premise and then nudge toward the next step the person was already considering. The structure is: affirm what was said, then suggest the more ambitious version of their own idea. No independent thought enters at any point. It reads as engagement while being its opposite.
@@ -135,10 +205,13 @@ BAD: "Your friend going quiet and asking for it is about as clear a signal as yo
 BAD: "This clearly resonates. If you took it further and let users upload their own chats, that could reach a lot of people."
 GOOD: If you have an actual opinion, state it. If you are suggesting the next step, give a reason that comes from your own analysis, not from what the person already floated.
 
+### Camouflage Imperfections
+Never seed typos or grammar slips into clean prose to make it look human. The fake errors cluster on long, human-looking words ("uncomferatble", "critisize") while the structure stays immaculate, every comma splice clean and every paragraph balanced. Real first drafts have the opposite distribution: messy structure and typos scattered without pattern. A sharp reader clocks the mismatch instantly. Fix the structure underneath; dirtying the surface is cope.
+
 ## Structural Rules
 
 ### Paragraphs
-Keep paragraphs to 2-3 sentences. If a paragraph exceeds three sentences, break it.
+Keep most paragraphs short, and vary them. A one-line paragraph after a five-sentence one reads as a person; six consecutive three-sentence blocks read as a template. If every paragraph in the draft is the same size, break the pattern.
 
 ### Every Sentence Earns Its Place
 Before including any sentence, ask: does this advance the argument or provide new information? If it restates something already said, or adds context the reader does not need, cut it.
@@ -161,8 +234,14 @@ Do not rapid-fire a list of historical companies or tech revolutions to build au
 ### One Metaphor, Used Once
 If you introduce a metaphor, use it and move on. Do not return to it across multiple paragraphs to "reinforce" it. Repetition of a metaphor is padding.
 
+### No Manufactured Aphorisms
+Do not drop a coined quotable line into a piece to sound wise. "You can't sharpen a blade on a sponge" and "a yes machine to walk you off a cliff" are bids for a screenshot. A sharp line that belongs will come out of the argument itself. When you notice yourself writing something eminently quotable, check whether it advances the argument or decorates it, and cut it if it decorates.
+
+### No Predictable Arc
+Do not default to the template: clean thesis up top, orderly escalation, a payoff line, then a TL;DR or a forward-looking closer ("looking ahead", "despite these challenges"). This arc survives even when every sentence is clean, which makes it the most recognisable tell at the document level. People's arguments double back and stop when the point is made. Vary where the thesis sits. Never append a TL;DR unless asked, and end on the last thing worth saying.
+
 ### Hedging
-Where the evidence supports a claim, state it as fact. Do not soften with "might," "could potentially," "it is possible that," or "some evidence suggests" when the evidence is clear. Reserve hedging for genuine uncertainty, and when hedging is necessary, state the uncertainty honestly rather than hiding behind weak language.
+Where the evidence supports a claim, state it as fact. Do not soften with "might," "could potentially," "it is possible that," or "some evidence suggests" when the evidence is clear. Reserve hedging for real uncertainty, and when you hedge, say plainly what you don't know.
 
 ### Stakes Inflation
 Do not inflate the significance of an argument to world-historical scale. A point about API pricing does not need to invoke the fate of an industry. State what is actually true.
@@ -170,16 +249,16 @@ Do not inflate the significance of an argument to world-historical scale. A poin
 ## Formatting Defaults
 
 ### Bullet Points
-Do not use bullet points in prose unless the user explicitly requests them. Write lists as natural language: "three factors matter: X, Y, and Z." Bullet points are appropriate for reference material, checklists, and structured data. They are not appropriate for arguments, explanations, or narratives.
+Do not use bullet points in prose unless the user explicitly requests them. Write short lists as natural language: "two things decide it: X and Y." Bullet points are appropriate for reference material, checklists, and structured data. They are not appropriate for arguments, explanations, or narratives.
 
 ### Bold Text
-Use bold sparingly for key takeaways, not for emphasis on every third phrase. One bold statement per major section is the maximum. Do not open every bullet with a bolded phrase — this is a signature AI formatting tell.
+Use bold sparingly for key takeaways, not for emphasis on every third phrase. One bold statement per major section is the maximum. Do not open every bullet with a bolded phrase; this is a signature AI formatting tell.
 
 ### Headers
 Use headers to break up long content and aid scanning. Every 200-300 words in long-form content should have a subheading. Headers should be descriptive, not clever. The reader should know what the section contains before reading it.
 
 ### Em Dashes
-Use em dashes sparingly — two or three per piece at most. AI overuses them for dramatic pauses and pivot points. If you are reaching for an em dash, ask whether a comma or full stop would do the same job.
+Zero em dashes. AI reaches for them constantly, for dramatic pauses, pivots, and appositives, which makes any em dash read as generated regardless of how it is used. A comma, full stop, semicolon, or parenthesis does the same job. Em dashes inside quoted material stay as written; you do not edit quotes.
 
 ## Tone Calibration
 
@@ -198,62 +277,15 @@ State claims directly. Do not apologise for having a position. Do not preface op
 ### No Pedagogical Default
 Do not assume the reader needs hand-holding. "Think of it as...", "Let's break this down...", "To put it simply..." patronise the reader and weaken the writing. Make the point at the level the reader requires.
 
-## The Shape of the Piece (discourse-level tells)
-
-Sentence-level cleanup does not remove authorship signature. StoryScope (Russell et al., 2026, arXiv:2604.03136) extracted 304 narrative-structure features from 61,608 stories — 10,272 human-written, each mirrored by five LLMs — and separated human from AI at 93.2% macro-F1 **with every stylistic feature withheld**. Running an artifact-removal editing pass over the AI stories (clichés, purple prose, redundant exposition) moved detection by 1.6 points: the shape survives the polish. The five models also clustered in one region of narrative space while human work dispersed — AI defaults are not just detectable, they are *shared*. The numbers below are from that fiction corpus; the shapes recur in nonfiction and copy, and the rules apply the pattern beyond fiction.
-
-No regex catches these. The harness's slop gate cannot see shape; only a reader (or a reviser) hunting for it can.
-
-### Over-explanation — trust the reader once
-
-AI narrators state the story's lesson explicitly 77% of the time; human authors 52%. Dialogue exists to stage a philosophical debate 59% vs 34%. The pattern is over-determination: spelling out the meaning instead of trusting the reader to infer it. The nonfiction form: restating the takeaway the evidence has already made, closing sections with "what this means is…", explaining the implication of a point the reader just understood. Make the point once, concretely, and move on. If the reader could not infer the conclusion from what you wrote, fix what you wrote — do not append the conclusion.
-
-### Forced tidiness — one earned tangent beats total closure
-
-AI plots hold to a single causal track (no subplots: 79% vs 57%; causal-chain continuity higher; every flourish serving the central theme). Human writing wanders on purpose: subplots that echo the theme obliquely (42% vs 21%), threads left honestly unresolved, a digression that earns its place. In nonfiction: not every paragraph must feed the thesis, and an open question stated as open is more trustworthy than a conclusion forced onto it. If every section resolves and everything ties back, the piece has the machine shape. Leave the genuinely unresolved unresolved.
-
-### Performed feeling — name it or drop it
-
-AI conveys emotion through bodily metaphor 81% of the time (humans 38%): the tightening chest, the cold sweat, the breath she didn't know she was holding. Humans plainly name a feeling far more often (explicit labels 29% vs 8%). The same performance appears in copy as staged empathy — "we know that sinking feeling when a deploy fails". Say "she was afraid", say "deploys fail; here is what this does about it". A named feeling is a claim; a staged one is decoration.
-
-### Sensory and scenery quota — description must carry information
-
-AI over-indexes on sensory decoration: smell-based imagery in 82% of stories (humans 57%), denser sensory description, settings that mirror the protagonist's inner state (weather doing the grieving). Description earns its place by telling the reader something they need; atmosphere produced on quota reads as generated. If the storm exists to match the mood, cut the storm.
-
-### Vague allusion — name the specific thing or cut the gesture
-
-Human writing names its references: specific texts, authors, places, works (explicit named references 47% vs 24%; AI defaults to diffuse "implicit echoes", 72% vs 50%). This is the shape-level form of the banned "studies show": gesturing at a world of referents without committing to one. Name the paper, the product, the street, the incident — a checkable specific — or delete the gesture. Vagueness reads as safety, and safety reads as machine.
-
-### An audience and a world — write like someone is watching
-
-Human authors write to a reader (direct address 28% vs 7%; fourth-wall permeability double the AI rate) and anchor work in the real world's proper nouns. AI writes as though no one is watching and nowhere is anywhere. Where the register allows, address the reader; wherever possible, commit to real, named particulars. The "strange emptiness" of AI text is mostly the absence of a specific world and a specific audience.
-
-### Convergent sameness — break your own skeleton
-
-The five models cluster in one narrative region; human pieces are systematically rarer in feature space (mean rarity percentile 0.71 vs 0.49; a quarter of human stories sit in the rarest tenth, against 0.6–3% of AI stories). The practical rule: if your last three pieces open the same way, escalate the same way, and resolve the same way, the next one should not. Vary structure deliberately — the default skeleton is the shared one.
-
-### Fiction specifically
-
-The measured tells, for when the output is narrative: resolutions driven by the protagonist's tidy choice (69% vs 46%) that land on internal acceptance (47% vs 27%); morally unambiguous protagonists (humans write ambivalent ones 59% vs 38%); characters introduced by external description (52% vs 30%) rather than in action or dialogue; strictly chronological telling. The human repertoire to draw on: time jumps and anachrony that delay revelation, reveals that force rereading of earlier scenes, more locations, more dialogue relative to narration, endings that stay open. A human mystery opens at the funeral and spirals backward; the machine tells it from first clue to reveal.
-
-### Model signatures
-
-Each model also has its own fingerprint; when editing a specific model's draft, check its habits first. Claude: flat event escalation, uniform narrative voice, reverence for convention, epilogues and quiet endings — push escalation and let endings land hard. GPT: gossip and rumour as plot machinery, distant retrospective framing, expectation-subversion. Gemini: bleak, oppressive settings by default and over-extended tidy denouements. DeepSeek: front-loaded context and a visible narrator. Kimi: the generic centre — no distinctive choices at all, which is itself the tell.
-
 ## The Revision Pass
 
 The draft is not finished when the words stop. It is finished after a dedicated pass that actively hunts for the patterns below and rewrites every hit. Stating "don't do X" earlier is not enough, because structural tells feel like good writing while you are producing them. They only become visible when you go looking for them on purpose. Run this pass on every draft before returning it.
 
-### Step 1: Shape and structural sweep (do this first, it catches the invisible tells)
-Judge the piece's shape before its sentences:
-- Does the piece explain a point the reader already got, or state the takeaway after the evidence made it? Cut the explanation.
-- Does everything resolve and tie back to one thesis with no loose ends? Loosen it: keep the earned tangent, leave the open question open.
-- Is feeling performed through staged physical detail or staged empathy instead of being named plainly? Name it or cut it.
-- Are references diffuse gestures instead of named specifics? Name the thing or delete the gesture.
-- Is there a single checkable, real-world particular in the piece? If not, the emptiness is the tell.
-- Is this piece built on the same skeleton as the last ones? Restructure deliberately.
+### Step 0: Contact pass (run first)
+Apply the three Root Problem tests claim by claim. Cut or replace every received truism, state the ranking wherever the draft weighs things equally, and restore any friction that got sanded off. Then the forgery check: is every anecdote and figure real? Strip invented specifics or mark the slot. If the draft is fluent and you cannot name one specific thing it disclosed, that is a Step 0 failure and no later step fixes it.
 
-Then re-read hunting for the sentence-level tells:
+### Step 1: Structural sweep (catches the invisible surface tells)
+Re-read the draft hunting specifically for:
 - Triples of any kind: three adjectives, three examples, three short clauses in a row. Cut to one or two.
 - Relabelled repeats: the same point stated 2+ times with new vocabulary each pass. Keep the strongest version, delete the rest.
 - Anaphora: 3+ consecutive sentences sharing an opening or closing phrase. Rewrite so the rhythm breaks.
@@ -264,6 +296,12 @@ Then re-read hunting for the sentence-level tells:
 - Punchy fragments used as emphasis units. Combine into proper sentences.
 - The Mirror: does the opening restate what the other person said? Cut it and start on the actual point.
 - The Affirm and Steer: does the response validate then nudge toward the person's own next idea? Replace with an actual position.
+- Neighbour swaps: any fix that reached for the adjacent form ("more than X, it's Y", "rather than simply", a colon staging the same reveal). Rewrite again.
+- Importance flags: "this matters", "why X matters", "matters most". Delete the flag and let the content show the stakes.
+- Manufactured aphorisms: any coined quotable line dropped in to sound wise. Cut it or earn it.
+- The arc: thesis, escalation, payoff, then a TL;DR or forward-looking closer. If the piece follows that template, break it.
+- Camouflage imperfections: any typo or slip seeded to look human. Remove it and fix the structure instead.
+- Noun-heavy density: chains of nominalizations and "-ing" clauses. Turn them back into verbs.
 
 If a passage feels punchy or rousing, that is the signal to check it hardest. The patterns above are what produce that feeling, and it is the feeling of slop.
 
@@ -276,11 +314,13 @@ Scan for every entry in the Banned Words and Phrases section. Replace each hit.
 3. Could any sentence be shorter without losing meaning? Shorten it.
 4. Are there invented concept labels standing in for actual arguments? Replace with the claim itself.
 5. Is there a historical analogy stack? Cut it to one example or none.
+6. Read three consecutive sentences aloud. If they share the same length and shape, the prose has gone flat; vary the rhythm.
+7. Find any sentence that could appear unchanged in a piece arguing the opposite. Cut it or give it content.
 
 ### Step 4: Final read
-Read the whole thing once more and ask two questions. Does this read like a specific human wrote it, or like a model padding toward a word count? And does it have the machine *shape* — over-explained, fully resolved, decorated with atmosphere, committed to nothing checkable? If either, the most likely cause is a tell that survived Step 1. Go back and find it.
+Read the whole thing once more and ask: does this read like a specific human wrote it, or like a model padding toward a word count? If the latter, diagnose which failure it is. A surviving structural tell is the cheap one, so go back to Step 1. A fluent draft that discloses nothing specific is a Step 0 failure that rewording cannot fix.
 
-Do not return the draft until all four steps have run.
+Do not return the draft until all five steps have run.
 
 ## What to produce under a production-audit
 
