@@ -28,6 +28,7 @@ A clean checker run has zero warnings since 2026-07-02 (the two historical name-
 | 2026-07-02 | this branch | backlog items 1–3 executed: coverage-matrix enforcement, runnable fixtures, inline lens contracts (below) |
 | 2026-07-02 | this branch | next three backlog items executed: the accessibility category grant, both name mismatches, ui-ux-pro-max intake debt (below) |
 | 2026-07-03 | this branch | anti-slop-writing gains a discourse-level "Shape of the Piece" layer from the StoryScope research (below) |
+| 2026-11-07 | `anti-slop-writing-v2` | anti-slop-writing moves to version 2.0: the Root Problem tests (provenance, asymmetry, friction), the stop rule, the anti-forgery guard and late-2026 current-model tells replace the shape layer; frontmatter and the lens contract unchanged |
 
 ## What this branch changed
 
