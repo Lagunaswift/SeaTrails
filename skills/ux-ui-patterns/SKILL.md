@@ -9,6 +9,7 @@ This skill covers interaction design, usability, and user experience decisions. 
 
 Before building any interface, read the relevant reference files:
 
+- `nielsen-usability-review.md`: Apply the ten Nielsen perspectives to complete user journeys during usability review and code-audit's UI/UX pass. Check cross-step context, safe exits and usable help through the existing controls; record evidence and limits.
 - `states-and-feedback.md` — Loading, empty, error, success, partial, offline states. Skeleton screens, progress indicators, toast/notification patterns, confirmation dialogs, optimistic updates, double-click prevention, button loading states, form submission guards, debouncing, drag-and-drop feedback, animation as feedback, perceived responsiveness thresholds
 - `forms-and-input.md` — Form layout, validation, multi-step forms, inline editing, search, filtering, sorting, autocomplete, date/time pickers, file uploads
 - `navigation-and-structure.md` — Information architecture, nav patterns, tabs, sidebars, command palettes, breadcrumbs, pagination, infinite scroll, deep linking, back button behaviour
@@ -21,6 +22,8 @@ Before building any interface, read the relevant reference files:
 ---
 
 ## Core Principles
+
+For usability reviews, run [nielsen-usability-review.md](nielsen-usability-review.md) on the selected journeys, then consult the component references as needed. Apply their examples to the product's actual requirements and consequences. Preserve useful conventions and approved brand choices; optional capabilities need a stated product reason.
 
 ### 1. The Interface Disappears When It Works
 
@@ -51,6 +54,7 @@ Be consistent with your own patterns (same component behaves the same way everyw
 ## Quick Reference: Which File to Read
 
 ```
+Reviewing a complete user journey   → nielsen-usability-review.md
 Building a form                    → forms-and-input.md
 Building search or filters         → forms-and-input.md
 Handling loading/error/empty        → states-and-feedback.md

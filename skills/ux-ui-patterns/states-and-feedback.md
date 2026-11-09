@@ -29,7 +29,7 @@ When to use progress bars:
 ### Loading State Rules
 
 - Never replace visible content with a full-page spinner. If the user was looking at data, keep that data visible and show loading for the new/updating portion only.
-- If a loading operation takes longer than 10 seconds, provide a way to cancel.
+- For a long operation, explain its state and the available exit or cancellation. Closing a waiting screen may leave server work running; label that behaviour accurately. Offer cancellation only when the operation supports it, and confirm the resulting state before claiming it stopped.
 - If loading fails, transition to the error state, not back to blank.
 - Show loading in the location where content will appear (co-located loading), not in a global position.
 
@@ -138,17 +138,19 @@ The data loaded but is incomplete, stale, or degraded. Examples:
 
 ## 6. Offline States
 
+Assess the offline behaviour the product supports or promises. An online-only task needs a clear unavailable state and recovery when the service returns. Offline drafts and queued writes are conditional capabilities; do not add them solely to satisfy this reference.
+
 ### Detection
 
-Monitor network status. When the user goes offline, immediately indicate it — do not wait for a request to fail.
+Use connection signals and actual request outcomes to describe availability. A browser connection indicator alone cannot establish that the service is reachable. Keep an uncertain operation outcome distinct from an action known to have failed.
 
 ### Behaviour
 
-- Show a persistent banner: "You are offline. Some features may be unavailable."
-- Queue actions that can be synced later (typing a message, editing a form).
-- Disable actions that require connectivity (payment, file upload) with a clear explanation.
-- When connectivity returns, sync queued actions and remove the banner.
-- If the user tries an action that requires connectivity, explain why it did not work and that it will be retried when they are back online.
+- Explain which task is unavailable and how to recover, without obstructing usable content.
+- Where drafts or queued writes exist, distinguish local storage, queued work and confirmed synchronisation. Preserve ownership and retention rules for private data.
+- Make connectivity-dependent actions unavailable when their prerequisites are missing, or handle the failed attempt with a clear explanation. Preserve appropriate input.
+- On reconnection, verify the service and reconcile pending operations before retrying. Use the existing idempotency and conflict rules for consequential writes.
+- Promise automatic retry only for work actually queued under the product's policy. Provide its state and cancellation path where supported; do not repeat payments or outbound messages merely because the response was lost.
 
 ---
 
@@ -215,9 +217,9 @@ Do not notify for:
 
 ### When to Confirm
 
-Confirm before: permanent deletion, sending communications (email, invoice), financial transactions, permission changes, actions affecting other users, bulk operations.
+Assess the target, consequence and available recovery before permanent deletion, communications, payment, permission changes or bulk operations. Use a proportionate commitment step when a mistake would be costly and recovery is limited. A checkout review or clearly scoped send action may already provide it; avoid stacking an extra dialog without a reason.
 
-Do not confirm before: saving, navigating, toggling preferences, actions that are easily undoable.
+Routine saves, navigation and reversible preferences usually need direct feedback. Warn before leaving when it would discard meaningful unsaved work, and keep a clear way to remain or leave.
 
 ### Confirmation Dialog Design
 
@@ -226,11 +228,13 @@ Do not confirm before: saving, navigating, toggling preferences, actions that ar
 - Actions: specific labels, not "OK/Cancel". Use "Delete project" / "Keep project" or "Send invoice" / "Go back". The destructive action should be visually distinct (red, outlined) and not the default focus.
 - Never use confirmation for routine actions — it trains users to click through without reading.
 
-### The Undo Pattern (Preferred)
+### Undo and Recovery
 
-Instead of asking "Are you sure?", perform the action and show an undo option. "Project deleted. Undo." The user can recover within 5-10 seconds. After the window closes, the action becomes permanent.
+Use undo when the underlying action can be reversed safely. Verify the restored state, including related records and effects already sent to another service. Reverting a local display does not retract a delivered message or prove a charge was reversed.
 
-This is faster for the common case (the user meant to do it) and equally safe for the rare case (they did not). It replaces interrupting every user with protecting the few who made a mistake.
+Choose the recovery period for the consequence and the users who must operate it. A disappearing toast must not be the only protection against substantial irreversible loss. Keep an accessible recovery route for as long as the product promises, explain any limit before commitment, and test expiry or recovery failure. Confirmation remains appropriate where reversal is unavailable or too costly.
+
+Distinguish cancellation before commitment from recovery afterwards. For queued work, handle the race between cancel and start, and report the authoritative result. If an operation cannot stop, let the user leave the waiting view where supported and provide a way to check its outcome.
 
 ---
 
@@ -376,8 +380,8 @@ The thresholds for perceived responsiveness:
 100-300ms:  Fast. Acceptable for button feedback, transitions, simple operations.
 300-1000ms: Noticeable delay. Show a loading indicator. Acceptable if the indicator appears within 100ms.
 1-5s:       Slow. Show progress or a status message. User attention starts to drift.
-5-10s:      Long. Show estimated time or progress percentage. Provide a way to cancel.
-10s+:       Background it. Queue the task, show a notification when complete. Do not hold the user.
+5-10s:      Long. Show supported progress or status and the available exit/cancel action.
+10s+:       Explain the wait. Use background work only when its lifecycle and recovery are supported.
 ```
 
 If your action falls in the 300ms-1s range, the loading indicator itself needs to appear within 100ms. A button that sits idle for 400ms then shows a spinner feels worse than a button that shows a spinner at 50ms and resolves at 400ms. The perception of speed is about how quickly the UI acknowledges the action, not how quickly the action completes.

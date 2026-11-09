@@ -99,6 +99,8 @@ The orchestrator selects the website-readiness profile for user-facing websites 
 
 Establish audience, primary tasks, routes/templates, business facts and brand decisions once, then share that context with the selected existing lenses. Public and authenticated surfaces can have different indexing, privacy and recovery requirements. The profile's twelve topics supplement the file/lens matrix. Record all twenty-four optional-feature decisions; a sensible omission needs a reason, not a fabricated defect.
 
+Run the Nielsen journey review through code-audit's UI/UX pass. Record each of its ten perspectives in the existing journey evidence, including context needed between steps, actual cancellation outcomes and usable task help. Link defects to native findings and keep unperformed required checks visible in partial/blocked coverage. A walkthrough is an expert assessment; participant results and conversion claims require separate evidence.
+
 Use keep/rewrite/restyle/remove for questioned design patterns. A useful eyebrow, familiar font or conventional layout can stay. If a meaningful label competes with a heading, inspect its rendered hierarchy and accessible treatment before recommending a change. The fix-phase frontend-design skill follows the same rule.
 
 Capture source, rendered, interactive and provider evidence only where actually available. A private source-only assessment cannot demonstrate a live checkout or keyboard journey. Partial/blocked topics and feature assessment limitations require `scope.partial=true` and appear in the rendered report. Optional recommendations and pending product choices alone do not imply an incomplete audit.

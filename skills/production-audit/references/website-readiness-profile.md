@@ -10,18 +10,26 @@ Establish the intended audience, primary outcomes, supported locales/devices, pu
 
 Build a route/template/journey inventory alongside the source-file inventory. Include navigation and direct entry, valid and missing routes, empty and long content, access denial, loading, failures and recovery. Select representative templates and risky boundaries; name the sampling limits. Retain the revision, environment, safe accounts and test conditions. Read code-audit's boundary tests and ux-ui-patterns/website-completeness.md for the relevant journeys.
 
+## Usability across complete tasks
+
+At Stage 2, code-audit's UI/UX pass runs [nielsen-usability-review.md](../../ux-ui-patterns/nielsen-usability-review.md) against the selected journeys. That reference adapts Jakob Nielsen's ten perspectives into task probes and maps them to the existing controls. Include needed context between screens, the actual effect of exits/cancellation and usable help for unfamiliar tasks. Apply the review to static sites as well as applications; conditional operations need a product-based applicability decision.
+
+Record an observation, applicability reason or precise untested scope for each HEUR-01 through HEUR-10 in the existing review notes referenced by the journeys topic's evidence. Link observations into interaction-states, mobile-accessibility, content-brand or layout-features when relevant; keep the native owner for each defect. A required perspective or task that remains unassessed makes the affected topic partial/blocked with a named limitation and scope.partial=true. The gate checks the existing declared records; it does not verify that these walkthroughs happened.
+
+Keep the twelve topic IDs, 119-control mapping and existing finding schema. HEUR labels add traceability within evidence, without a separate score or finding prefix. An expert walkthrough cannot establish a conversion improvement or representative user preference. Optional shortcuts, help interfaces and sparse styling need the same contextual judgement as other feature/design choices.
+
 ## Topic ownership
 
 Record all twelve topics. The owner is the existing lead lens used for this run; supporting lenses keep their established findings and consequence rules. A topic can be inapplicable for a stated product reason. Missing access or time is partial/blocked work, not inapplicability.
 
 | Topic ID | Assess | Typical lead and supporting lenses |
 |---|---|---|
-| journeys | Primary outcomes, route/template inventory, direct entry, interruption and recovery | code-audit; frontend-robustness |
+| journeys | Primary outcomes, route/template inventory, ten usability perspectives, direct entry, interruption and recovery | code-audit; frontend-robustness |
 | identity-navigation | Working navigation/contact actions, production name, favicon, starter residue and missing-page recovery | code-audit; seo-discoverability, mobile-and-responsive |
 | access-security | Accounts, direct resource permissions, secrets, uploads, fetches, private caches and dependencies where present | code-audit; ai-saas-security, dependency-audit, infrastructure-config |
 | commerce | Authoritative payment/entitlement and truthful offer, total commitment, terms and fulfilment | code-audit; data-privacy, email-deliverability |
 | reliability-cost | Retries, data consistency, queries, quotas, recovery, monitoring and operational evidence | scaling-audit; release-and-ops |
-| interaction-states | Real success/error/loading/empty states, duplicate actions and preservation of work | frontend-robustness; code-audit |
+| interaction-states | Real success/error/loading/empty states, cancellation outcomes, duplicate actions and preservation of work/context | frontend-robustness; code-audit |
 | mobile-accessibility | Reflow, keyboard/focus, semantics, authentication, readable content and supported devices | accessibility; mobile-and-responsive, internationalisation |
 | performance | Comparable runtime/field evidence, assets, bundles, rendering, caching and browser faults | performance; frontend-robustness |
 | discovery-sharing | Intentional indexing, rendering for the intended consumer, metadata, canonical URLs, sitemap, social previews and crawler policy | seo-discoverability |
