@@ -84,7 +84,7 @@ When running a lens (Stage 2), the orchestrator should:
 
 - **Skill:** `.claude/skills/accessibility/SKILL.md`
 - **References:** `accessibility/references/`: semantic-structure, keyboard-and-focus, screen-readers-and-text, colour-and-visual, forms-and-inputs, testing-accessibility.
-- **Owns:** Semantic structure, keyboard/focus management, screen-reader support (ARIA, alt, live regions), colour/contrast and colour-only indicators, form accessibility, motion/reduced-motion, component-primitive accessibility. Target: WCAG 2.1 AA.
+- **Owns:** Semantic structure, keyboard/focus management, screen-reader support (ARIA, alt, live regions), colour/contrast and colour-only indicators, form accessibility, motion/reduced-motion, component-primitive accessibility. Working target: WCAG 2.2 AA, with the project's applicable requirements recorded; no universal legal-minimum claim.
 - **Passes:** Semantic structure → Keyboard & focus → Screen readers & text → Colour & visual → Forms & inputs → Testing.
 - **Type:** Atomic. **When to run:** a user-facing UI exists (skip for headless API).
 

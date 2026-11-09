@@ -6,7 +6,15 @@ Written 2026-07-01 on branch `claude/opus-4.8-documentation-gy6nfh`, after a ful
 
 ## What this repo is
 
-seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The core suite now contains 97 tests, with 20 evidence integration checks and 17 corpus/scorer checks.
+seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The core suite now contains 147 tests, with 20 evidence integration checks and 17 corpus/scorer checks.
+
+## Website readiness update
+
+The website-readiness profile routes twelve review topics and twenty-four optional-feature decisions through existing lenses. All 119 controls in the supplied website brief map to native ownership in `website-readiness-coverage.md`. New coverage records stay inside report.json; findings, ledger and severity contracts remain unchanged. The gate rejects missing/contradictory profile records, hidden gaps and dangling finding references. The renderer exposes all decisions and limitations. It validates declared integrity, not visual truth or detection completeness.
+
+Added focused website/commercial completeness and direct security boundary references. Corrected rendering/SEO, consent, WCAG 2.2, cache, payment, spend-cap and restore guidance. Design audits, copy review and fix-phase frontend-design now share keep/rewrite/restyle/remove decisions based on purpose and observed consequences. Familiar words, fonts and patterns are not defects by themselves. Report mode remains the default.
+
+The integration branch retains the earlier pending design/evidence work through a merge, alongside main's anti-slop-writing v2. It does not install a second detector or change the skill/lens count. ADR 0017 records the profile decision. New invariant cases were demonstrated failing before their gate changes; all original cases remain.
 
 ## Evidence assurance update
 
@@ -22,10 +30,12 @@ Validation:
 
 ```bash
 node skills/production-audit/scripts/run-tests.mjs
+node skills/production-audit/scripts/test-assurance.mjs
+node skills/production-audit/scripts/test-benchmark.mjs
 node .claude/skills/release-check/scripts/check-consistency.mjs
 ```
 
-Expected: 97 passed, 0 failed; 0 consistency failures and warnings. ADR 0015 records the additions. Earlier pass descriptions below are historical, not the current inventory.
+Expected: 147 core cases, 20 assurance checks and 17 corpus/scorer checks pass; 0 consistency failures and warnings. ADRs 0015 and 0016 record the preceding design/evidence additions. Earlier pass descriptions below are historical, not the current inventory.
 
 ## History
 

@@ -1,40 +1,28 @@
 # Retention and third parties
 
-Two ongoing obligations: not keeping personal data longer than needed, and controlling where it flows once it leaves your code. Both are routinely ignored by fast-built apps, which keep everything forever and send data to third parties without tracking or agreements.
+Follow the data after collection. Record each category's purpose, retention trigger, duration or review criteria, deletion/restriction mechanism and actual recipients. Unjustified indefinite accumulation is a finding; long retention is not automatically unlawful when a documented continuing purpose or obligation applies.
 
-## Retention: don't keep it forever
+## Retention evidence
 
-Holding personal data indefinitely is itself a violation of the storage-limitation principle (GDPR and good practice generally): data should be kept only as long as the purpose requires, then deleted or anonymised. Fast-built apps default to keeping everything forever because deletion is extra work nobody built.
+Inspect schedules, TTLs, cleanup jobs, archived exports, logs and backup lifecycles. Compare policy with observed configuration and available execution evidence. Check legal holds or other required retention separately. Anonymisation must prevent identification in the relevant context; a reversible identifier or linkable pseudonym is not enough.
 
-The engineering question for each category of personal data: **how long is it actually needed, and what happens after?**
-- Is there any mechanism that deletes or anonymises data past its useful life (old logs, inactive accounts, expired sessions, abandoned signups)?
-- Or does everything accumulate indefinitely by default?
+Recommend a proportionate mechanism for the identified gap. An audit does not run destructive cleanup or invent legal retention periods.
 
-The fix is a retention approach: define how long each category is kept, and implement automatic deletion/anonymisation past that (a scheduled job, a TTL, a periodic cleanup). Anonymisation, stripping data of anything that identifies a person, is an alternative to deletion where you want to keep aggregate value (analytics) without keeping personal data. Note that "anonymised" must be genuine; if it can be re-linked to a person, it is still personal data.
+## Classify recipients by activity
 
-Less retention also reduces every other risk: less to secure, less to disclose in a breach, less to delete on request, less to export. It compounds with minimisation.
+For each external service, identify what it receives, why, who determines purposes and means, where it processes data and any onward recipients. Its role may be processor, independent controller or joint controller, and can differ across activities. Do not label every analytics, payment, hosting or AI vendor a processor automatically.
 
-## Third parties and processors
+Check the agreement and safeguards appropriate to the identified role, including processor instructions and subprocessor arrangements where applicable. Record missing access to agreements as unverified. Align the privacy notice and applicable rights-request propagation with the real relationship.
 
-Every external service that receives personal data is a "processor" you remain responsible for. Fast-built apps wire up analytics, email, hosting, payment, and AI providers without tracking that each one now holds user data on your behalf.
+## International processing
 
-For each third party that touches personal data:
-- **Know it exists and what it receives.** Map every service personal data flows to (this is part of the data inventory). The AI provider receiving user messages, the analytics service receiving behaviour, the email service receiving addresses, all are processors.
-- **A processor agreement / DPA.** You generally need a data-processing agreement with each, governing how they handle the data. Most reputable services offer one. **[LEGAL]** for whether you have the right ones.
-- **Propagating deletion.** When a user is deleted, processors must delete too (see data-subject-rights).
-- **Disclosure.** The privacy policy must name the categories of third party (see transparency).
+Map regions, remote access and onward transfers against actual contractual and regulatory obligations. EU/UK data is not universally required to remain within EU/UK borders. Determine whether a restricted transfer arises and whether the relevant adequacy decision, safeguards or exception applies. Region selection alone does not prove transfer compliance. Flag unresolved interpretation as **[LEGAL]** and supply the facts needed to resolve it.
 
-## International transfers [LEGAL]
+## Sources checked 9 November 2026
 
-Sending personal data across borders, EU/UK data to other countries, carries specific requirements (adequacy, standard contractual clauses, or equivalent). For a worldwide app this is common (a US-hosted service with EU users, an AI provider in another jurisdiction). The mechanism that makes a transfer lawful is a legal determination; flag it. The engineering-relevant part is simply knowing where data physically goes, which countries/regions your processors operate in, so the legal review has the facts.
+- [ICO controller and processor roles](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/controllers-and-processors/controllers-and-processors/what-are-controllers-and-processors/)
+- [ICO determining a recipient's role](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/controllers-and-processors/controllers-and-processors/how-do-you-determine-whether-you-are-a-controller-or-processor/)
 
-## What to flag, by stage
-- Minimal data: retention and processors may be light; still note any analytics/email/AI processor and confirm a policy exists.
-- Has accounts/data: the high findings are indefinite retention (nothing is ever deleted) and unmapped third parties (data going to services nobody tracked). Define retention and inventory the processors.
-- Worldwide / sensitive: full processor agreements and transfer mechanisms, lawyer/DPO involved. **[LEGAL]**
+- [ICO international-transfer guide](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/a-brief-guide-to-international-transfers/)
 
-## The honest framing
-Two simple disciplines cover most of this: delete data when it is no longer needed (don't keep everything forever), and know every external service your users' data flows to. The legal instruments (DPAs, transfer mechanisms) are a lawyer's job, but they depend on the engineering facts, what is kept how long, and where it goes, which only the build can establish.
-
-## Connection to other skills
-Retention deletion is the same machinery as data-subject deletion (`data-subject-rights`) and the scheduled-cleanup pattern from `scaling-audit`. The processor map is part of the data inventory. `release-and-ops` covers where data physically runs (relevant to transfers).
+Recheck current jurisdiction-specific retention and transfer requirements. `data-subject-rights.md` covers request handling; `scaling-audit` covers durable backup operation.

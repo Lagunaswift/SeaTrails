@@ -14,8 +14,8 @@ The test: if it is clickable, is it a real button or link? If it takes input, is
 ## Heading hierarchy
 
 Headings (`<h1>`–`<h6>`) are how screen-reader users understand and navigate page structure, they can jump between headings to scan, the way a sighted user skims. Requirements:
-- A logical hierarchy: one main `<h1>`, sections under `<h2>`, subsections under `<h3>`, not chosen for visual size but for structural meaning. (Style separately; the level reflects structure, not appearance.)
-- No skipped levels for visual reasons (h1 straight to h4).
+- A logical hierarchy with an identifiable main purpose: sections and subsections reflect relationships, not visual size. One primary `<h1>` is a useful project convention; multiple H1s alone do not establish a WCAG failure.
+- Investigate skipped levels and misleading section relationships; explain the navigation or information-relationship barrier rather than treating a count as the finding.
 - Headings that actually describe their section.
 
 A page with no real headings, or headings chosen by how big they look, is a page a screen-reader user cannot navigate.
@@ -39,3 +39,9 @@ Reach for the right native element before anything else. A real `<button>`, `<a>
 
 ## Connection to other references
 This underpins keyboard-and-focus (native elements are keyboard-operable by default) and screen-readers-and-text (semantics are what screen readers convey). ARIA, used to patch genuine gaps, only works well on top of correct structure; it is covered where it is needed in those references, never as a substitute for this.
+
+## Language and navigation
+
+Check a descriptive page title, correct document `lang`, language changes where applicable, and a working way to bypass repeated navigation. A skip link should become visible on focus and move the user to the intended main content. Name repeated landmarks distinctly where needed.
+
+Sources checked 9 November 2026: [WAI headings guidance](https://www.w3.org/WAI/tutorials/page-structure/headings/) and [WCAG 2.2](https://www.w3.org/TR/WCAG22/).

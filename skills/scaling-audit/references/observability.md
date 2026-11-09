@@ -16,6 +16,12 @@ Latency degradation is the early warning of a scaling problem (the synchronous-w
 **Can you diagnose when something is wrong?**
 When an error does happen, is there enough in the logs to understand it, request context, what failed, where, without so much that it's noise? And critically: do the logs avoid leaking secrets and user PII? Logging a whole request body that contains tokens or personal data turns a debugging aid into a security and compliance problem. This ties to `ai-saas-security` (don't log secrets) and to the error-message discipline in `error-handling-patterns` (useful internal detail, safe external messages).
 
+## Delivery and journey evidence
+
+Distinguish instrumentation in source, deployed monitoring configuration and an observed alert. Check a critical journey's failure signal; a healthy homepage alone cannot establish that checkout, uploads or background processing work. Trace a redacted correlation reference between the user-visible failure and restricted diagnostics, and identify who receives the alert and what action follows.
+
+Use an authorised synthetic failure and sandbox recipient where available. Do not send a real message or disrupt a live dependency merely to complete the audit. Missing access or an unperformed delivery test remains an explicit evidence limit.
+
 ## The minimum viable set for a growing app
 In rough priority:
 1. Uptime/health monitoring with alerting (know it's down).

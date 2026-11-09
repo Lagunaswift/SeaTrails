@@ -1,41 +1,36 @@
-# Lawful basis and consent
+# Lawful basis, storage/access and consent
 
-Why the app is allowed to process each piece of personal data, and where genuine consent is required. The engineering-relevant part is consent and tracking, where the implementation directly determines compliance. The choice of lawful basis for a given purpose is a legal determination. **[LEGAL]**
+Map each purpose, data flow, audience and jurisdiction before assessing the control. A lawful basis for personal-data processing and permission to store/access device information are separate questions. A banner's presence, an SDK's marketing label or the word "cookieless" cannot settle either.
 
-## Lawful basis, briefly [LEGAL]
+## Inspect actual behaviour
 
-Under GDPR/UK GDPR, every processing of personal data needs a lawful basis (consent, contract, legitimate interests, legal obligation, and others). You do not always need consent, processing necessary to provide the service the user signed up for often rests on contract, not consent. Picking the right basis for each purpose is a legal call; do not assume everything needs consent, and do not assume nothing does. Flag this for a lawyer/DPO. The engineering job is to implement whatever basis applies correctly, which for consent-based processing means implementing consent properly.
+Inventory cookies, local storage, scripts/SDKs, embeds, pixels, link decoration, fingerprinting and server-side forwarding. Record the destination, payload, identifiers, purpose, lifetime and responsible recipient. Check whether information is accessed or sent before a choice; a visually disabled banner category can still leak events through another path.
 
-## Consent done properly
+For purposes requiring consent, inspect an informed, specific, active opt-in with no preselected optional categories; refusal should be as easy as acceptance. Withdrawal should be accessible and stop subsequent relevant processing. Consent records and the stated purpose must match the actual implementation.
 
-Where consent is the basis (notably for non-essential tracking and for marketing), it has to be real consent, not the dark-pattern version most sites use. Valid consent is:
-- **Freely given:** the user can refuse without losing the core service. "Accept all or you can't use the site" is generally not valid for non-essential processing.
-- **Specific and informed:** the user knows what they are agreeing to, per purpose, before it happens.
-- **Unambiguous and opt-in:** an affirmative action. Pre-ticked boxes, "by continuing you agree", and implied consent do not count.
-- **As easy to withdraw as to give:** refusing/withdrawing must be as easy as accepting.
+## Conditional UK exceptions
 
-A compliant cookie/consent banner therefore has a "reject" option as prominent as "accept", does not pre-tick anything, and does not fire the non-essential trackers until the user opts in.
+ICO guidance updated in 2026 includes narrow exceptions for statistical purposes and appearance, alongside other defined exceptions. Do not infer eligibility from the name of a vendor or from all analytics being "first party".
 
-## Tracking and analytics, the common violation
+For the statistical exception, verify service-improvement purpose, aggregate non-personal results, no decisions about individual people, limited retention of individual information for aggregation and any third party acting solely on the service's behalf for that purpose. Check clear information and a simple, free means to object. Review appearance uses against their own current conditions. If the implementation falls outside an exception, assess the relevant consent requirement; do not silently reinterpret the purpose to qualify.
 
-This is where fast-built apps most often break the law without realising. Cookies and identifiers beyond the strictly necessary (analytics, advertising, most third-party scripts) generally require prior opt-in consent under GDPR/ePrivacy. The frequent mistakes:
-- Loading Google Analytics, Meta Pixel, or similar on page load, before any consent. The tracker has already run by the time the banner appears.
-- A banner that only has "Accept", or where "reject" is hidden or harder.
-- Treating "strictly necessary" loosely, only genuinely essential cookies (session, security, load balancing) are exempt from consent; analytics and marketing are not.
+These storage/access exceptions do not remove separate personal-data obligations. Other jurisdictions may require different controls. Record an unresolved applicability question as **[LEGAL]**, with the configuration and data-flow evidence.
 
-The fix: non-essential trackers must not fire until the user has opted in, and the user must be able to decline as easily as accept. This usually means a consent-management setup that gates script loading on the user's choice.
+## Verify the choice states
 
-## Marketing email consent
+Use a fresh browser profile and safe test events. Observe storage and outgoing requests for: no choice, accept, reject, custom choices, withdrawal and return visit. Test that any required pre-choice blocking works, refusal/objection persists appropriately, withdrawn categories stop and authorised essential functions still work. Include server forwarding and embedded services in the evidence. Test the exception's objection path where that is the applicable control rather than forcing a consent banner.
 
-Marketing email generally needs consent and always needs a working, easy unsubscribe (and an accurate "why you're getting this"). This ties to any email funnel the app runs and to email-deliverability (unsubscribe handling is both a legal duty and a deliverability factor). Transactional email (a receipt, a password reset) is different from marketing and rests on different ground, do not conflate them. **[LEGAL]** for the marketing/transactional line in a specific case.
+No access to the consent platform or server destination means that part remains unverified, not passed.
 
-## Regional note (worldwide apps)
-Consent-first is the GDPR/UK/EU model. Some regimes (notably California's CCPA/CPRA) lean more on opt-out and disclosure than prior opt-in for certain processing. For a worldwide audience, the safe default is to meet the strictest applicable standard (consent-first), since you will have EU/UK users. The exact obligations per region are **[LEGAL]**.
+## Marketing and follow-up
 
-## What to flag, by stage
-- No tracking, no marketing, transactional email only: consent is largely not the issue; confirm analytics genuinely is not running pre-consent.
-- Has analytics/tracking: the pre-consent firing of trackers and accept-only banners are the high findings. Fix by gating non-essential scripts on opt-in.
-- Marketing email: confirm consent and a working unsubscribe; flag the basis for review.
+Check the current rules for recipient type and jurisdiction, including valid consent or an applicable exception such as a qualifying UK soft opt-in. Verify unsubscribe, objection/suppression and the separation of transactional messages from marketing. Cart reminders are not automatically authorised merely because an address was entered. Refer delivery mechanics to `email-deliverability`; an audit does not send messages.
 
-## The honest framing
-The most common real violation in this area is analytics that runs before consent behind an accept-only banner. It is widespread, it is genuinely non-compliant under GDPR, and it is fixable with a proper consent gate. Flag it plainly, and separate the engineering fix (gate the scripts) from the legal question of which basis applies to what (lawyer/DPO).
+## Sources checked 9 November 2026
+
+- [ICO storage and access technologies guidance](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-the-use-of-storage-and-access-technologies/)
+- [ICO exceptions](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-the-use-of-storage-and-access-technologies/what-are-the-exceptions/)
+- [ICO consent in practice](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-the-use-of-storage-and-access-technologies/how-do-we-manage-consent-in-practice/)
+- [ICO direct-marketing planning](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/direct-marketing-guidance/plan-direct-marketing/)
+
+Recheck current guidance and applicable law before making a compliance determination.

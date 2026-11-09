@@ -14,6 +14,8 @@ A few minutes establishing this prevents both kinds of error: running lenses tha
 
 ## The lens-applicability map
 
+For a website or web application, select the `website-readiness` review profile and read `website-readiness-profile.md` plus `website-readiness-coverage.md`. It applies to private interfaces as well as public pages, while its discovery/commerce topics remain conditional. Record all twelve topics and twenty-four optional-feature decisions in the existing coverage block. Use product context to select their existing lens owners. An optional product choice can remain undecided without being a defect; required assessment blocked by missing access remains partial. The profile does not grant implementation or live-test authority.
+
 Consult `references/lens-registry.md` for the full details of each lens: its backing skill, passes, ownership, and supporting references. The registry is the single source of truth for what each lens does and how it's run. The map below tells you **when** to select each lens; the registry tells you **how** to run it.
 
 Run a lens when its subject is present; skip it (and say so) when it is not:

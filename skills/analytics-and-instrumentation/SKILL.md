@@ -5,67 +5,57 @@ description: "Use this skill to decide what product usage to measure and how to 
 
 # Analytics and Instrumentation
 
-The lens for one question: **does the product measure what actually tells you whether it is working, and is that measurement trustworthy?** Most products either measure nothing (flying blind on whether features are used, where users drop off, whether anyone comes back) or measure the wrong things (vanity metrics that feel good and decide nothing). Good instrumentation answers real questions, are people reaching value, where do they fall out of a flow, do they return, with data clean enough to trust. This is product analytics: understanding user behaviour, distinct from operational observability (is the system up and erroring, which is `scaling-audit`) and from the legality of tracking (which is `data-privacy`).
+Assess whether measurement answers useful product questions and can be trusted. Start with the decisions the owner needs to make, then the minimum events and evidence needed. A site does not need a tracking SDK, persistent user identity or an experiment programme merely because those features are available.
 
-This does not cover ops/error monitoring (`scaling-audit`, observability) or privacy law (`data-privacy`, which this skill *defers to* on consent and PII). It is the measure-the-right-things-well lens.
+## Assessment by default
 
-## The cardinal principle
+Inspect existing instrumentation and data quality without installing trackers, changing consent settings or sending marketing messages. Give implementation guidance when requested. Operational/error monitoring belongs to `scaling-audit`; legal scope and tracking choices belong to `data-privacy`.
 
-**Measure to answer a question you will act on; an event you would never make a decision from is noise, and a metric that only ever goes up is usually a vanity metric.** The point of analytics is decisions: what to build, fix, or change. Instrumentation should start from the questions that matter (are users activating? where do they drop? do they retain?) and capture what answers them, not "track everything" (which buries signal in noise and creates privacy risk) and not the flattering totals (total signups ever, page views) that feel like progress while telling you nothing actionable. Decide the question first, then instrument for it.
+## Areas to assess
 
-## Assessment by default, design guidance when asked
+### 1. Questions and metrics
 
-Default to assessing what the product measures (or fails to) against what would actually inform decisions, and flagging vanity metrics, gaps, messy event design, and privacy issues. Give instrumentation design guidance (event schema, funnel/retention setup) when asked to build rather than assess.
+Identify the core task and meaningful outcomes: for example a completed enquiry, successful purchase or return to a recurring service. Choose denominators, time windows and segments that answer a decision. A one-off information site may not need account-level retention cohorts. Avoid collecting data that nobody will act on.
 
-## The areas, in priority order
+Read `references/measuring-the-right-things.md`.
 
-### 1. Measuring the right things (start here, before any tooling)
-What to measure is a harder and more important question than which tool to use.
-- **Start from decisions/questions:** what do you need to know to improve the product? (Are people reaching the core value? Where do they drop off? Do they come back?) Instrument those, not everything.
-- **Avoid vanity metrics:** totals that only rise and flatter (cumulative signups, raw page views) rarely inform a decision. Prefer actionable metrics (activation rate, drop-off points, retention) tied to what you would change.
-- **Identify the product's key metrics:** the few that genuinely reflect health (often an activation metric, a retention metric, and a core-action metric), not a dashboard of fifty.
-`references/measuring-the-right-things.md` covers question-first instrumentation, vanity vs actionable metrics, and choosing key metrics.
+### 2. Event definitions and delivery
 
-### 2. Event design and schema
-How events are structured determines whether the data is usable or a mess.
-- **Consistent naming and structure:** a deliberate scheme for event names and properties (e.g. object-action like `signup_completed`), applied consistently, not ad hoc names that fragment the data.
-- **Useful properties** on events (enough context to segment and analyse) without dumping everything.
-- **A planned tracking schema** (a tracking plan) so events are defined intentionally and consistently across the app, rather than sprinkled by whoever added a feature.
-`references/event-design.md` covers naming conventions, properties, and maintaining a tracking plan.
+Inspect consistent event/property definitions, the exact trigger and the distinction between an attempted action and confirmed success. Check duplicate browser/server delivery, retries, test traffic and environment separation. Reconcile representative conversions with their authoritative outcome where possible. Sanitise URLs, query parameters and campaign/UTM values before forwarding; do not send secrets, addresses or free-text form content by default.
 
-### 3. Funnels and drop-off
-Understanding where users succeed and fail in multi-step flows.
-- **Funnel instrumentation:** track the steps of a key flow (signup, onboarding, checkout) so you can see where users drop off, the single most actionable analytics output for improving conversion.
-- Define the funnel steps deliberately and measure progression through them.
-- Distinguish where people leave (the drop-off step) from why (which needs more investigation).
-`references/funnels-and-dropoff.md` covers defining funnels, measuring drop-off, and reading conversion.
+Read `references/event-design.md`.
 
-### 4. Activation and retention (the metrics that matter most)
-Whether users reach value and whether they come back, the metrics most predictive of a product working.
-- **Activation:** do new users reach the product's core value (the "aha" / first meaningful success), and how many, how fast? Define the activation event for the product.
-- **Retention:** do users return over time? Retention curves (do they come back day 1, week 1, month 1) reveal whether the product has lasting value, far more than signup counts. A product can grow signups while retaining no one, retention exposes that.
-- These usually matter more than acquisition totals, which is why they rank above raw counts.
-`references/activation-and-retention.md` covers defining activation, retention curves/cohorts, and why these outrank vanity totals.
+### 3. Funnels
 
-### 5. Privacy-respecting analytics (defers to data-privacy)
-Measuring usage without violating privacy or the law.
-- **Consent before non-essential tracking** (analytics cookies/identifiers generally need opt-in, this is `data-privacy`'s domain and this skill defers to it). Tracking must respect consent.
-- **Minimise personal data in events:** track behaviour without unnecessarily capturing PII; avoid putting emails, names, or sensitive data in event properties where an ID or nothing would do (minimisation, `data-privacy`).
-- Consider privacy-respecting/cookieless analytics approaches where they suffice.
-`references/privacy-respecting-analytics.md` covers consent, PII minimisation in events, and the deferral to `data-privacy`.
+Define steps and eligibility before calculating drop-off. Verify navigation/state changes do not double count or omit steps. A funnel identifies where measured users leave, not why they leave. Report selection gaps caused by consent, blocking or missing instrumentation.
 
-### 6. Acting on the data (closing the loop)
-Analytics only has value if it changes decisions.
-- **Dashboards and review:** the key metrics visible and actually looked at, not collected and ignored.
-- **Data quality and trust:** instrumentation that is correct and consistent enough to trust (broken or inconsistent tracking produces confident wrong conclusions, worse than no data).
-- **From metric to action:** a metric should connect to a decision; if no one would act on it, question why it is tracked.
-`references/acting-on-data.md` covers dashboards, data trust, and keeping analytics decision-linked.
+Read `references/funnels-and-dropoff.md`.
+
+### 4. Activation and retention
+
+Where repeat usage matters, define a meaningful activation event and product-appropriate cohort/window. Check whether persistent identity is necessary and lawful before stitching sessions. Aggregate measurement can be enough for a different product question.
+
+Read `references/activation-and-retention.md`.
+
+### 5. Privacy and tracking controls
+
+Map actual payloads, storage, vendors and server forwarding. Pseudonymous IDs may be personal data; cookieless or first-party branding does not establish an exemption. Check the applicable consent or exception/objection path through `data-privacy`, including pre-choice, refusal and withdrawal behaviour. Minimise collection and confirm applicable retention/rights handling.
+
+Read `references/privacy-respecting-analytics.md`.
+
+### 6. Decisions, experiments and follow-up
+
+Check that reports are reviewed and instrumentation is trustworthy before interpreting changes. A before/after improvement does not itself establish causation. Experiments need a hypothesis, sensible assignment, primary metric, guardrails and a predeclared analysis plan; insufficient traffic may make a qualitative review more useful. Optional cart reminders need eligibility, suppression and privacy checks, not automatic activation.
+
+Read `references/acting-on-data.md`.
 
 ## How to report
-Order by what unlocks decisions: measuring nothing meaningful (flying blind) or measuring only vanity metrics (false comfort) are the top findings, then messy event design that makes data untrustworthy, then privacy issues, then the act-on-it loop. For each: what is measured or missing, what decision it does or does not inform, and the fix. Flag vanity metrics directly. Where tracking raises consent/PII issues, defer the legal specifics to `data-privacy`.
+
+Prioritise by consequence: unauthorised disclosure/tracking, misleading outcome counts and decisions based on broken data can outweigh a missing dashboard. Record the route/event, payload or definition, actual observed delivery, intended decision and limitation. Separate observed instrumentation defects from unavailable provider evidence. Do not claim a conversion lift or causal explanation the data cannot support.
 
 ## Scoping
-Match to stage and need. A pre-launch product with no users does not need elaborate analytics, it needs the instrumentation ready to learn once users arrive (an activation event, a key funnel). A live product making decisions needs the key metrics, clean events, and funnels. Avoid the opposite failure too: over-instrumenting (tracking everything, huge schemas, dashboards no one reads) is its own waste and a privacy liability. The honest output for most products is "you are either flying blind or drowning in vanity metrics; pick the three questions that matter (activation, the key funnel's drop-off, retention), instrument those cleanly and with consent, and act on them."
+
+Recommend the smallest measurement plan that serves the product's actual questions. Existing provider access may be absent; state the resulting coverage limit. Optional experimentation, user stitching, reminders and dashboards are not launch requirements by default. Reference `data-privacy`'s dated official guidance for current legal interpretation.
 
 ## What to produce under a production-audit
 

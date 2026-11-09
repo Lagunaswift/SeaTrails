@@ -5,6 +5,8 @@ description: "Use this skill whenever building, auditing, or hardening any SaaS 
 
 # SaaS Production Security
 
+When used for an audit, inspect the existing design and report findings under the parent audit contract. Apply only checks relevant to the product; implementation examples and suggested limits are not universal launch requirements. Audit mode does not authorise changes or live incident drills.
+
 Before writing any code, read the relevant reference files:
 
 - `references/web-security.md` — Transport security, auth hardening, sessions, XSS, CSRF, injection, security headers, dependencies, file uploads, CORS, logging, secrets, database security, server hardening, payments, account security, email, compliance, security testing, deployment
@@ -39,7 +41,7 @@ Subscription manipulation, payment fraud, coupon/referral abuse, rate limit circ
 
 ### Transport and Network
 - [ ] HTTPS on all endpoints, no exceptions
-- [ ] HSTS enabled with minimum 1-year max-age
+- [ ] HSTS scope and rollout match HTTPS readiness; subdomains/preload are deliberate commitments
 - [ ] TLS 1.2 minimum, TLS 1.3 preferred
 - [ ] Certificate renewal automated and monitored
 - [ ] CORS configured with specific origin allowlist (no wildcard on authenticated endpoints)
@@ -65,12 +67,12 @@ Subscription manipulation, payment fraud, coupon/referral abuse, rate limit circ
 - [ ] If using JWTs: short-lived (15-30 min), refresh token rotation, server-side revocation
 
 ### Input Protection
-- [ ] CSRF tokens on all state-changing endpoints (or SameSite=Strict cookies)
+- [ ] Cookie-authenticated mutations have tested CSRF protection appropriate to the framework/session design; SameSite alone is not assumed sufficient
 - [ ] All database queries parameterised (no string concatenation, ever)
 - [ ] Firestore Security Rules written and tested for every collection (if applicable)
 - [ ] Input validation on every endpoint (type, length, format)
-- [ ] File uploads: MIME validated via magic bytes, size limited, filename sanitised, antivirus scanned
-- [ ] Uploaded files stored outside web root, served through authenticated endpoint
+- [ ] Upload types, paths, expanded size and processing limits checked; required scan/review gates fail safely
+- [ ] Private/quarantined/public file access is intentional; active content is isolated from application credentials
 
 ### Output Protection
 - [ ] XSS prevention: all dynamic content encoded for its context (HTML, attribute, JS, URL)
@@ -94,8 +96,8 @@ Subscription manipulation, payment fraud, coupon/referral abuse, rate limit circ
 - [ ] Encryption at rest enabled
 - [ ] Application-level encryption on PII fields
 - [ ] Database connections use TLS
-- [ ] Automated daily backups with tested restoration (quarterly test minimum)
-- [ ] Backups stored in a different region, encrypted at rest
+- [ ] Backup frequency/retention match the agreed recovery targets; dated isolated restore evidence exists
+- [ ] Backups protected from the relevant failure scenario and encrypted at rest; region choice respects data requirements
 
 ### Payments (if applicable)
 - [ ] No raw card data handled (Stripe Elements or Checkout)
@@ -116,8 +118,8 @@ Subscription manipulation, payment fraud, coupon/referral abuse, rate limit circ
 ### Compliance
 - [ ] Privacy policy published
 - [ ] Cookie consent implemented (if applicable)
-- [ ] Self-service data export (right to portability)
-- [ ] Self-service account deletion with soft-delete recovery window
+- [ ] Secure access/export request process where applicable; use `data-privacy` to distinguish access from portability and assess scope
+- [ ] Effective verified deletion-request process, with retention/recovery behaviour matching applicable obligations
 - [ ] Data Processing Agreements with third-party processors
 - [ ] Breach notification process documented
 
@@ -140,7 +142,7 @@ Subscription manipulation, payment fraud, coupon/referral abuse, rate limit circ
 - [ ] Timeouts configured per dependency (not one global timeout)
 - [ ] Load balancer drain timeout matches maximum request duration
 - [ ] Health checks lightweight and independent of main processing
-- [ ] Disaster recovery: RTO/RPO defined, tested quarterly
+- [ ] Disaster recovery: RTO/RPO defined and verified through authorised isolated drills on the agreed schedule
 - [ ] Dead letter queue for failed background jobs
 - [ ] Database migrations follow zero-downtime expand-contract pattern
 - [ ] Structured logging with trace IDs across request lifecycle
@@ -171,7 +173,7 @@ If building from scratch, implement in this order:
 13. **Monitoring and dashboards** — visibility into what is happening
 14. **Queue management** — for anything that does not need synchronous processing
 15. **Database migration strategy** — before you need it, not during a crisis
-16. **Disaster recovery** — define RTO/RPO, test quarterly
+16. **Disaster recovery**: define RTO/RPO and verify recovery on the agreed schedule
 17. **API versioning** — before you have external consumers, not after
 18. **Documentation and runbooks** — before the first incident, not during it
 
@@ -187,7 +189,7 @@ If building from scratch, implement in this order:
 
 **Feature flags as an afterthought.** The first time you need to disable a feature in production without deploying, you will wish you had built flags from the start. The kill switch you add in a panic at 2am is the one you should have built on day one.
 
-**Untested backups.** A backup you have never restored is a file, not a backup. Test restoration quarterly. Verify data integrity after restoration. Time the process so you know your actual RTO.
+**Unverified recovery.** Backup configuration does not demonstrate a successful restore. Inspect dated isolated tests for integrity, a working recovered journey and elapsed time against the agreed RTO/RPO; distinguish missing evidence from a confirmed absence of recovery.
 
 **Console.log as an observability strategy.** Unstructured text logs are unsearchable at scale. Structured JSON logs with trace IDs, user IDs, and request metadata are queryable, alertable, and aggregatable. The migration from unstructured to structured gets harder the longer you wait.
 

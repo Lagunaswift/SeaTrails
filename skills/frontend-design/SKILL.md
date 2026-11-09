@@ -1,113 +1,113 @@
 ---
 name: frontend-design
-description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.
+description: "Create or improve frontend interfaces for their audience and task. Use when building web components, pages, applications or visual treatments. Preserve approved brand rules and useful conventions; diagnose weak hierarchy, irrelevant decoration and inconsistent execution in context."
 ---
 
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+Build working interfaces with a clear hierarchy, coherent visual choices and appropriate detail. During maintenance, preserve the product's identity and established interaction patterns. A request to fix a defect is not a request to redesign the site.
 
 The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
 
 ## Design Thinking
 
-Before coding, understand the context and commit to a BOLD aesthetic direction:
+Before coding, establish the context and an appropriate visual direction:
 - **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
+- **Tone**: Follow the supplied brief and brand. Editorial, playful, restrained and utilitarian directions can all be appropriate. Propose a new direction only when the task calls for one.
 - **Constraints**: Technical requirements (framework, performance, accessibility).
-- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+- **Differentiation**: Which real product qualities should the design communicate? Use supplied content and assets; do not invent proof or claims.
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work. What carries either one is intentionality rather than raw intensity.
+Use the existing design system where available. If the brief is missing, record assumptions and solve the immediate task without inventing a replacement identity. Read production-audit/references/design-review-context.md when implementing an audit recommendation.
 
 Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
 - Production-grade and functional
-- Visually striking and memorable
+- Legible and appropriate to the task
 - Cohesive with a clear aesthetic point-of-view
 - Meticulously refined in every detail
 
 ## Frontend Aesthetics Guidelines
 
 Focus on:
-- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-- **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
-- **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+- **Typography**: Choose readable type that fits the brand and content. A system stack, Arial or Inter can be the right choice. Inspect hierarchy, line length, weight, fallback and loading cost before changing a font.
+- **Colour & Theme**: Reuse meaningful colour roles and tokens. Check actual contrast and states in every supported theme. A gradient or a solid background is a contextual choice.
+- **Motion**: Add motion when it explains a transition or supplies useful feedback. Preserve reduced-motion behaviour, keyboard use and performance. A content page can work well without entrance animation.
+- **Spatial Composition**: Fit density and hierarchy to the reading, comparison or work task. Symmetry, asymmetry, grids and single columns are available tools; novelty alone is not a requirement.
+- **Backgrounds & Visual Details**: Give decoration a purpose and a budget. Preserve clear foreground content. Check blur, textures and overlays against real text, images, themes and lower-powered devices.
 
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics.
+Consistency across a product is useful. Vary a treatment when the content or task needs a different hierarchy, not to make each screen look unrelated.
 
-**IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+Use the smallest implementation that delivers the intended result. Preserve working components and avoid new dependencies for cosmetic changes without a clear benefit.
 
-## AI-Generated Frontend Anti-Patterns
+## Patterns to review in context
 
-These are the specific, recognisable patterns that mark a frontend as AI-generated. They are the visual equivalent of "As an AI language model." Treat every pattern below as a hard constraint: do not produce it unless the user explicitly asks for it.
+The patterns below are prompts for inspection. Their presence does not establish AI authorship or a design defect. Use the product's audience, task, brand and observed behaviour to judge each one. This rule governs every example and suggested alternative below.
 
-Each entry names the tell, explains why it reads as machine output, and gives the alternative. Do not satisfy the constraint by swapping one banned class for its neighbour (`shadow-lg` to `shadow-xl`, `purple-600` to `indigo-600`). The point is the judgement behind the choice, not the specific token.
+Choose keep, rewrite, restyle or remove, and state the observed reason. Keep useful conventions. Rewrite unsupported or redundant content only to facts the owner can support. Restyle a useful element when hierarchy or consistency is the issue. Remove an element when it adds no useful information or obstructs the task. A token substitution without a reason is not an improvement.
+
+For an eyebrow, identify whether it supplies audience, category, location, status or evidence context. "Case study" above a project title can stay; "Overview" can correctly name a summary. A label that repeats the heading can be removed. A meaningful label competing with the heading can be restyled, while preserving readable size and contrast. Common nouns, gerunds and uppercase text are not failures by themselves.
 
 ### Structure & Layout
 
-**The landing page formula.** Hero, then a three-feature grid with icons, then testimonials, then pricing, then a final CTA. This exact running order appears in so much AI output that the shape alone gives it away. Read the actual content and decide what the page has to communicate, in what order, with what emphasis. A page selling one idea well might be a single long argument with no feature grid at all.
+**A landing sequence chosen before the content.** Check whether the hero, features, proof, pricing and action answer the visitor's questions in a useful order. A familiar sequence can work. Reorder or remove a section when its actual content is redundant, unsupported or misplaced.
 
-**The default dashboard skeleton.** Four stat cards across the top (Revenue, Users, Orders, Growth, each with a coloured icon, a big number, and a green or red percentage with an up/down arrow), a three-column card grid in the middle, a data table at the bottom. This is "Hello World" for dashboards. Ask how many metrics the user actually needs and what the real hierarchy is. A single prominent figure with sparkline context often beats four equally weighted boxes. Consider dense single-column feeds, split-pane master-detail views, kanban swim lanes, timeline layouts, map-centric views, or full-screen visualisations with overlay controls.
+**Dashboard metrics without a decision.** Identify what the user needs to notice and do. Four equal metric cards can suit four comparable measures; they can also hide the one urgent exception. Consider a feed, master-detail view, table, timeline or map when the task calls for it. Verify with realistic data, including zero values and long labels.
 
-**Unconsidered navigation.** Sidebars and top navs are fine; real products use them. The tell is that AI never weighs alternatives before reaching for sidebar-with-icon-label-rows or logo-left / nav-centre / avatar-right. Weigh tabs, command palettes, bottom bars, breadcrumb-driven hierarchy, full-screen overlays, contextual toolbars, or no persistent nav at all. Fit the navigation to the product's information architecture, not to the SaaS starter kit.
+**Unconsidered navigation.** Sidebars, top navigation, tabs and bottom bars each support different tasks. Check discoverability, current location, hierarchy and available space before changing a familiar pattern. Preserve useful conventions and existing routes.
 
-**Bento grids by reflex.** Mixed-size rounded tiles arranged in a masonry-ish grid, deployed whether or not the content has any real size hierarchy. The bento layout earns its place when some items genuinely deserve more space than others. Applied to a set of equal-weight features, it is just decoration pretending to be hierarchy.
+**Mixed-size grids without meaningful emphasis.** Check whether larger tiles deserve their prominence and whether visual order agrees with reading/focus order. Retain the grid when it helps comparison or expresses a real content hierarchy.
 
-**Reflexive symmetry.** Every grid even, every section centred, every layout balanced. Perfect symmetry in every section is itself a tell. Use asymmetry as a tool: offset headings, uneven column splits (7/5 rather than 6/6), left-weighted heroes, content that bleeds off one edge, elements placed deliberately off-grid.
+**Unexamined symmetry.** Centred sections and equal grids may suit comparable content. Check whether important differences remain visible. Use an uneven split or left-weighted composition when it clarifies a real hierarchy; retain symmetry when it supports the task.
 
 ### Spacing & Shape
 
-**Uniform spacing.** AI puts `p-6 gap-6` or `p-8 gap-8` on everything, so nothing has density variation. Spacing is how you create rhythm and grouping. Some things sit deliberately tight (related controls, label-input pairs, tag clusters); others get room (section breaks, hero areas). The contrast between dense and open is the rhythm. Without it the layout reads flat.
+**Spacing that hides relationships.** Use the established scale to group related controls and distinguish sections. Consistency is useful; adjust density where the task or content hierarchy warrants it. Diagnose the relationship that is unclear before changing spacing tokens.
 
-**One radius for everything.** The same `rounded-xl` or `rounded-2xl` on a full-width container, a card, a badge, and a button. Scale radius with component size: small elements get tight corners or full pills, medium elements get moderate rounding, large containers get very subtle rounding or none.
+**Radius without a component role.** Inspect whether corners support the established component system at different sizes. A consistent radius can be intentional. Change it only for a demonstrated hierarchy or system mismatch.
 
-**Pill-shaping every button.** A specific case of the above worth its own line: `rounded-full` on every button regardless of context. A fully rounded primary CTA next to fully rounded secondary buttons next to fully rounded chips flattens the hierarchy that radius is supposed to express. Reserve the pill for where it means something.
+**Buttons and chips that are hard to distinguish.** A pill shape can be a coherent brand choice. Check whether action, selection and status remain distinguishable through the complete treatment and accessible semantics; radius alone does not determine that.
 
 ### Surface & Depth
 
-**Shadow-only depth.** The single depth tool AI knows: `shadow-sm`, then `shadow-md`, then `shadow-lg` on hover, on every raised element. Real interfaces build depth with borders, inset shadows, background-colour shifts, hairline dividers, and layering as well. Reaching only for drop shadows produces the soft, floating, slightly weightless look that signals a template.
+**Depth without a hierarchy.** Check whether shadows, borders and surface colours communicate grouping and layering. Repeated shadows are acceptable when their roles are consistent. Remove or change them when they obscure boundaries or imply interactivity that is absent.
 
-**Glassmorphism as a "premium" default.** `backdrop-blur-xl bg-white/10 border border-white/20` on cards and navs because it reads as modern. Glass works over rich photographic or video backgrounds where there is actually something to blur. Over a flat grey background it is a faintly transparent card blurring nothing.
+**Transparency without a benefit.** Test text and controls over actual background content in both themes. Blur/transparency can express layering; an expensive effect with no visible or useful result can be simplified.
 
-**The drifting gradient blob.** Large blurred radial gradients (`blur-3xl` coloured orbs) floating behind a hero, often animated. This aurora-background look is one of the most dated AI landing-page tells there is. If the background needs atmosphere, derive it from the design's own language rather than dropping in glowing orbs.
+**Animated background decoration.** Check its relationship to the brand, contrast, distraction, reduced-motion behaviour and runtime cost. Retain a suitable gradient background; remove motion that prevents a user reading or completing the task.
 
 ### Colour & Type
 
-**The default Tailwind palette as the real palette.** `blue-600` primary, `gray-100` backgrounds, `green-500` / `red-500` status states. These are scaffolding, not decisions. Derive the palette from the brand, the industry, the content, the chosen aesthetic.
+**Colour roles chosen inconsistently.** Framework colours can be suitable. Check the actual role, brand fit and contrast of each colour, and accompany status colours with other cues. Consolidate inconsistent uses into meaningful tokens.
 
-**The purple-to-blue gradient.** `bg-gradient-to-r from-purple-600 to-blue-500` is as recognisable now as clip art, whether on a CTA or anywhere else. Its typographic cousin is `text-transparent bg-clip-text` gradient headings. If a gradient is warranted, build it from the project palette; most of the time a strong solid colour with real contrast is better.
+**Gradient text or actions with uneven contrast.** Measure readability across the complete gradient and background. Check fallback rendering and brand consistency. Its colours or popularity do not determine whether it should stay.
 
-**The dark developer-tool template.** Near-black background (`#0a0a0a`, slate-950), one electric accent (violet or cyan), a faint dot or line grid behind the hero, a monospace label or two. It has hardened into its own template, distinct from the purple gradient. Dark mode is fine; this specific costume is the tell.
+**A theme that does not fit the task.** A dark technical interface can be appropriate. Inspect surface separation, reading comfort, status distinction and the product's intended identity. Do not force a light theme to make the site look different.
 
-**Generic display fonts.** Inter, Roboto, Arial, system stacks, and the AI convergence pick, Space Grotesk. Defaulting to any of these wastes the single highest-leverage aesthetic decision. Pick a distinctive display face with a refined body face, and do not land on the same pairing every time.
+**Type without hierarchy.** A common font is not the problem to diagnose. Check whether headings, body text, numbers and controls are readable and appropriately distinguished. Preserve a suitable existing font; change the treatment or face when the task and brand justify it.
 
 ### Iconography & Decoration
 
-**Defaulting to Lucide or Heroicons.** The first libraries AI reaches for, so every app ends up using the same fifteen glyphs (Home, Settings, User, Bell, Search, ChevronRight, Menu, X, Plus, ArrowRight, Check, Star, Heart, Mail, Calendar). If an icon set is needed, choose one that fits the aesthetic (Phosphor, Tabler, Remix, Iconoir) or draw custom SVG.
+**Icons chosen without checking their role.** Existing Lucide, Heroicons or other coherent libraries can remain. Check recognisable meaning, accessible names, optical consistency and whether text would communicate better. Replacing a familiar icon library solely for novelty adds work without establishing a benefit.
 
-**The icon-in-a-coloured-circle.** AI shorthand for "make this look designed": an icon inside a `bg-blue-100 rounded-full p-3` circle above a heading, repeated down a feature list. Instantly readable as generated. If a section needs an anchor, use something tied to the content: an illustration fragment, a typographic mark, a number, a decorative border, a colour block.
+**Repeated icon containers.** Check whether they aid scanning or communicate meaningful categories. Keep a coherent pattern when useful; simplify containers that compete with the content or make different concepts look identical.
 
-**Emoji as iconography.** 🚀 ✨ 🎯 💡 dropped into headings, feature bullets, and buttons as a cheap stand-in for visual design. Reads as a hurried generation, not a considered interface. Use real icons or typographic treatment instead.
+**Emoji used without checking meaning.** Emoji can fit an informal brand. Inspect platform rendering, spoken labels and whether the symbol is informative or decorative. Essential action meaning needs a reliable accessible name.
 
-**Fake trust bars.** A "Trusted by" strip of greyed-out, evenly spaced, generic or placeholder company wordmarks. If there are no real logos to show, the strip is a lie that everyone recognises; cut it.
+**Unsupported trust claims.** Confirm customer logos, reviews, metrics and permission against supplied evidence. Remove unsupported claims or request the missing fact. Never manufacture social proof to complete a layout.
 
 ### Motion
 
-**`transition-all duration-300` on everything.** No discrimination about what should animate. Animate intentionally: colour on a link hover, height on an accordion, opacity on a fade. Name the properties that transition and match duration to the interaction: roughly 150ms for hover feedback, 250ms for reveals, 400ms or more for layout shifts.
+**Broad transitions.** Inspect which properties actually change and why. Prefer explicit transitions where broad rules animate unintended layout or delay feedback. Choose timing for the interaction and test reduced-motion settings; one duration is not a universal defect.
 
-**The universal hover state.** `hover:scale(1.02)` plus `shadow-lg` on every card, button, and clickable element: the same subtle zoom-and-lift everywhere. Vary the response to the element's purpose. A text link underlines or shifts colour; a card moves a border; a button inverts; an image reveals an overlay.
+**Hover that promises the wrong action.** Check that interactive feedback matches what the element does and has a suitable keyboard equivalent. Avoid hover-only access to essential information. A consistent hover treatment can stay when it communicates consistently.
 
 ### Content & Copy
 
-**Microcopy that narrates instead of labelling.** Buttons that say "Click here to get started on your journey" rather than "Start." Headings that sell rather than identify. Descriptions like "This powerful dashboard helps you visualise your key metrics at a glance" where "Recent activity" would do. AI over-explains because verbosity scored well in training. Real product copy is lean.
+**Labels that obscure the action.** State what a control does and what commitment it makes. Keep explanatory text when it helps the decision. "Start trial" can be clearer than either "Start" or a vague promotional sentence, depending on the actual action.
 
-**Placeholder content that smells generated.** "Welcome back, [User]" over sample data with exactly four metrics, three recent activities, and two notifications. If the interface needs example content, make it look like real data: some names long, some rows truncated, some fields empty, uneven counts.
+**Sample content mistaken for production data.** Remove unintended placeholders from released surfaces. For prototypes, label synthetic fixtures and exercise long names, empty values, errors and uneven counts. Do not pass invented fixtures off as real customers or results.
 
-### The Functional Ugliness Test
+### Working density
 
-The meta-pattern beneath most of the above: **AI frontends have no ugly-on-purpose elements.** Real products carry dense data tables with tight rows and almost no decoration, cramped forms where twelve fields sit above the fold because the workflow demands it, utilitarian admin screens with no hero and no gradient, terminal-style tools, settings pages that are just a long list of toggles.
+Inspect interfaces at the volume people actually use. A dense table or settings list can be appropriate, provided reading, keyboard access and target requirements still work. Keep the content needed for the task visible and preserve useful comparisons. Evaluate a 50-row administration view as a work surface, not by the visual rhythm of a marketing page.
 
-AI makes everything look like a marketing page because that is what scored well in training. The absence of functional ugliness is itself the tell. When the context calls for density, utility, or raw function over polish, commit to it. An admin table that stays usable at 50 rows is better design than a handsome card grid that shows six items before pagination.
+## Verify the change
 
-## Final Reminder
-
-Remember: Claude is capable of extraordinary creative work. The guidelines above set the floor, not the ceiling. Avoiding AI patterns is necessary but not sufficient. The goal is to produce frontends that look like they were designed by a human with opinions, taste, and deep understanding of the specific context. Every interface should feel like it was made for this particular problem, for this particular user, by someone who cared about this particular domain.
+Compare the changed component with the supplied brief and neighbouring components. Check actual content, supported widths/themes, zoom, focus and relevant interaction states. Record visual evidence at the same revision as the source. Preserve genuine business claims and approved assets. During a production audit, report findings without editing the app; perform implementation only in the authorised fix phase.

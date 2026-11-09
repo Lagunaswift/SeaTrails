@@ -57,7 +57,7 @@ What it catches:
   ("delve", "game-changer", "experts agree") hard-fail the build. 10 borderline
   terms warn. Plain deterministic code with no model in the loop.
 
-97 adversarial test cases lock the harness. Each is a way a past audit tried to
+147 adversarial test cases lock the harness. Each is a way a past audit tried to
 look clean while hiding something. They are not happy-path tests; they are
 attacks. A few of the actual case names from `run-tests.mjs`:
 
@@ -120,6 +120,18 @@ design systems from product-type queries. Requires Python 3.
 `impeccable-audit` and `taste-audit` are self-contained, read-only adaptations of the Impeccable audit/critique methods and Taste Skill's context-first design review. They preserve existing brand rules and use the same ledger, verification and deduplication as the other lenses. Their intake notes identify the reviewed upstream revisions; no upstream CLI, detector, hook or runtime is installed.
 
 Ask for `production-audit` as usual; it selects the relevant design lenses for the surfaces present. Or request an `impeccable audit` / `taste audit` on a named route. Taste is for marketing, portfolio and editorial surfaces, not operational dashboards. Cosmetic findings cap at medium; genuine task blockers keep their functional severity. Without browser evidence, the report explicitly limits its visual claims.
+
+## Website readiness
+
+For websites and web applications, production-audit selects a [website-readiness profile](skills/production-audit/references/website-readiness-profile.md). It routes twelve topics through existing lenses and records decisions for twenty-four optional features. The [coverage map](skills/production-audit/references/website-readiness-coverage.md) accounts for all 119 controls in the supplied website brief without creating a second finding system.
+
+The profile covers real journeys, navigation and contact actions, truthful commercial information, privacy/measurement and contextual design. Existing security, accessibility, performance and operational checks remain with their native owners. Familiar fonts, gradients, cards and eyebrows receive a keep/rewrite/restyle/remove decision based on their purpose. Missing optional features do not become defects automatically.
+
+Ask Claude or Codex:
+
+> Read `.claude/skills/production-audit/SKILL.md` and run a production audit with the website-readiness profile. Check existing coverage before proposing additions. Preserve useful design conventions and approved brand choices. Record evidence, optional-feature decisions and gaps, then deliver the gated report with fixes ordered by risk and dependency. Keep this run in report mode.
+
+The gate checks that the declared profile has complete, consistent coverage records and surviving finding references. Browser/provider evidence limits remain visible. It does not prove visual quality or that every defect was detected.
 
 ## Machine-readable gate
 

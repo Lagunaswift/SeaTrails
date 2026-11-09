@@ -1,5 +1,7 @@
 # Forms and Input
 
+Apply these patterns where they serve an existing task. Search, autosave, filters, shortcuts and uploads are conditional capabilities, not a feature list every website must add. Record an existing pattern's usability failure separately from an optional enhancement.
+
 ## 1. Form Layout
 
 ### Single Column
@@ -75,7 +77,7 @@ Show: current step, total steps, step labels. "Step 2 of 4: Shipping address." A
 
 ### Saving Progress
 
-For long forms (applications, onboarding), auto-save progress so the user can return later. Show "Draft saved" with a timestamp. Provide a way to resume from where they left off.
+For a form where interrupted work matters, assess whether drafts or another recovery path is useful. If autosave exists, show "Draft saved" only after persistence succeeds, handle failures and preserve safe input. Scope drafts to the correct user/device and clear them appropriately on logout or deletion; do not persist passwords, payment credentials or unnecessary sensitive fields. Autosave is optional unless the product promises it.
 
 ---
 
@@ -120,7 +122,7 @@ Do not use inline editing for: complex fields (date ranges, file uploads), field
 
 - Show result count: "47 results for 'invoice'."
 - Show what was matched (title, description, content) with the matching portion highlighted.
-- Preserve the search query in the URL so it is shareable and survives page refresh.
+- Preserve a non-sensitive search query in the URL when sharing/refresh needs justify it. Avoid exposing private queries or identifiers to history, referrers, logs or analytics.
 - Provide sorting options (relevance, date, name) on the results page.
 
 ---
@@ -140,7 +142,7 @@ Do not use inline editing for: complex fields (date ranges, file uploads), field
 - Show result count updating as filters change: "Showing 23 of 156 items."
 - Update results immediately on filter change (no "Apply" button needed for simple filters).
 - For expensive filter operations (database-backed), use an "Apply" button or debounce.
-- Preserve filter state in the URL so the filtered view is shareable and survives page refresh.
+- Preserve non-sensitive filter state in the URL where sharing and refresh behaviour call for it.
 - Show active filter count on the filter button when filters are collapsed: "Filters (3)."
 
 ### Sorting
@@ -186,3 +188,11 @@ Do not use inline editing for: complex fields (date ranges, file uploads), field
 - File too large: "This file is 52MB. Maximum size is 25MB."
 - Upload failed: "Upload failed. Try again." with a retry button.
 - Show errors per file, not as a batch error. If 3 of 5 files succeed, show success for those 3 and errors for the 2 that failed.
+
+## 9. Password and Authentication Inputs
+
+Support password managers, appropriate autocomplete and paste, including code-entry flows. Do not require a visibility toggle as a universal feature; if present, use a keyboard-operable button with an accessible name/state and `type="button"` so it does not submit accidentally. Verify the accessible authentication path and cognitive-test exceptions with `accessibility/references/wcag-22-checks.md`.
+
+For any submission, distinguish pending, confirmed success, recoverable error and uncertain outcome. Preserve safe values after a failure. Duplicate submission/payment protection belongs to the server-side integrity checks; disabling a button alone does not establish it.
+
+Source checked 9 November 2026: [WCAG 2.2](https://www.w3.org/TR/WCAG22/). Apply the project's current target and complete-process scope.

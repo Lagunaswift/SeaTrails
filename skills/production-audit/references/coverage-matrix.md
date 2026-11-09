@@ -50,3 +50,11 @@ File counts are non-negative integers, examined cannot exceed total, and areas_t
 ## Captured evidence for new audits
 
 Follow `evidence-assurance.md` for source delivery receipts, exact quotation checks, finding-bound independent review records and the combined delivery gate. Coverage counts come from captured deliveries. Semantic support remains a review judgement and must include counterevidence.
+
+## Website topic and feature coverage
+
+When `scope.review_profiles` selects `website-readiness`, include `coverage.website_readiness.topics` and `.features` according to `website-readiness-profile.md`. These supplement the file denominator and lens matrix. All twelve topics and twenty-four feature decisions are required once; they are not additional findings or a score.
+
+Keep applicability, assessment status and evidence modes separate. Applicable assessed topics need a run owner, named surfaces and evidence. Partial/blocked topics require a selected run/deferred owner, explicit limitations and `scope.partial=true`. A genuinely inapplicable topic names its reason and does not force its owner to run. Existing features need evidence even if adding them was optional. Any outstanding feature assessment limitation also requires a partial audit. Optional absent recommendations or owner choices alone do not.
+
+Use surviving report finding IDs after reconciliation. Keep/not-needed decisions cannot conceal linked defects, and unknown presence cannot carry invented findings. The gate checks these declared relationships and array completeness. It cannot authenticate browser/provider evidence, infer product intent or prove that the correct profile was selected. The renderer exposes the complete records and repeats assessment gaps in the limitations section.

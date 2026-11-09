@@ -2,6 +2,12 @@
 
 Not fetching or recomputing what has not changed. Caching is among the most effective performance tools because the fastest request is the one never made. The discipline is caching what is safe to cache, for as long as it is valid, and invalidating correctly so users do not get stale content.
 
+## Safety and ownership before speed
+
+Classify responses as public, user-specific or tenant-specific before caching. Inspect HTTP/CDN directives, application/query cache keys, service workers and invalidation on writes, logout, account switching and permission changes. `private` restricts shared-cache reuse; `no-store` has a different purpose, and neither replaces server-side authorisation. Do not recommend public caching simply because a response is expensive.
+
+Where authorised, use separate synthetic users/tenants and an anonymous session to verify isolation and freshness. If the evidence shows private data served to another audience, hand the root cause to `code-audit` as `SEC`/`security`; this lens's canonical category remains `performance`. Record unavailable runtime verification explicitly. No production purge or cross-account probing is implied by the audit.
+
 ## HTTP/browser caching of static assets
 
 Static assets (JS, CSS, images, fonts) rarely change between deploys, so the browser should cache them and not re-download on every visit. The mechanism is HTTP cache headers:
@@ -32,7 +38,7 @@ The famous hard problem. Cached data that should have updated but did not is a c
 
 ## What to flag
 - Static assets with no caching (re-downloaded every visit) or caching without cache-busting (stale after deploy).
-- Assets/cacheable responses not served via CDN/edge.
+- Measured latency or repeated transfer that a suitable CDN/edge cache could improve safely; absence of a CDN alone is not a defect.
 - Client refetching the same data on every navigation with no caching.
 - Expensive server work recomputed per request that could be cached.
 
@@ -41,3 +47,5 @@ Caching turns repeated work into work done once. The biggest wins: cache static 
 
 ## Connection to other skills
 `scaling-audit` for server-side caching as cost/load control. `network-and-requests` (this skill) for the request-reduction side. `release-and-ops` for how cache-busting interacts with deploys.
+
+Source checked 9 November 2026: [RFC 9111, HTTP caching](https://www.rfc-editor.org/rfc/rfc9111.html). Provider-specific caching defaults must be checked against the deployed stack.

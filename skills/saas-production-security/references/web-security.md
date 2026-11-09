@@ -32,9 +32,9 @@ Every page, every API endpoint, every asset, every WebSocket connection. No exce
 
 **Implementation:**
 - Obtain TLS certificates via Let's Encrypt (free, automated) or your CDN provider
-- Configure HSTS (HTTP Strict Transport Security) with a minimum max-age of 1 year (31536000 seconds)
+- Stage HSTS (HTTP Strict Transport Security) with a max-age appropriate to verified HTTPS readiness and the rollback implications.
 - Include `includeSubDomains` in HSTS after verifying all subdomains support HTTPS
-- Submit your domain to the HSTS preload list (hstspreload.org) for browser-level enforcement
+- Treat HSTS preload as a separate domain-policy decision; check its requirements and recovery implications before recommending it.
 - Redirect all HTTP requests to HTTPS at the infrastructure level (load balancer or CDN), not the application level
 
 **TLS Configuration:**
@@ -107,13 +107,12 @@ If you support "Sign in with Google/GitHub/etc.":
 Set-Cookie: session_id=<value>;
   HttpOnly;        ← JavaScript cannot read the cookie (XSS protection)
   Secure;          ← Cookie only sent over HTTPS
-  SameSite=Lax;    ← CSRF protection (Strict if you can tolerate it)
+  SameSite=Lax;    ← Chosen cross-site cookie policy; see CSRF section
   Path=/;          ← Available on all paths
   Max-Age=86400;   ← 24 hours
-  Domain=yourdomain.com;
 ```
 
-Every one of these flags matters. `HttpOnly` prevents XSS from stealing sessions. `Secure` prevents HTTP downgrade attacks. `SameSite` prevents CSRF. Do not omit any of them.
+These values illustrate one session design. Prefer host-only cookies unless cross-subdomain sharing is required; set scope and expiry deliberately. `HttpOnly` limits direct script access to a cookie, but XSS can still act as the user. `Secure` restricts cookie transport to HTTPS. `SameSite` restricts cross-site sending and needs the CSRF assessment below. Test the chosen policy through the actual login, redirect and logout flows.
 
 ### JWT Considerations
 
@@ -172,17 +171,17 @@ For AI SaaS, CSRF could trigger AI requests on the user's behalf, consuming thei
 
 ### Prevention
 
-**SameSite cookies:** Set `SameSite=Lax` on all session cookies. This blocks most CSRF attacks by preventing the browser from sending cookies with cross-origin POST requests.
+**SameSite cookies:** Set an intentional policy for authentication cookies and test it with legitimate cross-site flows. Same-site can include sibling origins; a SameSite setting does not establish a complete CSRF defence. Check the framework's token/origin or Fetch Metadata protections against the actual deployment. See [OWASP CSRF prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
 
-**CSRF tokens:** For state-changing requests (POST, PUT, DELETE), include a CSRF token:
+**CSRF tokens:** Where this is the chosen framework defence, protect cookie-authenticated state-changing requests (POST, PUT, PATCH, DELETE):
 1. Generate a unique token per session (or per request for higher security)
 2. Include it in a hidden form field or custom header
 3. Validate it server-side on every state-changing request
 4. Reject requests without a valid token
 
-**Custom headers:** For API-style requests (AJAX/fetch), require a custom header (e.g., `X-Requested-With: XMLHttpRequest`). Browsers do not add custom headers to cross-origin requests without CORS pre-flight approval.
+**Custom headers:** A required custom header can support an API defence only with a controlled CORS origin policy and rejection of requests lacking it. CORS does not authenticate a caller. Verify denied-origin requests and permitted journeys; safe methods such as GET and HEAD must not perform ordinary application mutations.
 
-**Double-submit cookie pattern:** Set a CSRF token as a cookie and require it in the request body or header. The attacker cannot read the cookie value from another origin.
+**Double-submit cookie pattern:** Use the framework's signed, session-bound implementation where appropriate. A naive equality check is vulnerable if an attacker can inject a matching cookie. Avoid replacing a maintained framework defence with custom token code.
 
 ### API Endpoints
 
@@ -356,19 +355,18 @@ This ensures the CDN-served file matches what you expect. If the CDN is compromi
 
 ## 9. File Upload Security (General) {#file-uploads}
 
-### Validation
+### Validation and publication
 
-1. **File type:** Validate MIME type from file content (magic bytes), not just the extension or Content-Type header. Both can be spoofed.
-2. **File size:** Enforce server-side. Client-side limits are for UX.
-3. **Filename:** Sanitise. Strip path traversal characters (`../`, `..\\`). Generate a new random filename on the server. Never use the client-provided filename for storage.
-4. **Content scanning:** Run antivirus/malware scanning on uploaded files before processing or storing them.
+1. **Supported content:** Establish the product's allowed formats. Inspect file signatures or a suitable parser, alongside declared type and extension; no one check establishes safety.
+2. **Bounds:** Enforce bytes, expanded archive size, entry counts and processing time on the server. Check extracted paths and reject traversal; generate storage keys independently of display filenames.
+3. **Publication:** Distinguish private, quarantined and intentionally public assets. Check the documented scan/review gate before publication or unsafe processing. A missing/failed required check must leave the asset quarantined. A clean scan does not guarantee safety.
 
-### Storage
+### Storage and delivery
 
-- Store uploads outside the web root. Uploaded files should not be directly accessible via URL without access control.
-- Serve uploaded files through an authenticated endpoint that checks the requesting user's permissions.
-- Use a separate domain or CDN for serving uploaded content (prevents cookie theft if an uploaded file contains XSS).
-- Set `Content-Disposition: attachment` on download responses to prevent browsers from rendering uploaded HTML/SVG files.
+- Keep untrusted uploads outside application execution paths. Private/quarantined objects require permission checks even through direct or signed URLs; public gallery assets and approved downloads may deliberately be accessible.
+- Serve active user content from an isolated origin without application credentials. Review cookie scope and browser sandbox permissions for playable HTML builds and embeds.
+- Use response types and `Content-Disposition` appropriate to the intended view/download behaviour. Supporting game archives or executables does not permit running them on the application server.
+- Verify invalid fixtures fail without breaking a valid supported upload. Use harmless bounded files in isolated tests. See [OWASP file-upload guidance](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html).
 
 ### Image-Specific
 
@@ -505,9 +503,9 @@ Use `.gitignore` to exclude `.env` files. Use a pre-commit hook (e.g., git-secre
 
 ### Backups
 
-- Automated daily backups with retention policy (minimum 30 days).
-- Test backup restoration regularly (quarterly minimum). An untested backup is not a backup.
-- Store backups in a different region from your primary database.
+- Check backup frequency and retention against the product's data-loss and recovery targets.
+- Inspect dated restoration evidence and the isolation checks in `../../scaling-audit/references/data-durability.md`; configuration alone does not demonstrate recovery.
+- Check protection from the relevant failure scenario, including region failure where required, without violating the product's data-location requirements.
 - Encrypt backups at rest.
 - Restrict backup access to a small set of operators.
 
@@ -556,11 +554,13 @@ Every component runs with the minimum permissions it needs. Your web server does
 
 ```
 Verify EVERY incoming webhook:
-  1. Check the signature header against your webhook secret
-  2. Check the timestamp is recent (within 5 minutes)
-  3. Look up the referenced object in your database to verify consistency
-  4. Process idempotently (same webhook delivered twice produces the same result)
+  1. Verify with the provider's SDK/body handling before any durable side effect
+  2. Enforce its signature timestamp/replay policy, where defined
+  3. Reconcile the referenced object against authoritative provider/application state
+  4. Deduplicate durably and handle valid delayed or out-of-order business events
 ```
+
+For audit acceptance probes, use `../../code-audit/references/website-boundaries.md`, payment section. Verify tampered purchase fields, invalid signatures and safe concurrent/retried fulfilment in provider test mode.
 
 ### Billing Integrity
 
@@ -587,11 +587,10 @@ Implement progressive delays: 1 second after 1st failure, 2 seconds after 2nd, 4
 
 ### Account Deletion
 
-- Provide a self-service account deletion option (GDPR requirement).
-- Soft-delete first (30-day recovery period), then hard-delete.
-- Delete or anonymise all user data including: conversation history, uploaded files, AI-generated content, billing records (anonymise, do not delete — you need these for tax records), audit logs (retain anonymised for compliance period).
-- Revoke all sessions, API keys, and OAuth tokens on deletion.
-- Notify the user via email when deletion is scheduled and when it completes.
+- Check that verified requests can be handled effectively, manually or through self-service. The [ICO's erasure guidance](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/) recognises verbal and written requests; a particular UI is not the requirement.
+- Follow the applicable deletion and retention policy across data stores, caches and processors. Do not invent a recovery window or erase records subject to a valid retention obligation. Use `data-privacy` for this assessment.
+- Revoke the deleted account's sessions and credentials; ensure old links or cached content do not restore access.
+- Check existing confirmation behaviour using sandbox destinations. The audit does not authorise sending user messages.
 
 ### Admin Access
 
@@ -623,7 +622,9 @@ Implement progressive delays: 1 second after 1st failure, 2 seconds after 2nd, 4
 
 This is not legal advice. Consult a lawyer for your specific jurisdiction.
 
-### GDPR (if you have EU users)
+### GDPR (where applicable)
+
+Use `../../data-privacy/SKILL.md` to establish jurisdiction and processing scope. A visitor's location alone does not establish all obligations; the points below are prompts to verify against actual policy and applicable rules.
 
 - Privacy policy describing what data you collect, why, and how long you retain it.
 - Cookie consent banner for non-essential cookies.
@@ -634,7 +635,7 @@ This is not legal advice. Consult a lawyer for your specific jurisdiction.
 - Record of processing activities documenting all data flows.
 - Data breach notification within 72 hours to the supervisory authority if a breach risks user rights.
 
-### CCPA (if you have California users)
+### CCPA (where applicable)
 
 - "Do not sell my personal information" link on your website.
 - Disclose what personal information you collect and how it is used.

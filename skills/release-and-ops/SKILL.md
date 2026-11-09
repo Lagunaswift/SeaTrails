@@ -33,7 +33,7 @@ How the app knows what environment it is in and behaves accordingly.
 - Clean separation of config from code (the same build runs in dev/staging/prod, differing only by injected config)?
 - Is there a staging environment, or do changes go straight to production untested in a prod-like setting?
 - Config validated at startup so a missing/wrong value fails fast and loud, not silently at runtime?
-`references/environments.md` covers config-as-injection, environment parity, and startup validation.
+`references/environments.md` covers config-as-injection, environment parity, startup validation and the limits of repository evidence for deployed provider settings.
 
 ### 3. Rollback and recovery
 What happens when a release is broken. The difference between a two-minute blip and an all-night incident.

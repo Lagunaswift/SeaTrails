@@ -18,6 +18,12 @@ A staging environment that differs significantly from production (different data
 **The danger of no staging at all.**
 Pushing changes straight to production with no intermediate environment means every change is tested live, on real users. For a hobby app this may be an acceptable tradeoff; for an app with users it is a recipe for user-facing breakage. At minimum, a way to run the production build against non-production data before it goes live.
 
+## Deployed settings and external evidence
+
+Reconcile repository assumptions with observed provider settings when authorised read access exists: auth callback/domain, payment/webhook mode, email delivery, storage rules, quotas, CDN/crawler policy and alert configuration. Record the environment, observation date and deployed revision. Keep credential values out of evidence. A local config file or passing preview cannot establish production configuration.
+
+If provider access is missing, name the exact setting/evidence needed and continue the source review. Do not invent a pass or infer an absent control solely because it is managed outside the repo. `infrastructure-config` remains a repository-only lens; this operational check does not change that boundary or authorise settings changes.
+
 ## Startup validation
 
 **Fail fast on bad config.**

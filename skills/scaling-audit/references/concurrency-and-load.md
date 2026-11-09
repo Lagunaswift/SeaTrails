@@ -18,6 +18,8 @@ If the request handler does slow work inline, calling the AI model, sending an e
 **Unbounded work per request.**
 Work that's fine for one user's data but grows with total data: loading all records to filter in memory, an endpoint that returns everything, an N+1 query pattern. Scales with the wrong number and falls over as data grows.
 
+Inspect the actual query shape, joins/fan-out and indexes using a query plan or provider evidence where available. Compare bounded payloads and read cost at representative data volume, not only an empty development store. For growing lists, check server-enforced page limits and stable ordering/cursors across next/previous pages. Record measured evidence before proposing an index or changing pagination; do not add indexes speculatively.
+
 ## Load characteristics
 
 **Connection-pool exhaustion.**
@@ -28,6 +30,12 @@ Caches with no eviction, lists that only ever grow, per-user data accumulated in
 
 **O(n) and worse in users.**
 Anything where the cost per request grows with the number of users or total records: scanning all users to do a thing, work that's quadratic in some growing quantity. Find the operations whose cost scales with total scale rather than staying constant per request.
+
+## Bounded test evidence
+
+Inspect existing load results before proposing execution. Where authorised, use isolated data and a bounded profile matched to expected concurrency, payloads and dataset size. Record the environment/revision, duration, request/job mix, latency/error rate, queue growth and resource cost. Check recovery after pressure ends and inspect money/uniqueness effects for corruption or duplication.
+
+Do not infer a capacity threshold from a small empty dataset or run an unbounded production stress test. If execution is unavailable, describe the source-level bottleneck and a proposed measurement; keep the actual capacity unknown.
 
 ## What to flag, by stage
 - Prototype: most of this is theoretical at low traffic. Flag races on anything involving money or uniqueness (those bite even at low traffic and the cost is high), note the rest as "becomes a problem at scale."

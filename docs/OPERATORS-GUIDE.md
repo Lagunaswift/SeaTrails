@@ -93,6 +93,18 @@ Pass one shared product/brand context, reviewed source revision, routes, viewpor
 
 For machine consumers run `node .claude/skills/production-audit/scripts/audit-check.mjs <audit-dir> --repo <target-repo> --json`. Check the process exit code as well as `ok`; retain the warnings and named gaps. Do not deliver the rendered report after a failed gate.
 
+## Website audits
+
+The orchestrator selects the website-readiness profile for user-facing websites and web applications. Read `skills/production-audit/references/website-readiness-profile.md` for its exact contract and `website-readiness-coverage.md` for the source-control mapping. When installed in a target repo, those paths begin `.claude/skills/`.
+
+Establish audience, primary tasks, routes/templates, business facts and brand decisions once, then share that context with the selected existing lenses. Public and authenticated surfaces can have different indexing, privacy and recovery requirements. The profile's twelve topics supplement the file/lens matrix. Record all twenty-four optional-feature decisions; a sensible omission needs a reason, not a fabricated defect.
+
+Use keep/rewrite/restyle/remove for questioned design patterns. A useful eyebrow, familiar font or conventional layout can stay. If a meaningful label competes with a heading, inspect its rendered hierarchy and accessible treatment before recommending a change. The fix-phase frontend-design skill follows the same rule.
+
+Capture source, rendered, interactive and provider evidence only where actually available. A private source-only assessment cannot demonstrate a live checkout or keyboard journey. Partial/blocked topics and feature assessment limitations require `scope.partial=true` and appear in the rendered report. Optional recommendations and pending product choices alone do not imply an incomplete audit.
+
+After reconciliation, update each profile finding reference to its surviving ID. Run the ordinary gate and renderer. The profile adds no separate report and grants no implementation, purchase, messaging or production-load authority. Fixes remain a separately authorised phase ordered through the existing remediation rules.
+
 ## New audit evidence and detection calibration
 
 Before starting an audit, follow `skills/production-audit/references/evidence-assurance.md`. The controller must capture source deliveries and retain separate reviewer responses. New rendering requires those records. Use `--legacy` only for historical artifacts and retain the printed limitation. The same reference documents blinded benchmark preparation and scoring; regression counts are not detection accuracy.

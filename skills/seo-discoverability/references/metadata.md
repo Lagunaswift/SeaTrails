@@ -1,42 +1,29 @@
-# Page metadata: titles and descriptions
+# Page metadata
 
-What search engines display in results and use to understand each page. These are small pieces of text per page, but the title tag in particular is among the highest-impact on-page SEO elements, and getting metadata wrong (missing, duplicated, or never updating per page) is a common, easily-fixed gap.
+Inspect titles and descriptions on distinct public pages and their shared templates. Use accurate text that helps a reader identify the page. Framework starter text, accidental duplication and metadata that describes a different route are useful findings.
 
-## The title tag
+## Titles and descriptions
 
-The `<title>` is the most important single on-page SEO element and the clickable heading shown in search results. Requirements:
-- **Unique per page.** Every page needs its own title describing that page. A whole site sharing one title (or "Home" everywhere) wastes the strongest on-page signal and produces useless, identical search listings.
-- **Descriptive and front-loaded.** Put the distinctive, important words near the front; describe what the page actually is. Include the terms a searcher would use, naturally, not stuffed.
-- **Reasonable length.** Search engines truncate long titles (~50-60 characters typically shown); keep the key content within the visible portion.
-- A common convention: "Page topic, Site name", with the page-specific part first.
+- A title should identify the page and, where helpful, the organisation. Keep its distinguishing information readable when truncated.
+- A description should summarise that page truthfully. Search engines may generate their own snippets; a supplied description does not guarantee particular wording or click-through.
+- Treat familiar character counts as editing guidance. Display width and query context vary; exceeding a fixed count alone is not an audit failure.
+- Parameter variants need intentional canonical and metadata handling. Do not force artificial uniqueness onto equivalent URLs.
 
-## The meta description
+## Route and consumer checks
 
-The `<meta name="description">` is the snippet text often shown under the title in results. It is **not a direct ranking factor**, but it strongly influences click-through (a compelling, relevant description gets more clicks than a truncated random sentence the engine pulls instead). Requirements:
-- **Per page, written for that page**, summarising it usefully and invitingly.
-- **Reasonable length** (~150-160 characters before truncation).
-- If absent, the search engine generates a snippet from the page, often poorly, so a deliberate description is better.
+Compare the initial response and rendered head on direct requests and client navigation. Verify the actual consumers: search rendering and a non-JavaScript social preview can behave differently. Check for contradictory or duplicated tags and confirm the route-specific image/title pair in `social-sharing.md`.
 
-## The single-page-app metadata trap
+Check document language, meaningful heading structure and a clear primary page title with `accessibility`. One primary H1 is a useful convention; H1 count alone is not an SEO acceptance test. For supported translations, coordinate language/region metadata with `internationalisation`.
 
-A specific, common failure: in a client-side-routed SPA, the title and meta tags are often set once in the initial HTML and **never updated as the user (or crawler) navigates between routes**. Every "page" then shares the homepage's title and description. Even with SSR/prerendering, if per-route metadata is not set, every page looks identical to search engines.
+Inspect favicons, app icons where applicable, browser-tab identity and leftover starter branding. A hosting subdomain or a Vite/React stack is not evidence of defective engineering. Recommend domain changes only where the approved production identity requires them.
 
-The fix: ensure each route/page sets its own title and meta description, via the framework's head/metadata management (Next.js metadata, react-helmet-style head management, the framework's equivalent), and ensure it is present in the server-rendered/prerendered HTML (crawlability-and-rendering.md), not only applied client-side after load. Per-page metadata that only appears after client JS may not be seen by crawlers.
+## Evidence and limits
 
-## Other on-page metadata
-- **Headings (`<h1>` etc.):** a clear, single descriptive `<h1>` per page reinforces the topic (also an `accessibility` concern, the two align). Logical heading structure helps both.
-- **Alt text on images:** describes images to search engines as well as screen readers (overlaps `accessibility`); meaningful alt aids image search and context.
-- **Language declaration** (`lang` attribute) and, for multi-language sites, hreflang (ties to `internationalisation` and indexing-and-canonical.md).
+Record the route/template, observed tags and the discrepancy. Cite the responsible source for generated metadata. Distinguish absent data from inaccurate data and from a proposed copy improvement. Do not predict ranking or sales uplift from changing tags.
 
-## What to flag
-- Missing title tags, or the same title across many/all pages (the homepage-title-everywhere SPA failure).
-- Generic or absent meta descriptions.
-- An SPA that does not update title/meta per route (every page sharing one set).
-- Per-page metadata applied only client-side, absent from the crawlable HTML.
-- Missing or multiple/unclear `<h1>`s.
+## Sources checked 9 November 2026
 
-## The honest framing
-Give every page a unique, descriptive title (the highest-impact piece) and a useful per-page meta description, and make sure both are in the HTML a crawler receives, not just set client-side after load. The signature fast-built failure is the SPA where every route shares the homepage's title because navigation never updates the head, easy to miss, easy to fix with the framework's metadata handling. Metadata is small, cheap, and high-impact once crawlability is sorted.
+- [Google title-link guidance](https://developers.google.com/search/docs/appearance/title-link)
+- [Google SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide)
 
-## Connection to other references
-Metadata must be in the crawlable HTML, crawlability-and-rendering.md (SSR/SSG). Headings and alt text overlap `accessibility`. Title/description copy quality is `anti-slop-writing`. Social-sharing tags (og:title etc.) are the sharing counterpart, social-sharing.md.
+Use current platform documentation for implementation. `anti-slop-writing` reviews the wording; this lens owns metadata delivery and consistency.

@@ -25,6 +25,8 @@ The first four are the spine; the rest hang off them.
 | [0013](0013-report-rendered-from-gated-data.md) | Report rendered from gated data | Counts the reader trusts are computed from report.json, and the headline is the gating set |
 | [0014](0014-ai-slop-prose-gate.md) | AI-slop prose gate | Deterministic regexes hard-fail slop phrases in the deliverable |
 | [0015](0015-design-audits-and-evidence-boundaries.md) | Design audits and evidence boundaries | Read-only design integrations, contained evidence, exact coverage and machine-readable gate results |
+| [0016](0016-evidence-assurance-and-detection.md) | Evidence assurance and detection | Captured source delivery, independent finding review and separate detection calibration |
+| [0017](0017-website-readiness-profile.md) | Website readiness profile | Existing lenses assess website topics; explicit optional decisions and evidence gaps stay in the gated report |
 
 ## Format
 

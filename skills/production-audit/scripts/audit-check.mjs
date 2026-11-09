@@ -535,6 +535,142 @@ function checkCoverage(report, ledger) {
   }
 }
 
+// ---- website profile: declared review scope, not another findings ledger ----
+const WEBSITE_TOPICS = new Set([
+  'journeys', 'identity-navigation', 'access-security', 'commerce',
+  'reliability-cost', 'interaction-states', 'mobile-accessibility', 'performance',
+  'discovery-sharing', 'privacy-measurement', 'content-brand', 'layout-features',
+]);
+const WEBSITE_FEATURES = new Set(Array.from({ length: 24 }, (_, i) => `OPT-${String(i + 1).padStart(2, '0')}`));
+const WEBSITE_EVIDENCE = new Set(['source', 'rendered', 'interactive', 'provider']);
+
+function checkWebsiteReadiness(report) {
+  if (!report) return;
+  const scope = report.scope || {};
+  const coverage = report.coverage || {};
+  const owns = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+  const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+  const text = (value) => typeof value === 'string' && value.trim().length > 0;
+  const problem = (message) => fail(`website-readiness: ${message}`);
+  const profiles = scope.review_profiles;
+  const hasCoverage = owns(coverage, 'website_readiness');
+  if (!owns(scope, 'review_profiles') && !hasCoverage) return; // historical/non-profile reports
+  if (!Array.isArray(profiles)) { problem('scope.review_profiles must be an array'); return; }
+  const seenProfiles = new Set();
+  for (const profile of profiles) {
+    if (profile !== 'website-readiness') problem(`unknown review profile ${String(profile)}`);
+    if (seenProfiles.has(profile)) problem(`duplicate review profile ${String(profile)}`);
+    seenProfiles.add(profile);
+  }
+  if (!seenProfiles.has('website-readiness')) {
+    if (hasCoverage) problem('coverage exists without scope.review_profiles selecting website-readiness');
+    return;
+  }
+  const website = coverage.website_readiness;
+  if (!object(website)) { problem('coverage.website_readiness must be an object'); return; }
+  const selected = new Set(scope.lenses_selected || []);
+  const run = new Set(scope.lenses_run || []);
+  const deferred = new Set(scope.lenses_deferred || []);
+  const reported = new Set(report.findings.map((finding) => finding.id));
+
+  const strings = (value, where) => {
+    if (!Array.isArray(value) || value.some((entry) => !text(entry))) {
+      problem(`${where} must be an array of non-empty strings`);
+      return [];
+    }
+    return value;
+  };
+  const evidence = (value, where) => {
+    if (!Array.isArray(value)) { problem(`${where} must be an array`); return []; }
+    for (const entry of value) {
+      if (!object(entry) || !WEBSITE_EVIDENCE.has(entry.mode) || !text(entry.ref)) {
+        problem(`${where} entries require a source/rendered/interactive/provider mode and a non-empty ref`);
+      }
+    }
+    return value;
+  };
+  const findingRefs = (value, where) => {
+    const ids = strings(value, where);
+    const seen = new Set();
+    for (const id of ids) {
+      if (!reported.has(id)) problem(`${where} references ${id}, which is not a surviving reported finding`);
+      if (seen.has(id)) problem(`${where} repeats ${id}`);
+      seen.add(id);
+    }
+    return ids;
+  };
+  const rows = (value, expected, where) => {
+    if (!Array.isArray(value)) { problem(`${where} must be an array`); return []; }
+    const seen = new Set();
+    const result = [];
+    for (const row of value) {
+      if (!object(row)) { problem(`${where} must contain objects`); continue; }
+      if (!expected.has(row.id)) problem(`${where} contains unknown id ${String(row.id)}`);
+      if (seen.has(row.id)) problem(`${where} repeats ${String(row.id)}`);
+      seen.add(row.id);
+      result.push(row);
+    }
+    for (const id of expected) if (!seen.has(id)) problem(`${where} is missing ${id}`);
+    return result;
+  };
+  const common = (row, where) => {
+    if (!text(row.reason)) problem(`${where} needs a contextual reason`);
+    return {
+      evidence: evidence(row.evidence, `${where}.evidence`),
+      findings: findingRefs(row.finding_ids, `${where}.finding_ids`),
+      limitations: strings(row.limitations, `${where}.limitations`),
+    };
+  };
+  const incomplete = (where, limitations) => {
+    if (scope.partial !== true) problem(`${where} is incomplete but scope.partial is not true`);
+    if (!limitations.length) problem(`${where} must name its remaining work or access limitation`);
+  };
+
+  for (const topic of rows(website.topics, WEBSITE_TOPICS, 'topics')) {
+    const where = `topic ${String(topic.id)}`;
+    const data = common(topic, where);
+    const surfaces = strings(topic.surfaces, `${where}.surfaces`);
+    if (!LENSES.has(topic.owner)) problem(`${where} has no registered lens owner`);
+    if (topic.applicability === 'not_applicable') {
+      if (topic.status !== 'not_applicable') problem(`${where} is not applicable but its status disagrees`);
+      if (data.evidence.length || data.findings.length) problem(`${where} cannot claim evidence or findings while not applicable`);
+      if (data.limitations.length) problem(`${where} has unfinished assessment work; use applicable partial/blocked instead of not applicable`);
+      continue; // an excluded topic need not select its registered owner
+    }
+    if (topic.applicability !== 'applicable') problem(`${where} has invalid applicability`);
+    if (!selected.has(topic.owner)) problem(`${where} owner was not selected`);
+    if (!run.has(topic.owner) && !deferred.has(topic.owner)) problem(`${where} owner neither ran nor was explicitly deferred`);
+    if (topic.status === 'assessed') {
+      if (!run.has(topic.owner)) problem(`${where} cannot be assessed by an owner that did not run`);
+      if (!surfaces.length || !data.evidence.length) problem(`${where} assessed scope requires surfaces and evidence`);
+      if (data.limitations.length) problem(`${where} has remaining assessment work; use partial or blocked instead of assessed`);
+    } else if (topic.status === 'partial' || topic.status === 'blocked') {
+      incomplete(where, data.limitations);
+    } else problem(`${where} has invalid status for an applicable topic`);
+  }
+
+  for (const feature of rows(website.features, WEBSITE_FEATURES, 'features')) {
+    const where = `feature ${String(feature.id)}`;
+    const data = common(feature, where);
+    if (data.limitations.length && scope.partial !== true) problem(`${where} has an assessment limitation but scope.partial is not true`);
+    if (feature.presence === 'present') {
+      if (!['keep', 'improve', 'remove'].includes(feature.decision)) problem(`${where} present feature requires keep, improve or remove`);
+      if (!data.evidence.length) problem(`${where} present feature requires evidence for its decision`);
+      if (feature.decision === 'keep' && data.findings.length) problem(`${where} cannot keep a linked defect without an improve/remove decision`);
+    } else if (feature.presence === 'absent') {
+      if (!['not_needed', 'recommend', 'approved', 'decision_required'].includes(feature.decision)) {
+        problem(`${where} absent feature requires not_needed, recommend, approved or decision_required`);
+      }
+      if (feature.decision === 'not_needed' && data.findings.length) problem(`${where} justified absence cannot also claim a defect`);
+      // Future product choices do not imply incomplete assessment or authorise a fix.
+    } else if (feature.presence === 'unknown') {
+      if (feature.decision !== 'blocked') problem(`${where} unknown presence requires a blocked decision`);
+      if (data.findings.length) problem(`${where} unknown presence cannot claim a known feature defect`);
+      incomplete(where, data.limitations);
+    } else problem(`${where} has invalid presence`);
+  }
+}
+
 // ---- INVARIANT 10: remediation order — every gating finding has a fix position
 function gatingFindingIds(report) {
   if (!report) return new Set();
@@ -721,6 +857,16 @@ function checkProse(report) {
     if (typeof d.reason === 'string') fields.push({ src: `dropped:${d.id}.reason`, text: d.reason });
   }
   for (const [index, text] of (report.limitations || []).entries()) fields.push({ src: `limitations[${index}]`, text });
+  const website = report.coverage?.website_readiness;
+  for (const collection of ['topics', 'features']) {
+    for (const row of (Array.isArray(website?.[collection]) ? website[collection] : [])) {
+      if (!row || typeof row !== 'object') continue;
+      if (typeof row.reason === 'string') fields.push({ src: `website:${row.id}.reason`, text: row.reason });
+      for (const [index, text] of (Array.isArray(row.limitations) ? row.limitations : []).entries()) {
+        if (typeof text === 'string') fields.push({ src: `website:${row.id}.limitations[${index}]`, text });
+      }
+    }
+  }
   for (const { src, text } of fields) {
     for (const [re, why] of SLOP_HARD) {
       const m = text.match(re);
@@ -766,6 +912,7 @@ checkChains(ledger, report, ledgerById);
 checkRollCall(report);
 checkComplianceDuty(report);
 checkCoverage(report, ledger);
+checkWebsiteReadiness(report);
 checkRemediationOrder(report);
 checkEvidenceFiles(report, args.repo, ledgerById);
 checkProse(report);

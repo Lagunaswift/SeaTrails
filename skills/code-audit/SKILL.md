@@ -26,9 +26,11 @@ Review in this order, because the order is the priority order: a security hole o
 
 Security issues are first because they're the highest-cost failures and the ones a reviewer most reliably adds value on (authors miss their own holes). Sweep for the vulnerability classes and apply the security skills as the lens:
 
-- **Apply `ai-saas-security`** for anything that sends user input to an AI provider or returns AI output, and for its general web-security checklist (auth, injection, XSS, CSRF, secrets, headers, dependencies, sessions, payments, multi-tenant isolation). Its checklist and "Common Mistakes" are a ready-made audit list.
-- **Apply `saas-production-security`** for production-hardening concerns (its specific coverage applies as the lens for deployment, infrastructure, and production-security posture).
+- **Apply `ai-saas-security`** where the product sends input to an AI provider or returns AI output. It owns prompt injection, AI usage/cost controls and model-context isolation; a site built with AI does not by itself need this lens.
+- **Apply `saas-production-security`** for applicable web-security foundations: auth, sessions, injection, CSRF, uploads, headers and payment handling. Match its implementation examples to the existing architecture and product requirements.
 - The security pass looks for: missing or broken auth and authorisation, injection (SQL/NoSQL/command/prompt), secrets in source, missing input validation, insecure defaults, XSS/CSRF gaps, exposed internals in errors, dependency vulnerabilities, missing rate limiting and cost controls on AI endpoints, and cross-tenant/cross-user data leakage.
+
+For website/API surfaces, read `references/website-boundaries.md` for direct ownership, private-cache, remote-fetch and payment probes. Record unavailable runtime/provider checks through the existing evidence and coverage rules.
 
 Security findings are almost always report-first even in fix mode, because a wrong security fix is worse than the hole. Flag, explain the risk, propose the fix, and apply it only with care and verification.
 
@@ -38,6 +40,8 @@ Bugs and behaviours that are wrong or fragile. Apply these lenses:
 
 - **`error-handling-patterns`** for failure handling: swallowed errors (empty catches, ignored returns), catching at the wrong layer, lost error context, missing failure paths, naive retries, no resilience around external calls, and partial-failure hazards.
 - **`state-management`** for state bugs: the same fact stored in two places that can drift, derived values stored instead of computed, illegal state combinations (several booleans encoding one condition), uncontrolled mutation, per-request state leaking across requests, and concurrency on shared state.
+
+Where money or entitlements are involved, use the payment-state and event-processing checks in `references/website-boundaries.md` alongside the registered payment-provider deepener.
 
 ### Pass 3: Active debugging probe
 
@@ -72,12 +76,12 @@ The code's shape, where bad structure makes it hard to understand, change, or sa
 
 ### Pass 6: UI, UX & Frontend Design (when applicable)
 
-For code with a user interface, apply two complementary lenses. Skip entirely for non-UI code.
+For code with a user interface, apply the following references, including static brochure sites. Skip entirely for non-UI code. Read `../ux-ui-patterns/website-completeness.md` for route/navigation, identity/contact and commercial/content checks. Keep these in this pass even when `frontend-robustness` is inapplicable to a static site.
 
 - **`ux-ui-patterns`** for usability and interaction patterns: form design, navigation structure, accessibility, responsive behaviour, data display, error states, empty states, loading states, and microcopy. This lens asks "can the user accomplish their task correctly and efficiently?"
-- **`frontend-design`** for visual design quality and distinctiveness: typography choices, colour and theme coherence, spatial composition, motion and micro-interactions, depth and surface treatment, and whether the interface has a clear aesthetic point of view or defaults to generic AI-generated patterns. This lens asks "does this look like it was designed by a human with taste, or like it was generated from a template?" Apply the AI anti-pattern checklist from `frontend-design` — the landing-page formula, the default dashboard skeleton, uniform spacing, one-radius-for-everything, the purple-to-blue gradient, generic fonts, pill-shaped everything, and the other tells. An interface that functions perfectly but looks generated still undermines user trust and product credibility.
+- **`frontend-design`** for typography, colour, composition, motion and brand fit. Judge the rendered page against its purpose and established design rules. A familiar layout, eyebrow label, font or gradient is not a finding by itself. Identify the actual mismatch, repetition or hierarchy problem and its consequence; preserve conventions that help the task.
 
-The two lenses are complementary: ux-ui-patterns catches a form with no error states; frontend-design catches a form that works perfectly but looks like every other AI-generated SaaS page. Both matter for production-grade user-facing code.
+Use the existing consequence routing: an inaccessible or broken interaction retains its functional severity; a supported aesthetic mismatch belongs in `design-aesthetic`. Source inspection alone cannot establish rendered quality or user behaviour.
 
 ## How to remediate (fix mode)
 
@@ -118,7 +122,7 @@ For reference, the lenses and what each covers:
 - `api-and-interface-design`: interface and contract issues (pass 5)
 - `data-modelling`: persisted data shape (pass 5)
 - `ux-ui-patterns`: usability, interaction patterns, accessibility (pass 6, UI code only)
-- `frontend-design`: visual design quality, AI-pattern avoidance, aesthetic distinctiveness (pass 6, UI code only)
+- `frontend-design`: visual design quality, brand fit and purposeful hierarchy (pass 6, UI code only)
 
 ## What to produce under a production-audit
 

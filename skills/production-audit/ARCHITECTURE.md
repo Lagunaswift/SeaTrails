@@ -133,6 +133,14 @@ code-audit  ──┬── Pass 1 Security      ── lens: saas-production-se
 
 ---
 
+## Website profile coverage
+
+The orchestrator selects `website-readiness` for user-facing website/app surfaces. `references/website-readiness-profile.md` supplies shared product context, twelve topics, twenty-four optional decisions and layout vocabulary. `website-readiness-coverage.md` maps the supplied brief's 119 controls to existing owners. No lens, category or finding prefix is added.
+
+Profile data lives in `scope.review_profiles` and `coverage.website_readiness`. The ordinary gate validates declared completeness, applicability/status relationships, existing owners, evidence references and links to reconciled findings. Partial/blocked work and feature assessment limitations require the partial flag and are rendered visibly. Optional choices are separate from defects. Legacy reports without the profile retain their existing contract.
+
+This is an integrity check on reported assessment, not a detector or proof of product intent. Source delivery receipts do not authenticate browser/provider observations, and a structural pass does not establish that all defects were found. ADR 0017 records the scope and trade-offs.
+
 ## Full skill inventory — role in the audit
 
 | Role | Skills |

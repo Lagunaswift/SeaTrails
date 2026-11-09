@@ -38,6 +38,8 @@ Coverage is made measurable too (`references/coverage-matrix.md`): the report st
 
 ## The process
 
+For user-facing websites and web applications, select the website-readiness profile during Stage 0/1. Read `references/website-readiness-profile.md` and its coverage map. Record `scope.review_profiles: ["website-readiness"]` and the corresponding `coverage.website_readiness` topics and feature decisions. Route the work through existing lenses; missing optional features are not automatic findings. The profile adds route/journey and business context, including keep/rewrite/restyle/remove decisions for familiar design patterns. Backend-only services do not need it.
+
 The audit runs in six stages (Stage 0 plus Stages 1–5). The references detail each. Stage 0 and the four pieces of machinery above are what let it produce, in an unfamiliar repo, a report whose rigour is checked, not merely asserted.
 
 **There is no single command that runs the whole audit.** The audit is executed by an agent (you) working through Stages 0–5; the scripts under `scripts/` do not perform the audit — `audit-check.mjs` *gates* the result and `render-report.mjs` *renders* it from the gated data. Running `audit-check.mjs` against an empty or absent audit-dir will not produce an audit; it will report that there is nothing to check. So the drop-in model is: drop the `.claude/skills/` tree into the target repo, invoke this skill, and the agent walks the stages writing `raw-findings.jsonl` and `report.json`; the two scripts then gate and render the deliverable.
@@ -58,6 +60,8 @@ Before selecting lenses, profile the repository: language(s), framework, datasto
 Determine what the app is and therefore which lenses apply, then state the scope explicitly. Not every lens fits every app (a static marketing site needs no scaling or analytics pass; an internal tool needs no SEO). Selecting the wrong lenses pads the report with irrelevant findings and dilutes the real ones. The stack profile from Stage 0 informs this directly. `references/scope-and-lens-selection.md` covers reading the app, the lens-applicability map, and stating scope and what was excluded and why.
 
 ### Stage 2: Run the lenses (the passes)
+Pass the selected website profile's common product context, relevant topic ownership and route/state inventory to each participating lens. Return actual evidence modes and coverage alongside canonical findings. Source-only review cannot complete required interaction, rendered or provider checks; record remaining work as partial/blocked. Use the shared context to avoid duplicate findings or conflicting brand assumptions.
+
 Run each selected lens over the codebase, in priority order, each producing findings cited to file and line in the canonical schema (`references/finding-schema.md`), appended to the `raw-findings.jsonl` ledger as they're found — never summarised on the way in. Atomic lenses run first; the two **synthesis lenses** (soc2-compliance, adversary-emulation) run last and consume the ledger. The lenses and what each owns:
 - **`code-audit`**: security, correctness, debugging, tests, structure, UI/UX (itself six deep passes; the security/correctness core).
 - **`ai-saas-security`**: AI-specific abuse, prompt injection, cost runaway, token/rate limits (for apps with an AI surface).

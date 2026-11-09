@@ -1,39 +1,25 @@
 # Touch targets and interaction
 
-Touch is a different input from a mouse, and an interface designed for a precise cursor fails under imprecise fingers. The differences are concrete: fingers are large and inexact, there is no hover, and gestures differ from clicks. An interface that ignores this is technically functional but frustrating to use on the devices most people hold.
+Check the device and input methods the product actually supports, including touch, mouse, keyboard and hybrid use. Do not depend on hover for essential information or operation.
 
-## Touch target size and spacing
+## Target size and spacing
 
-A mouse cursor is a single pixel; a fingertip covers a sizeable area and lands imprecisely. So controls sized for a mouse are often too small to tap reliably:
-- **Minimum target size:** guidelines put a comfortable minimum around 44x44px (Apple) / 48x48px (Android/Material), tap targets smaller than this are hard to hit accurately. Small icon buttons, tiny text links, compact controls designed at the desk fail here.
-- **Spacing between targets:** adjacent tappable elements need enough gap that a finger does not hit the wrong one. Densely-packed links/buttons (fine with a mouse) cause mis-taps on touch. Space them, or enlarge their hit areas.
-- The visible element can stay small if its *hit area* is enlarged (padding, an invisible larger touch region), the thing being tapped must be finger-sized even if the icon looks small.
+For WCAG 2.2 AA, success criterion 2.5.8 generally requires a pointer target at least 24 × 24 CSS pixels, with defined spacing, equivalent-control, inline, user-agent and essential exceptions. Measure the actual hit area and neighbouring targets, then evaluate the relevant exception. A 32-pixel target is not automatically an AA failure.
 
-This overlaps `accessibility`: adequate target size helps motor-impaired users too, the same fix serves both.
+Larger targets, often around 44 × 44 CSS pixels, can improve touch comfort and are an enhanced recommendation. Do not mislabel that recommendation as the universal AA minimum. Padding can enlarge a hit area, but overlapping targets or an overlay intercepting taps can defeat it. Inline prose links have their own exception; do not blindly add padding that breaks reading layout.
 
-## The hover problem
+## Hover and gestures
 
-Touch devices have no hover state, the finger is either not touching or tapping; there is no "pointer is over this but not pressing." So any interaction that depends on hover breaks on touch:
-- **Hover-only menus/dropdowns** that open when the mouse moves over them have no way to open on touch (a tap may navigate instead, or do nothing). Provide a tap/click way to open them.
-- **Content revealed only on hover** (tooltips, info that appears on mouseover, controls that show on hover) is unreachable on touch, the user never sees it. Make it available via tap, or always-visible, on touch.
-- **Hover feedback** (a state change on mouseover) simply does not happen on touch; do not rely on it to communicate something essential.
+- Menus, tooltips and revealed controls need an appropriate tap/keyboard path where their content is needed. Check actual opening, dismissal and focus behaviour.
+- Preserve native scrolling and zoom. Optional swipe, pull-to-refresh or other gestures should serve a task rather than be added because mobile supports them.
+- Dragging needs a single-pointer alternative without dragging unless a criterion exception applies. Keyboard operation alone does not establish this alternative.
+- Test target reachability with the on-screen keyboard, safe areas, sticky navigation, contact widgets and other overlays visible.
 
-The rule: hover can *enhance* on devices that have it, but nothing essential can depend on it, because touch devices do not. Design the interaction to work by tap first.
+## Evidence and ownership
 
-## Gestures and native behaviour
+Report measured size/spacing or an observed interaction failure with viewport, device/input and state. Distinguish a standards failure from a comfort recommendation and from an untested real-device risk. `accessibility` owns the detailed WCAG interpretation; `frontend-robustness` owns general state/interaction failure.
 
-- **Support expected gestures** where they fit (swipe to dismiss, pull to refresh, pinch to zoom on images/maps), they are what touch users expect.
-- **Do not break native gestures.** Hijacking scroll, disabling pinch-zoom (also an accessibility harm, viewport-and-rendering.md), or capturing swipes that the browser/OS needs frustrates users and breaks expectations. Intervene in native touch behaviour only deliberately and carefully.
-- **Account for touch imprecision in interactions** (drag handles big enough to grab, sliders tappable, etc.).
+## Sources checked 9 November 2026
 
-## What to flag
-- Tap targets below ~44x44px or packed too closely (mis-tap risk), the common touch finding.
-- Hover-dependent interactions (menus, revealed content, essential feedback) with no touch equivalent (unusable on touch).
-- Broken or hijacked native gestures (scroll, pinch-zoom) where unnecessary.
-- Drag/precise interactions that assume mouse precision.
-
-## The honest framing
-Design interactions for the finger, not the cursor: targets big enough (~44px) and spaced enough to tap reliably, and never depend on hover, because touch devices do not have it (the hover-only menu is the classic break). Support the gestures touch users expect and do not hijack the native ones. These are not edge cases; touch is how most people use the web, so an interface that only works well with a mouse is broken for the majority. The fixes (bigger targets, tap-accessible everything, working gestures) also tend to help accessibility.
-
-## Connection to other references
-Target size and not-disabling-zoom are shared with `accessibility`. The hover-to-tap and gesture handling overlap `frontend-robustness` (handling the real input conditions). Viewport/zoom basics are viewport-and-rendering.md.
+- [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
+- [Target size minimum and exceptions](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum)

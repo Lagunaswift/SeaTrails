@@ -14,7 +14,7 @@ Modern formats (WebP, AVIF) compress far better than older JPEG/PNG at the same 
 Even in the right format and size, images should be compressed to a sensible quality. The difference between an uncompressed and a well-compressed image is usually invisible to the eye and large on the wire.
 
 **Loaded eagerly when below the fold.**
-Images far down the page are downloaded immediately even though the user may never scroll to them, competing for bandwidth with what is actually visible. Lazy loading (`loading="lazy"` or framework equivalents) defers off-screen images until they are near the viewport. The above-the-fold hero image should NOT be lazy-loaded (it is what LCP measures); everything below should be.
+Images far down the page are downloaded immediately even though the user may never scroll to them, competing for bandwidth with what is actually visible. Lazy loading (`loading="lazy"` or framework equivalents) defers off-screen images until they are near the viewport. Avoid lazy-loading an image that is needed for the initial viewport or is the observed LCP element. Defer off-screen media where it reduces contention without delaying a user task; not every hero is the LCP element and not every below-fold resource needs the same policy.
 
 **No dimensions reserved (causes layout shift).**
 An image with no width/height set lets the page reflow when it loads, shoving content around (the CLS problem). Always reserve the space (set dimensions or aspect-ratio) so the layout is stable as images arrive. This is both a performance metric (CLS) and a UX annoyance.
@@ -35,7 +35,7 @@ Large video/audio loaded eagerly is the same problem as images at larger scale: 
 
 ## What to flag
 - The single largest image on the critical path, if it is oversized/uncompressed, this is usually the top finding and the biggest LCP win.
-- Below-fold images not lazy-loaded.
+- Off-screen media loading eagerly and measurably competing with required content.
 - Images without reserved dimensions (CLS).
 - Excessive font weights or render-blocking font loading.
 

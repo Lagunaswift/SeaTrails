@@ -49,3 +49,11 @@ A form is where accessibility becomes pass/fail for completing a task. The essen
 
 ## Connection to other references
 Labels and announcements rest on screen-readers-and-text; keyboard completion on keyboard-and-focus; error colours on colour-and-visual (don't rely on colour alone). Forms are where these converge, which is why they are the highest-stakes single surface.
+
+## Completion, authentication and recovery
+
+Check appropriate autocomplete/input purpose, preserved safe values after an error, and announced success only after the intended operation succeeds. For financial or data-changing submissions, assess applicable review, confirmation or correction mechanisms. Check time limits and redundant entry in the complete process.
+
+Test password-manager use and paste, including one-time-code flows. A visibility toggle is optional; if present it needs an accessible name/state, keyboard operation and must not accidentally submit the form. See `wcag-22-checks.md` for accessible-authentication requirements and exceptions.
+
+Source checked 9 November 2026: [WCAG 2.2](https://www.w3.org/TR/WCAG22/).

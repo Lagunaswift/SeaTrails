@@ -192,13 +192,18 @@ for (const dir of skillDirs) {
   }
 }
 
-// ---- 8. no dead references/<file>.md inside production-audit ----------------
+// ---- 8. no dead local or skill-qualified reference paths in audit docs ------
 const paDocs = [join(PA, 'SKILL.md'), join(PA, 'ARCHITECTURE.md'), join(PA, 'scripts', 'audit-check.mjs'),
   ...readdirSync(join(PA, 'references')).map((f) => join(PA, 'references', f))];
 for (const doc of paDocs) {
   const src = readFileSync(doc, 'utf8');
-  for (const m of src.matchAll(/references\/([a-z0-9-]+\.md)/g)) {
-    if (!existsSync(join(PA, 'references', m[1]))) fail(`${doc.replace(ROOT + '/', '')} references references/${m[1]} which does not exist`);
+  for (const m of src.matchAll(/(?:([a-z0-9-]+)\/)?references\/([a-z0-9-]+\.md)/g)) {
+    // A qualified path belongs to that skill; a bare references/ path belongs
+    // to the orchestrator. Do not silently ignore either form.
+    const owner = m[1] || 'production-audit';
+    if (!existsSync(join(SKILLS, owner, 'references', m[2]))) {
+      fail(`${doc.replace(ROOT + '/', '')} references ${owner}/references/${m[2]} which does not exist`);
+    }
   }
 }
 

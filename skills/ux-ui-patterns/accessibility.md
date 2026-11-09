@@ -4,7 +4,7 @@
 
 Accessibility is not a feature. It is a quality bar. An interface that does not work with a keyboard, a screen reader, or for users with low vision is a broken interface. In many jurisdictions it is also a legal liability (ADA, EAA, EN 301 549).
 
-The standards below target WCAG 2.1 Level AA, which is the legal and practical minimum.
+Use WCAG 2.2 Level AA as the working technical target unless the project specifies another applicable standard. Legal and contractual obligations depend on scope and jurisdiction; this pattern reference is not a full conformance assessment. Use the `accessibility` lens for criterion-level findings and verification.
 
 ---
 
@@ -16,7 +16,7 @@ Use the correct HTML element for each purpose. This is the single highest-impact
 Navigation:  <nav>
 Page structure: <header>, <main>, <footer>, <aside>
 Sections: <section> with a heading
-Headings: <h1> through <h6> in order (never skip levels)
+Headings: <h1> through <h6> reflecting a meaningful content hierarchy
 Lists: <ul>, <ol>, <li>
 Buttons: <button> (not <div onclick>)
 Links: <a href> (not <span onclick>)
@@ -32,16 +32,16 @@ Tables: <table>, <thead>, <tbody>, <th>, <td>
 
 ### Every Interactive Element Must Be Keyboard Accessible
 
-- All buttons, links, inputs, and controls must be reachable via Tab.
-- All actions must be triggerable via Enter or Space.
-- All modals and menus must be closable via Escape.
-- Tab order must follow visual order (left to right, top to bottom). Never use tabindex values greater than 0 — they break natural tab order.
+- All functionality must be keyboard reachable and operable. Composite widgets may use one Tab stop and arrow-key navigation within the widget.
+- Use the expected keys for each control: native buttons support Enter/Space; links use Enter; custom widgets follow their established keyboard pattern.
+- Provide a keyboard escape/close path for dialogs and menus, using Escape where the interaction pattern expects it.
+- Focus and DOM order should preserve meaning and operation, including the language reading direction. Avoid positive tabindex values that impose a competing order.
 
 ### Focus Management
 
 - **Visible focus indicator.** Every focusable element shows a clear outline when focused. The browser default is fine. If you override it for aesthetic reasons, replace it with something equally visible — a 2px ring in your brand colour, offset from the element. Never use `outline: none` without a replacement.
-- **Focus trapping in modals.** When a modal opens, focus moves to the first focusable element inside. Tab cycles only within the modal. When the modal closes, focus returns to the element that opened it.
-- **Focus on content changes.** When new content appears (toast notification, error message, dynamic section), move focus to it or announce it. Otherwise screen reader users do not know it appeared.
+- **Focus trapping in modals.** When a modal opens, focus moves to an appropriate element inside (sometimes a heading or explanatory text). Tab cycles only within the modal. When the modal closes, focus returns to the element that opened it.
+- **Focus on content changes.** Use appropriate status announcements or focus management. Do not steal focus for every toast. Check that sticky headers, banners and overlays do not entirely obscure a focused component (WCAG 2.2 AA 2.4.11).
 
 ### Skip Links
 
@@ -65,7 +65,7 @@ Every interactive element has an accessible name. For most elements, the visible
 ARIA supplements semantic HTML. It does not replace it.
 
 **Use ARIA for:**
-- Custom widgets that have no native HTML equivalent (tabs, accordions, tree views, comboboxes)
+- Custom widgets when native elements do not meet the need (for example tabs or tree views); consider native details/summary for a simple disclosure
 - Live regions that update dynamically (`aria-live="polite"` for non-urgent updates, `aria-live="assertive"` for urgent ones)
 - States that are visually communicated but not semantically communicated (`aria-expanded`, `aria-selected`, `aria-current`)
 
@@ -87,7 +87,7 @@ When content changes without a page load (AJAX updates, form validation, live da
 ```
 
 `polite`: announces at the next pause in speech (for non-urgent updates).
-`assertive`: interrupts current speech (for errors and urgent alerts).
+`assertive`: interrupts current speech; reserve it for genuinely urgent updates rather than every validation message.
 
 ---
 
@@ -95,9 +95,9 @@ When content changes without a page load (AJAX updates, form validation, live da
 
 ### Contrast Ratios (WCAG AA)
 
-- Normal text (below 18px or 14px bold): 4.5:1 contrast ratio against background.
-- Large text (18px+ or 14px+ bold): 3:1 contrast ratio.
-- UI components and graphical objects: 3:1 contrast ratio against adjacent colours.
+- Normal text: at least 4.5:1 contrast ratio against its background, applying the criterion exceptions.
+- Large text (at least 18 pt, or 14 pt bold; approximately 24 or 18.7 CSS px respectively): at least 3:1.
+- Meaningful UI components and graphical objects generally need 3:1 against adjacent colours; apply exceptions such as inactive controls and decorative content.
 
 Test with a contrast checker tool (WebAIM Contrast Checker, browser dev tools). Do not eyeball it.
 
@@ -121,22 +121,15 @@ If supporting dark mode, verify contrast ratios in both themes. Colours that pas
 
 ## 6. Touch Targets
 
-### Minimum Size
+### Size and Exceptions
 
-Touch targets (buttons, links, inputs, interactive elements) must be at minimum 44x44px (WCAG) or 48x48px (Material Design recommendation). This is the tappable area, not the visible element — padding counts.
+WCAG 2.2 AA generally requires at least 24 × 24 CSS pixels under 2.5.8, with spacing, equivalent-control, inline, user-agent and essential exceptions. Evaluate the actual hit area and applicable exception before declaring failure. A 44 × 44 target is an enhanced/comfort target, not the universal AA minimum.
 
-```
-A 24px icon button with 12px padding on each side = 48px touch target. Accessible.
-A 24px icon button with 4px padding = 32px touch target. Too small.
-```
+Padding can enlarge the hit area if it remains unobstructed and does not overlap adjacent controls. A 32-pixel target can satisfy AA; a 48-pixel target alone does not prove the whole control is accessible. There is no universal 8-pixel spacing rule in AA: check the criterion's geometry and the task's mis-tap risk. Inline prose links have an exception; avoid padding that disrupts reading layout.
 
-### Spacing
+### Pointer Alternatives
 
-Touch targets need spacing between them so adjacent taps do not hit the wrong target. Minimum 8px between touch targets.
-
-### Hit Area Expansion
-
-For text links in prose, the text itself may be small. Expand the hit area with padding on the anchor element so it is easier to tap without adding visual bulk.
+Where dragging is used, check a single-pointer alternative without dragging unless an exception applies. Keyboard access alone is not sufficient for that pointer requirement. Essential tooltip/menu content must also work without hover.
 
 ---
 
@@ -156,7 +149,7 @@ Respect the user's `prefers-reduced-motion` system setting.
 }
 ```
 
-This disables animations for users who have indicated motion sensitivity (vestibular disorders, motion sickness). Do not remove functional transitions entirely — a near-instant transition (0.01ms) preserves state changes without motion.
+This is a possible starting point, not a universal fix. Inspect component behaviour: blanket animation overrides can break transition-driven logic or leave content hidden. Prefer reduced-motion treatments that preserve the final state and meaning, then test them. Assess pause/stop/hide and flashing requirements separately.
 
 ### Autoplay
 
@@ -172,7 +165,7 @@ Content that flashes more than 3 times per second can trigger seizures. Do not c
 
 ### Labels
 
-Every input has a visible `<label>` associated via `for`/`id`. No exceptions.
+Every control needs an appropriate accessible name. Prefer persistent visible labels associated with inputs via `for`/`id`; use a visually hidden label only when the visible context remains clear. Do not use placeholder text as the only label.
 
 ```html
 <label for="email">Email address</label>
@@ -222,11 +215,22 @@ Before shipping any page:
 [ ] Does Escape close modals, dropdowns, and menus?
 [ ] Test with a screen reader (VoiceOver on Mac, NVDA on Windows). Does it make sense?
 [ ] Check colour contrast ratios (every text element and UI component).
-[ ] Verify the page works at 200% zoom without horizontal scrolling.
+[ ] Test 200% text resizing without lost content/function.
+[ ] Test 320 CSS-pixel reflow (or equivalent 400% zoom), allowing legitimate two-dimensional content exceptions.
+[ ] Test WCAG text-spacing overrides without clipping or lost controls.
+[ ] Check password-manager/paste support, target-size exceptions and non-drag alternatives where applicable.
 [ ] Test with prefers-reduced-motion enabled. Do animations stop?
 [ ] Are all images either decorative (alt="") or have descriptive alt text?
 ```
 
 ### Automated Testing
 
-Run axe-core or Lighthouse accessibility audit in CI. These catch structural issues (missing alt text, missing labels, contrast failures). They do not catch interaction issues (focus management, keyboard behaviour, screen reader experience). Automated testing is necessary but not sufficient.
+Run axe-core or Lighthouse accessibility audit in CI. These catch structural issues (missing alt text, missing labels, contrast failures). They do not catch interaction issues (focus management, keyboard behaviour, screen reader experience). A clean scan is not proof of accessibility. Record the routes, states, tools and browser/assistive-technology combinations actually tested; report missing manual coverage explicitly.
+
+## Sources checked 9 November 2026
+
+- [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
+- [Target size minimum](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum)
+- [WAI evaluation guidance](https://www.w3.org/WAI/test-evaluate/)
+
+Recheck the applicable standard for a formal assessment. `accessibility/references/wcag-22-checks.md` supplies further WCAG 2.2 checks and exceptions.

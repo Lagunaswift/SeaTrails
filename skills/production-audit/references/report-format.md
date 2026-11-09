@@ -24,6 +24,8 @@ One JSON object with these top-level keys (the harness and renderer read exactly
 | `remediation_order` | when gating findings exist | `[{id, reason}]` covering **every** gating finding (critical/high, excluding polish categories and re-narrated chains). Sequenced by damage-rate-per-effort: `live blast-radius × likelihood ÷ fix cost` — not by severity label, not by data-sensitivity. Each entry's `reason` says why it sits where it does. |
 | `summary` | optional | Free-text executive summary. The one hand-written prose slot — it passes through the slop gate like everything else. Omit it and the renderer generates a summary from the counts. |
 
+For website audits, `scope.review_profiles` includes `website-readiness`, and `coverage.website_readiness` contains the twelve topic records and twenty-four feature decisions defined in `website-readiness-profile.md`. A coverage block without its declaration, or a declared profile without its complete block, fails the gate. Older/non-website reports with neither retain their existing contract. The profile IDs are coverage labels, not canonical finding IDs.
+
 ## The rendered structure (what the reader sees, in order)
 
 1. **Title + method line.** Stack, lenses run, the reconciliation arithmetic, verification counts, "integrity harness passed", "report mode (no code changed)". A partial run gets "**This is a PARTIAL audit**" stamped here with the deferred lenses named — never buried below.
@@ -34,7 +36,7 @@ One JSON object with these top-level keys (the harness and renderer read exactly
 6. **Remediation order.** The sequenced list with per-entry reasons.
 7. **Findings by severity.** Tiers count distinct defects: re-narrated attack chains (chains whose `chain.root_cause_finding` points at a reported finding) fold into that finding's entry as "also surfaced as an attack path", and are excluded from tier counts. Each finding: id, title, location, issue, consequence, lens(es), confidence type, fix. Reasoning-typed critical/highs carry the "confirm the inference against the code before acting" warning.
 8. **Design & copy quality.** The polish axes — `design-aesthetic` and `content` — in their own capped section, never in the readiness tiers. Credibility and conversion risks, addressed after the readiness findings.
-9. **Coverage matrix.** When provided.
+9. **Coverage matrix and selected profiles.** The website profile, when selected, renders every topic, owner, applicability/status, route/state, evidence reference, finding link and limitation, then every optional-feature decision and reason. Assessed means scoped review, not a global pass.
 10. **Reconciliation.** The identity spelled out, plus every dropped finding with its reason.
 11. **What could not be assessed.** Deferred lenses, unexamined files, and always: live/runtime state is not determinable from a repository.
 
@@ -60,6 +62,8 @@ The audit-directory positional form and explicit `--ledger` / `--report` form ar
 ## Named assessment limits
 
 The optional `limitations` array contains non-empty strings naming unassessed routes, themes, states, evidence modes or scope assumptions. The gate validates the field and its prose; the renderer includes every entry in "What could not be assessed". Use it for source-only design reviews so missing browser evidence remains visible in the delivered report. It supplements the matrix and partial flag; it does not make missing coverage complete.
+
+Website-profile partial/blocked topics and any feature assessment limitations also appear in that rendered section. They require `scope.partial=true` even if all source files were delivered. Missing browser/provider access is an evidence limit, not a pass or a reason to declare an applicable topic inapplicable. Pending optional product recommendations do not imply missing audit evidence.
 
 ## Evidence assurance
 
