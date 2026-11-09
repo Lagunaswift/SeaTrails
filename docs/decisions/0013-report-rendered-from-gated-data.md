@@ -1,6 +1,6 @@
 # 0013 — The human report is rendered from gated data and leads with the gating set
 
-**Status:** Accepted (retrospective record)
+**Status:** Superseded in part by 0016 (snapshot validation replaces sequencing-only delivery; presentation rules remain).
 **Date:** 2026-07-01
 
 ## Context

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "name": "seatrial-security-pairs-v1",
+  "cases": [
+    {"id":"case-01","weakness":"CWE-639","vulnerable":true,"line":1,"source":"export function run(db, actor, id) { return db.find(x => x.id === id); }\n"},
+    {"id":"case-02","weakness":"CWE-639","vulnerable":false,"line":1,"source":"export function run(db, actor, id) { return db.find(x => x.id === id && x.owner === actor); }\n"},
+    {"id":"case-03","weakness":"CWE-22","vulnerable":true,"line":2,"source":"import { resolve } from 'node:path';\nexport function run(root, name) { return resolve(root, name); }\n"},
+    {"id":"case-04","weakness":"CWE-22","vulnerable":false,"line":2,"source":"import { resolve, relative, isAbsolute } from 'node:path';\nexport function run(root, name) { const path = resolve(root, name); const rel = relative(root, path); if (rel === '..' || rel.startsWith('../') || isAbsolute(rel)) throw Error('outside root'); return path; }\n"},
+    {"id":"case-05","weakness":"CWE-601","vulnerable":true,"line":1,"source":"export function run(next) { return new URL(next, 'https://app.invalid').href; }\n"},
+    {"id":"case-06","weakness":"CWE-601","vulnerable":false,"line":1,"source":"export function run(next) { const u = new URL(next, 'https://app.invalid'); if (u.origin !== 'https://app.invalid') throw Error('external redirect'); return u.href; }\n"},
+    {"id":"case-07","weakness":"CWE-89","vulnerable":true,"line":1,"source":"export function run(db, name) { return db.query(\"SELECT id FROM users WHERE name = '\" + name + \"'\"); }\n"},
+    {"id":"case-08","weakness":"CWE-89","vulnerable":false,"line":1,"source":"export function run(db, name) { return db.query('SELECT id FROM users WHERE name = ?', [name]); }\n"}
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "corpus_sha256": "73fdc1b348c177b67b4ee9f4c2877b138729fc74025f3e0ef6c32ca583e9bad7",
+  "model": "ChatGPT Work fresh child agent",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "86748af",
+  "prompt_sha256": "64edf804052f3c23f065c5797d7c485726fdfde5eee97d74326e2840ef05b5f6",
+  "run_id": "2026-10-16-detector_run",
+  "started_at": "2026-10-16",
+  "blind": true,
+  "limitations": [
+    "Prompt-level isolation only; worker was instructed not to read evaluator files; no filesystem sandbox boundary was provisioned.",
+    "ai-saas-security was not supplied; only the code-audit security/correctness passes were requested.",
+    "SQL behaviour checked at the query boundary, without a live database.",
+    "Single synthetic calibration run; model version unavailable, so this is not a reproducible model comparison."
+  ],
+  "cases": [
+    {
+      "id": "case-01",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-639",
+          "line": 1,
+          "explanation": "The lookup uses attacker-controlled id without checking ownership against actor. With db=[{id:'secret',owner:'victim'}], actor='attacker', and id='secret', it returns the victim's record. Restrict the predicate to both id and owner===actor."
+        }
+      ]
+    },
+    {
+      "id": "case-02",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "case-03",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-22",
+          "line": 2,
+          "explanation": "resolve normalizes the supplied name but does not enforce containment. root='/safe/root' and name='../outside' return '/safe/outside', outside the allowed root. Validate the normalized path's relative relationship to root before returning it."
+        }
+      ]
+    },
+    {
+      "id": "case-04",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "case-05",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-601",
+          "line": 1,
+          "explanation": "The URL base does not constrain absolute or protocol-relative input. next='https://evil.invalid/' returns that external URL, violating the required redirect origin. Validate the parsed destination against the allowed origin before returning it."
+        }
+      ]
+    },
+    {
+      "id": "case-06",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "case-07",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-89",
+          "line": 1,
+          "explanation": "Attacker-controlled name is concatenated into SQL syntax. name=\"' OR 1=1 -- \" produces \"SELECT id FROM users WHERE name = '' OR 1=1 -- '\", replacing the intended name filter with a tautology. Use a ? placeholder and supply name separately in the parameters array."
+        }
+      ]
+    },
+    {
+      "id": "case-08",
+      "status": "complete",
+      "findings": []
+    }
+  ]
+}

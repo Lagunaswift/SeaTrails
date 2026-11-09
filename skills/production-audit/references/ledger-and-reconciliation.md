@@ -94,3 +94,8 @@ If it exits non-zero, the audit is **not done** — a finding was lost, a critic
 ## Why this beats "be careful"
 
 The old instruction was "merge and verify without losing findings." That is a request for vigilance, and vigilance fails — especially across a summarising hand-off between a subagent and the orchestrator, or across a context boundary. The ledger turns vigilance into bookkeeping, and the harness turns bookkeeping into a gate. You cannot accidentally lose a finding, because the finding's id is on disk and the script will name it.
+
+
+## Disposition identity at the gate
+
+All four declared reconciliation counts are required non-negative integers. Duplicate ids within the raw, reported or dropped collections fail; sets cannot conceal duplicate records. Each merged id has exactly one survivor and exists in the ledger. Dropped ids also exist in the ledger. These identity checks supplement the existing one-state rule and arithmetic; they never permit an unexplained loss or severity downgrade.

@@ -184,3 +184,22 @@ When running a lens (Stage 2), the orchestrator should:
 - **Passes:** Container security (Docker) → Cloud infrastructure (Terraform/CFN) → Kubernetes manifests → CI/CD pipeline security → Reverse proxy/server config → Environment and secrets files.
 - **Overlap:** Complements `release-and-ops` (app-level deploy safety), `code-audit` (app-level security), and `scaling-audit` (app-level scaling). This lens checks the infrastructure layer beneath all of them.
 - **When to run:** any project with infrastructure config files in the repo. Skip for client-side-only projects with no deployment config.
+
+
+## Lens 20: impeccable-audit  (prefix IMP · priority 5 · ATOMIC)
+
+- **Skill:** `.claude/skills/impeccable-audit/SKILL.md`
+- **References:** `references/design-review-context.md` in production-audit; `INTAKE.md` in the backing skill.
+- **Owns:** Design-system coherence, theme roles, typography/spacing consistency and task hierarchy. Primary category `design-aesthetic`; demonstrated interaction and access failures may use `frontend` or `accessibility` with their justified severity.
+- **Passes:** Tokens/themes → Typography/hierarchy → Interaction states → Responsive/content stress → Motion → Anti-pattern triage.
+- **Type:** Atomic. **When to run:** user-facing interfaces, including operational dashboards. Source-only review states its visual limits. Skip headless services.
+- **Boundary:** Impeccable-informed, self-contained audit integration, not the upstream CLI/detector. Existing performance/mobile/functional lenses keep their tests. No auto-fixes, style replacement, scorecard or external installation.
+
+## Lens 21: taste-audit  (prefix TASTE · priority 5 · ATOMIC)
+
+- **Skill:** `.claude/skills/taste-audit/SKILL.md`
+- **References:** `references/design-review-context.md` in production-audit; `INTAKE.md` in the backing skill.
+- **Owns:** Brief/brand fit, contextual composition, useful density and visual direction. Category `design-aesthetic` only, hard-capped at medium. Commercial effects are hypotheses unless supported by supplied data.
+- **Passes:** Brief/audience → Composition/density → Type/colour/imagery → Motion/restraint → Anti-slop triage.
+- **Type:** Atomic. **When to run:** marketing, portfolio, editorial and brand-led commerce surfaces. On mixed apps, limit the review to those routes. Skip dashboards, data tables and multi-step product workflows.
+- **Boundary:** Taste Skill-informed audit integration. No numeric dial defaults, mandatory libraries or font bans. Impeccable owns implementation coherence; anti-slop-writing owns wording. Merge shared root causes once with reviewer credit; functional failures keep their real owner/severity.

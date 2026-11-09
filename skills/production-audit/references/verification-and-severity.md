@@ -101,3 +101,7 @@ Treat every serious finding as a claim to disprove, not confirm: go back to the 
 
 ## Connection to other stages
 Operates on Stage 3's merged findings (whose combined consequences may have already moved severity). Produces the verified, ranked set that Stage 5 formats. The "dropped N false positives" and the inline calibrated ratings both surface in the report (report-format.md) as signals of rigour, and the verification's limits feed the "what could not be assessed" section.
+
+## Captured evidence for new audits
+
+Follow `evidence-assurance.md` for source delivery receipts, exact quotation checks, finding-bound independent review records and the combined delivery gate. Coverage counts come from captured deliveries. Semantic support remains a review judgement and must include counterevidence.
