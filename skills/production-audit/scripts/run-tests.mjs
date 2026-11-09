@@ -13,7 +13,7 @@
 // Exit 0 = all cases behave as expected. Exit 1 = a regression.
 // =============================================================================
 
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, mkdirSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -51,6 +51,23 @@ function report(over = {}) {
   }
   return out;
 }
+
+
+// One atomic finding with a matching roll-call and exact reconciliation.
+function single(over = {}, reportOver = {}) {
+  const f = finding(over);
+  return { ledger: [f], report: report({
+    scope: { lenses_selected: [f.lens], lenses_run: [f.lens] },
+    reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+    findings: [f], ...reportOver,
+  }) };
+}
+function evidenceRepo(dir) {
+  mkdirSync(join(dir, 'repo'));
+  writeFileSync(join(dir, 'repo', 'a.ts'), 'const x = 1;\n');
+  writeFileSync(join(dir, 'outside.ts'), 'const outside = true;\n');
+}
+const VERIFIED = { status: 'verified', evidence: GOOD_EVIDENCE };
 
 // ---- the cases --------------------------------------------------------------
 const cases = [
@@ -698,6 +715,257 @@ const cases = [
     expectExit: 1,
     fixtureDir: 'fixtures/fail',
   },
+
+  // ---- design lenses: category ownership and the consequence boundary --------
+  {
+    name: 'impeccable: design-system finding at medium PASSES',
+    expect: 'pass',
+    ...single({ id: 'IMP-001', lens: 'impeccable-audit', category: 'design-aesthetic' }),
+  },
+  {
+    name: 'taste: contextual visual finding at medium PASSES',
+    expect: 'pass',
+    ...single({ id: 'TASTE-001', lens: 'taste-audit', category: 'design-aesthetic', confidence_type: 'reasoning' }),
+  },
+  {
+    name: 'impeccable: security cannot be hidden in a design lens FAILS',
+    expect: 'fail',
+    ...single({ id: 'IMP-001', lens: 'impeccable-audit', category: 'security' }),
+  },
+  {
+    name: 'taste: cannot claim frontend ownership to evade the polish cap FAILS',
+    expect: 'fail',
+    ...single({ id: 'TASTE-001', lens: 'taste-audit', category: 'frontend', severity: 'high', verification: VERIFIED }, { remediation_order: [{ id: 'TASTE-001', reason: 'test order' }] }),
+  },
+  {
+    name: 'impeccable: verified access barrier keeps high severity PASSES',
+    expect: 'pass',
+    ...single({ id: 'IMP-001', lens: 'impeccable-audit', category: 'accessibility', severity: 'high', verification: VERIFIED }, { remediation_order: [{ id: 'IMP-001', reason: 'restore keyboard access' }] }),
+  },
+  {
+    name: 'taste: visual preference at high FAILS',
+    expect: 'fail',
+    ...single({ id: 'TASTE-001', lens: 'taste-audit', category: 'design-aesthetic', severity: 'high', verification: VERIFIED }),
+  },
+  {
+    name: 'impeccable: borrowing the taste prefix FAILS',
+    expect: 'fail',
+    ...single({ id: 'TASTE-001', lens: 'impeccable-audit', category: 'design-aesthetic' }),
+  },
+  // ---- evidence: local fixtures, not existence checks against the maintainer's repo
+  {
+    name: 'evidence: a supplied nonexistent repo cannot skip verification FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'missing-repo',
+    ...single(),
+  },
+  {
+    name: 'evidence: a real in-repo file and line PASSES',
+    expect: 'pass',
+    repo: 'repo', setup: evidenceRepo,
+    ...single({ verification: VERIFIED }),
+  },
+  {
+    name: 'evidence: relative traversal outside the repo FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: evidenceRepo,
+    ...single({ location: { file: '../outside.ts', line: 1 } }),
+  },
+  {
+    name: 'evidence: symlink escape outside the repo FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: (dir) => { evidenceRepo(dir); symlinkSync('../outside.ts', join(dir, 'repo', 'escape.ts')); },
+    ...single({ location: { file: 'escape.ts', line: 1 } }),
+  },
+  {
+    name: 'evidence: directory cannot stand in for a cited file FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: (dir) => { evidenceRepo(dir); mkdirSync(join(dir, 'repo', 'folder')); },
+    ...single({ location: { file: 'folder', line: null } }),
+  },
+  {
+    name: 'evidence: zero is not a source line FAILS',
+    expect: 'fail',
+    ...single({ location: { file: 'a.ts', line: 0 } }),
+  },
+  {
+    name: 'evidence: secondary citations are checked too FAILS',
+    expect: 'fail',
+    repo: 'repo', setup: evidenceRepo,
+    ...single({ location: { file: 'a.ts', line: 1, others: ['missing.ts:1'] } }),
+  },
+  {
+    name: 'evidence: dropped high refutation cannot cite a missing file FAILS',
+    expect: 'fail',
+    repo: 'repo', setup: evidenceRepo,
+    ledger: [finding({ severity: 'high' })],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 },
+      dropped: [{ id: 'SEC-001', reason: 'Guard prevents the reported failure', verification: { status: 'refuted', evidence: 'missing.ts:1 contains the rejecting guard' } }] }),
+  },
+  // ---- reconciliation: sets must not conceal duplicate or invented entries ---
+  {
+    name: 'reconciliation: missing declared counts FAILS',
+    expect: 'fail',
+    ...single({}, { reconciliation: {} }),
+  },
+  {
+    name: 'reconciliation: duplicate report id cannot disappear into a Set FAILS',
+    expect: 'fail',
+    ...single({}, { findings: [finding(), finding()] }),
+  },
+  {
+    name: 'reconciliation: duplicate dropped id FAILS',
+    expect: 'fail',
+    ledger: [finding()],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 }, dropped: [
+      { id: 'SEC-001', reason: 'Not reachable from this application' },
+      { id: 'SEC-001', reason: 'Not reachable from this application' },
+    ] }),
+  },
+  {
+    name: 'reconciliation: a merged id has exactly one survivor FAILS',
+    expect: 'fail',
+    ledger: [finding(), finding({ id: 'SEC-002' }), finding({ id: 'SEC-003' })],
+    report: report({ reconciliation: { raw: 3, reported: 2, merged: 1, dropped: 0 }, findings: [
+      finding({ dedup: { merged_from: ['SEC-003'] } }), finding({ id: 'SEC-002', dedup: { merged_from: ['SEC-003'] } }),
+    ] }),
+  },
+  // ---- coverage: a denominator must be a real count, and a lens an exact id ---
+  {
+    name: 'coverage: negative file counts FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: -1, files_examined: -1, areas_total: 1, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: examined cannot exceed total FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 2, areas_total: 1, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: fractional counts FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1.5, files_examined: 1.5, areas_total: 1, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: fractional area count FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 0.5, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: substring in a prose row cannot impersonate a lens FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['not-code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: exact lens in an object row PASSES',
+    expect: 'pass',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: [{ lens: 'code-audit', areas: { source: 'covered' } }] } }),
+  },
+  {
+    name: 'coverage: duplicate lens rows FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['code-audit: complete', 'code-audit: complete'] } }),
+  },
+  {
+    name: 'roll-call: unknown selected and run lens FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { lenses_selected: ['code-audit', 'invented'], lenses_run: ['code-audit', 'invented'] } }),
+  },
+  {
+    name: 'roll-call: a lens cannot be both run and deferred FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { partial: true, lenses_selected: ['code-audit'], lenses_run: ['code-audit'], lenses_deferred: ['code-audit'] } }),
+  },
+  {
+    name: 'roll-call: deferred work cannot masquerade as complete FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { lenses_selected: ['code-audit', 'performance'], lenses_run: ['code-audit'], lenses_deferred: ['performance'] } }),
+  },
+  // ---- machine-readable output and argument validation -----------------------
+  {
+    name: 'json: passing gate emits a single result object PASSES',
+    expect: 'pass',
+    args: ['--json'], json: true,
+    ...single(),
+  },
+  {
+    name: 'json: failing gate retains exit 1 and structured failures FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    args: ['--json'], json: true,
+    ...single({ severity: 'high' }),
+  },
+  {
+    name: 'json: unknown flag is an input error with structured output FAILS',
+    expect: 'fail',
+    expectExit: 2,
+    args: ['--json', '--typo'], json: true,
+    ...single(),
+  },
+  {
+    name: 'args: missing repo argument is not silently ignored FAILS',
+    expect: 'fail',
+    expectExit: 2,
+    args: ['--repo'],
+    ...single(),
+  },
+  {
+    name: 'shape: invalid findings array yields a diagnostic instead of a crash FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    args: ['--json'], json: true,
+    ledger: [], report: { findings: {}, dropped: [], reconciliation: {} },
+  },
+  {
+    name: 'evidence: dropped refutation inherited from ledger is still checked FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: evidenceRepo,
+    ledger: [finding({ severity: 'high', verification: { status: 'refuted', evidence: 'missing.ts:1 contains the rejecting guard' } })],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 }, dropped: [{ id: 'SEC-001', reason: 'Guard prevents the reported failure' }] }),
+  },
+  {
+    name: 'evidence: symlink to a file inside the repository PASSES',
+    expect: 'pass',
+    repo: 'repo', setup: (dir) => { evidenceRepo(dir); symlinkSync('a.ts', join(dir, 'repo', 'alias.ts')); },
+    ...single({ location: { file: 'alias.ts', line: 1 } }),
+  },
+  {
+    name: 'roll-call: missing selection cannot skip deferred-work checks FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { lenses_run: ['code-audit'], lenses_deferred: ['performance'] } }),
+  },
+  {
+    name: 'reconciliation: duplicate raw id with a fabricated merge to balance counts FAILS',
+    expect: 'fail',
+    ledger: [finding(), finding()],
+    report: report({ reconciliation: { raw: 2, reported: 1, merged: 1, dropped: 0 }, findings: [finding({ dedup: { merged_from: ['SEC-404'] } })] }),
+  },
+  {
+    name: 'limitations: named visual gaps survive the renderer PASSES',
+    expect: 'pass',
+    renderIncludes: 'Dark-theme screenshots were not available.',
+    ...single({}, { limitations: ['Dark-theme screenshots were not available.'] }),
+  },
+  {
+    name: 'limitations: a non-array must not disappear in rendering FAILS',
+    expect: 'fail',
+    ...single({}, { limitations: 'No browser was available' }),
+  },
+  {
+    name: 'limitations: empty entries are not coverage explanations FAILS',
+    expect: 'fail',
+    ...single({}, { limitations: [''] }),
+  },
+  {
+    name: 'limitations: generated filler in the delivered gap section FAILS',
+    expect: 'fail',
+    ...single({}, { limitations: ['In conclusion no browser was available.'] }),
+  },
 ];
 
 // ---- run --------------------------------------------------------------------
@@ -712,10 +980,27 @@ for (const c of cases) {
       writeFileSync(join(dir, 'raw-findings.jsonl'), ledgerText);
       writeFileSync(join(dir, 'report.json'), c.rawReport != null ? c.rawReport : JSON.stringify(c.report));
     }
-    const res = spawnSync(process.execPath, [HARNESS, dir], { encoding: 'utf8' });
+    if (c.setup) c.setup(dir);
+    const argv = [HARNESS, dir, ...(c.repo ? ['--repo', join(dir, c.repo)] : []), ...(c.args || [])];
+    const res = spawnSync(process.execPath, argv, { encoding: 'utf8', timeout: 10000 });
     const got = res.status === 0 ? 'pass' : 'fail';
     const exitOk = c.expectExit == null || res.status === c.expectExit;
-    const ok = got === c.expect && exitOk;
+    let jsonOk = true;
+    if (c.json) {
+      try {
+        const out = JSON.parse(res.stdout);
+        jsonOk = out.format_version === 1 && out.exit_code === res.status && out.ok === (res.status === 0)
+          && Array.isArray(out.failures) && Array.isArray(out.warnings)
+          && (res.status === 0 ? out.failures.length === 0 : out.failures.length > 0)
+          && !res.stderr.trim();
+      } catch { jsonOk = false; }
+    }
+    let renderOk = true;
+    if (c.renderIncludes && res.status === 0) {
+      const rendered = spawnSync(process.execPath, [join(HERE, 'render-report.mjs'), dir], { encoding: 'utf8', timeout: 10000 });
+      renderOk = rendered.status === 0 && rendered.stdout.includes(c.renderIncludes);
+    }
+    const ok = got === c.expect && exitOk && jsonOk && renderOk && !res.error;
     if (ok) { passed++; console.log(`✔  ${c.name}  (expected ${c.expect}${c.expectExit != null ? `, exit ${c.expectExit}` : ''})`); }
     else {
       failed++;

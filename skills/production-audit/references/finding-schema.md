@@ -81,7 +81,7 @@ Why it matters: the ledger keeps both records (no loss — see `ledger-and-recon
 
 ## Enums
 
-**`lens`** — `code-audit` · `ai-saas-security` · `scaling-audit` · `release-and-ops` · `data-privacy` · `frontend-robustness` · `performance` · `accessibility` · `email-deliverability` · `soc2-compliance` · `adversary-emulation` · `seo-discoverability` · `mobile-and-responsive` · `analytics-and-instrumentation` · `internationalisation` · `anti-slop-writing` · `code-quality` · `dependency-audit` · `infrastructure-config`
+**`lens`** — `code-audit` · `ai-saas-security` · `scaling-audit` · `release-and-ops` · `data-privacy` · `frontend-robustness` · `performance` · `accessibility` · `email-deliverability` · `soc2-compliance` · `adversary-emulation` · `seo-discoverability` · `mobile-and-responsive` · `analytics-and-instrumentation` · `internationalisation` · `anti-slop-writing` · `code-quality` · `dependency-audit` · `infrastructure-config` · `impeccable-audit` · `taste-audit`
 
 **`category`** — `security` · `correctness` · `scaling` · `ops` · `privacy` · `performance` · `accessibility` · `email` · `frontend` · `seo` · `mobile` · `analytics` · `i18n` · `compliance` · `attack-path` · `design-aesthetic` · `content` · `code-quality` · `supply-chain` · `infrastructure`
 
@@ -122,6 +122,8 @@ Each lens owns one or more prefixes so reconciliation can trace findings back to
 | dependency-audit | `DEP` |
 | infrastructure-config | `INFRA` |
 | anti-slop-writing | `COPY` |
+| impeccable-audit | `IMP` |
+| taste-audit | `TASTE` |
 
 ## `confidence_type`: the factual / reasoning distinction
 
@@ -135,3 +137,10 @@ The harness does not auto-cap reasoning findings, but the report must visibly di
 ## The one hard invariant the harness enforces on this schema
 
 **No finding may sit at `critical` or `high` severity unless its `verification.status` is `verified` (with non-empty `evidence`) or `capped`.** A critical/high with `status: unverified` is a hard failure — the harness exits non-zero and the audit is not shippable until it is resolved (verify it, or cap it at medium). This is the structural form of the rule in `verification-and-severity.md`: it can no longer be merely claimed, because a script checks it.
+
+
+## Evidence and design-review limits
+
+`location.line` is a positive integer or null; `location.others` contains repo-relative `file:line` strings (or a file without a line). With `--repo`, every primary and secondary citation and every refutation-evidence citation must resolve to an existing regular file within the repository. Absolute paths, traversal and symlink escapes fail. For missing-file findings, cite an existing caller/configuration and identify the absent path in `issue`.
+
+The design lenses also read `design-review-context.md`. Rendered evidence supplements source citations through `verification.note`; it never replaces the source-location contract. Taste owns only `design-aesthetic`. Impeccable owns that primary category plus demonstrated `frontend`/`accessibility` consequences. Purely visual judgements remain capped at medium.

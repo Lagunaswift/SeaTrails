@@ -48,3 +48,15 @@ One JSON object with these top-level keys (the harness and renderer read exactly
 ## Related references
 
 `finding-schema.md` (the record shape) · `ledger-and-reconciliation.md` (the ledger and the identity) · `verification-and-severity.md` (what verified means) · `coverage-matrix.md` (the denominator) · `merge-and-deduplicate.md` (survivors and `merged_from`).
+
+
+## Machine-readable gate results
+
+`audit-check.mjs <audit-dir> [--repo <path>] --json` prints one JSON object and no progress prose. The additive output contract is `format_version: 1`, boolean `ok`, numeric `exit_code`, string arrays `failures` and `warnings`, and `counts.raw` / `counts.reported` when validation ran. Exit codes remain 0 for a passing gate, 1 for validation failure and 2 for invalid command arguments. Do not treat a JSON-shaped failure as a passing report. Unknown flags, repeated path options and missing option values are rejected.
+
+The audit-directory positional form and explicit `--ledger` / `--report` form are alternatives. A supplied `--repo` must be an existing directory; primary, secondary and refutation citations are checked inside its realpath boundary. A passing gate verifies artifact integrity, not completeness of the underlying audit or truth of a visual judgement.
+
+
+## Named assessment limits
+
+The optional `limitations` array contains non-empty strings naming unassessed routes, themes, states, evidence modes or scope assumptions. The gate validates the field and its prose; the renderer includes every entry in "What could not be assessed". Use it for source-only design reviews so missing browser evidence remains visible in the delivered report. It supplements the matrix and partial flag; it does not make missing coverage complete.

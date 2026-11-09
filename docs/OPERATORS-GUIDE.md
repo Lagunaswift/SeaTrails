@@ -83,3 +83,12 @@ The one thing never to do: weaken the check that fired. In this repo that flips 
 ## 7. Running a single lens
 
 For one concern, skip the orchestrator and use the specialist skill directly (`code-audit` for security-only, etc.). Most lenses double as standalone advisory skills and produce a prose report in that mode — the canonical schema and the gate only apply under `production-audit`. If you want gated output for a single lens, run the orchestrator with a one-lens scope; the machinery works the same.
+
+
+## Design reviews
+
+Use the existing production-audit invocation; its applicability map now selects `impeccable-audit` for interfaces and `taste-audit` for relevant marketing/editorial surfaces. Both are installed with the normal skills copy. They need no upstream package or API key. Read their intake notes before replacing these adapters with a separate upstream tool.
+
+Pass one shared product/brand context, reviewed source revision, routes, viewports and evidence limits to the reviewers. Preserve useful density on dashboards. Source-only review must state that rendered and interactive behaviour remain unassessed. Fixing is still a separate phase.
+
+For machine consumers run `node .claude/skills/production-audit/scripts/audit-check.mjs <audit-dir> --repo <target-repo> --json`. Check the process exit code as well as `ok`; retain the warnings and named gaps. Do not deliver the rendered report after a failed gate.

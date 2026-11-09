@@ -11,8 +11,8 @@
 // Pure Node, zero dependencies. Runs in any repo with Node 16+.
 //
 // Usage:
-//   node audit-check.mjs <audit-dir>  [--repo <path>]
-//   node audit-check.mjs --ledger <path.jsonl> --report <path.json>  [--repo <path>]
+//   node audit-check.mjs <audit-dir>  [--repo <path>] [--json]
+//   node audit-check.mjs --ledger <path.jsonl> --report <path.json>  [--repo <path>] [--json]
 //
 //   <audit-dir> must contain:
 //     raw-findings.jsonl   one finding JSON per line (the pre-merge raw set)
@@ -24,8 +24,8 @@
 //   2  bad input / could not run
 // =============================================================================
 
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, existsSync, realpathSync, statSync } from 'node:fs';
+import { join, resolve, relative, isAbsolute, win32 } from 'node:path';
 import process from 'node:process';
 
 const LENSES = new Set([
@@ -33,7 +33,7 @@ const LENSES = new Set([
   'frontend-robustness', 'performance', 'accessibility',
   'email-deliverability', 'soc2-compliance', 'adversary-emulation', 'seo-discoverability',
   'mobile-and-responsive', 'analytics-and-instrumentation', 'internationalisation', 'anti-slop-writing',
-  'code-quality', 'dependency-audit', 'infrastructure-config',
+  'code-quality', 'dependency-audit', 'infrastructure-config', 'impeccable-audit', 'taste-audit',
 ]);
 const CATEGORIES = new Set([
   'security', 'correctness', 'scaling', 'ops', 'privacy', 'performance', 'accessibility',
@@ -76,6 +76,8 @@ const LENS_CATEGORIES = {
   'code-quality': ['code-quality', 'correctness', 'security'],
   'dependency-audit': ['supply-chain', 'security'],
   'infrastructure-config': ['infrastructure', 'security', 'ops'],
+  'impeccable-audit': ['design-aesthetic', 'frontend', 'accessibility'],
+  'taste-audit': ['design-aesthetic'],
 };
 // Which id prefixes each lens may use (from finding-schema.md's prefix table).
 const LENS_PREFIXES = {
@@ -98,6 +100,8 @@ const LENS_PREFIXES = {
   'code-quality': ['QUAL'],
   'dependency-audit': ['DEP'],
   'infrastructure-config': ['INFRA'],
+  'impeccable-audit': ['IMP'],
+  'taste-audit': ['TASTE'],
 };
 
 const failures = [];
@@ -117,20 +121,26 @@ const extractReferencedIds = (text) =>
 // ---- arg parsing ------------------------------------------------------------
 function parseArgs(argv) {
   const a = argv.slice(2);
-  if (a.length === 0) return null;
-  const out = {};
+  const out = { json: a.includes('--json') };
   let positional = null;
   for (let i = 0; i < a.length; i++) {
-    if (a[i] === '--ledger' && a[i + 1]) out.ledger = a[++i];
-    else if (a[i] === '--report' && a[i + 1]) out.report = a[++i];
-    else if (a[i] === '--repo' && a[i + 1]) out.repo = a[++i];
-    else if (!positional) positional = a[i];
+    if (a[i] === '--json') continue;
+    if (['--ledger', '--report', '--repo'].includes(a[i])) {
+      const key = a[i].slice(2);
+      if (!a[i + 1] || a[i + 1].startsWith('--')) throw new Error(`${a[i]} requires a path`);
+      if (out[key]) throw new Error(`duplicate option ${a[i]}`);
+      out[key] = a[++i];
+    } else if (a[i].startsWith('-')) throw new Error(`unknown option ${a[i]}`);
+    else if (positional) throw new Error('only one audit directory is accepted');
+    else positional = a[i];
   }
-  if (positional && !out.ledger) {
+  if (positional) {
+    if (out.ledger || out.report) throw new Error('use an audit directory OR --ledger/--report');
     out.ledger = join(positional, 'raw-findings.jsonl');
-    out.report = out.report || join(positional, 'report.json');
+    out.report = join(positional, 'report.json');
   }
-  return (out.ledger && out.report) ? out : null;
+  if (!out.ledger || !out.report) throw new Error('supply an audit directory or both --ledger and --report');
+  return out;
 }
 
 function readLedger(path) {
@@ -154,9 +164,18 @@ function readReport(path) {
     fail('report.json must be a JSON object with findings/dropped/reconciliation keys (got array or scalar)');
     return null;
   }
-  if (!Array.isArray(parsed.findings)) fail('report.json: "findings" must be an array');
-  if (!Array.isArray(parsed.dropped)) fail('report.json: "dropped" must be an array');
-  if (!parsed.reconciliation || typeof parsed.reconciliation !== 'object') fail('report.json: "reconciliation" object missing');
+  let valid = true;
+  const invalid = (m) => { fail(`report.json: ${m}`); valid = false; };
+  for (const key of ['findings', 'dropped']) {
+    if (!Array.isArray(parsed[key])) invalid(`"${key}" must be an array`);
+    else if (parsed[key].some((v) => !v || typeof v !== 'object' || Array.isArray(v))) invalid(`"${key}" must contain objects`);
+  }
+  if (!parsed.reconciliation || typeof parsed.reconciliation !== 'object' || Array.isArray(parsed.reconciliation)) invalid('"reconciliation" object missing');
+  for (const key of ['lenses_selected', 'lenses_run', 'lenses_deferred']) {
+    if (parsed.scope?.[key] != null && !Array.isArray(parsed.scope[key])) invalid(`scope.${key} must be an array`);
+  }
+  if (parsed.limitations != null && (!Array.isArray(parsed.limitations) || parsed.limitations.some((v) => typeof v !== 'string' || !v.trim()))) invalid('limitations must be an array of non-empty strings');
+  if (!valid) return null;
   return parsed;
 }
 
@@ -164,7 +183,7 @@ function readReport(path) {
 function checkSchema(f, where) {
   const id = f && f.id ? f.id : '<no id>';
   const tag = `${where} ${id}`;
-  if (!f || typeof f !== 'object') { fail(`${where}: finding is not an object`); return; }
+  if (!f || typeof f !== 'object' || Array.isArray(f)) { fail(`${where}: finding is not an object`); return; }
   if (!ID_RE.test(f.id || '')) fail(`${tag}: id must match <PREFIX>-<3+digits>`);
   if (!LENSES.has(f.lens)) fail(`${tag}: lens "${f.lens}" not a known lens`);
   if (!CATEGORIES.has(f.category)) fail(`${tag}: category "${f.category}" invalid`);
@@ -177,7 +196,7 @@ function checkSchema(f, where) {
   if (!f.location || typeof f.location !== 'object') fail(`${tag}: location missing`);
   else {
     if (typeof f.location.file !== 'string' || !f.location.file.trim()) fail(`${tag}: location.file missing`);
-    if (f.location.line != null && !Number.isInteger(f.location.line)) fail(`${tag}: location.line must be an integer or null`);
+    if (f.location.line != null && (!Number.isSafeInteger(f.location.line) || f.location.line < 1)) fail(`${tag}: location.line must be a positive integer or null`);
     if (f.location.others != null && !Array.isArray(f.location.others)) fail(`${tag}: location.others must be an array`);
   }
   // verification block
@@ -246,6 +265,28 @@ function checkPostVerification(f) {
 // ---- INVARIANT 4: reconciliation — no finding silently lost ----------------
 function checkReconciliation(ledger, report, ledgerById) {
   if (!report) return;
+  const seen = (items, name) => {
+    const ids = new Set();
+    for (const item of items) {
+      if (!item || typeof item.id !== 'string') { fail(`reconciliation: ${name} entry missing id`); continue; }
+      if (ids.has(item.id)) fail(`reconciliation: duplicate ${name} id ${item.id}`);
+      ids.add(item.id);
+    }
+  };
+  seen(ledger, 'ledger');
+  seen(report.findings || [], 'reported');
+  seen(report.dropped || [], 'dropped');
+  const owners = new Map();
+  for (const f of report.findings || []) {
+    for (const mid of f.dedup?.merged_from || []) {
+      if (!ledgerById[mid]) fail(`reconciliation: merged id ${mid} is absent from the ledger`);
+      if (owners.has(mid)) fail(`reconciliation: merged id ${mid} has multiple dispositions (${owners.get(mid)}, ${f.id})`);
+      owners.set(mid, f.id);
+    }
+  }
+  for (const d of report.dropped || []) {
+    if (!ledgerById[d.id]) fail(`reconciliation: dropped id ${d.id} is absent from the ledger`);
+  }
   const reported = new Set((report.findings || []).map((f) => f.id));
   const mergedAway = new Set();
   for (const f of report.findings || []) {
@@ -281,7 +322,8 @@ function checkReconciliation(ledger, report, ledgerById) {
   const r = report.reconciliation || {};
   const counted = { raw: ledger.length, reported: reported.size, merged: mergedAway.size, dropped: dropped.size };
   for (const k of ['raw', 'reported', 'merged', 'dropped']) {
-    if (typeof r[k] === 'number' && r[k] !== counted[k]) fail(`reconciliation: stated ${k}=${r[k]} but actual ${k}=${counted[k]}`);
+    if (!Number.isSafeInteger(r[k]) || r[k] < 0) fail(`reconciliation: ${k} must be a non-negative integer`);
+    else if (r[k] !== counted[k]) fail(`reconciliation: stated ${k}=${r[k]} but actual ${k}=${counted[k]}`);
   }
   if (counted.reported + counted.merged + counted.dropped !== counted.raw) {
     fail(`reconciliation: reported(${counted.reported}) + merged(${counted.merged}) + dropped(${counted.dropped}) != raw(${counted.raw})`);
@@ -417,20 +459,26 @@ function checkComplianceDuty(report) {
 function checkRollCall(report) {
   if (!report) return;
   const scope = report.scope || {};
+  for (const key of ['lenses_selected', 'lenses_run', 'lenses_deferred']) {
+    const values = scope[key] || [];
+    if (new Set(values).size !== values.length) fail(`roll-call: duplicate lens in ${key}`);
+    for (const lens of values) if (!LENSES.has(lens)) fail(`roll-call: unknown lens "${lens}" in ${key}`);
+  }
   const selected = scope.lenses_selected;
   const run = new Set(scope.lenses_run || []);
   if (!Array.isArray(selected)) {
-    warn('roll-call: report.scope.lenses_selected not recorded — cannot verify every selected lens ran');
+    fail('roll-call: report.scope.lenses_selected must be recorded — cannot verify every selected lens ran');
     return;
   }
   const deferred = new Set(scope.lenses_deferred || []);
+  for (const lens of deferred) if (run.has(lens)) fail(`roll-call: ${lens} is both run and deferred`);
   for (const lens of selected) {
     if (!run.has(lens) && !deferred.has(lens)) {
       fail(`roll-call: lens "${lens}" was selected but is neither in lenses_run nor lenses_deferred — a silently-skipped lens (mark it deferred for a partial run, or run it)`);
     }
   }
   if (deferred.size > 0 && scope.partial !== true) {
-    warn(`roll-call: ${deferred.size} lens(es) deferred but report not marked scope.partial=true — a partial audit should say so`);
+    fail(`roll-call: ${deferred.size} lens(es) deferred but report not marked scope.partial=true — a partial audit should say so`);
   }
 }
 
@@ -440,7 +488,8 @@ function checkCoverage(report, ledger) {
   if (ledger.length === 0) warn('ledger is empty — no findings at all; confirm the pipeline actually ran (valid only for a truly trivial/static repo)');
   const c = report.coverage;
   if (!c) { fail('coverage: no coverage block in report — "all issues" is unmeasured and the audit cannot claim coverage'); return; }
-  if (typeof c.files_total === 'number' && typeof c.files_examined === 'number') {
+  if (Number.isSafeInteger(c.files_total) && c.files_total >= 0 && Number.isSafeInteger(c.files_examined) && c.files_examined >= 0) {
+    if (c.files_examined > c.files_total) fail('coverage: files_examined exceeds files_total');
     if (c.files_examined < c.files_total) {
       const pct = ((c.files_examined / c.files_total) * 100).toFixed(0);
       const scope = report.scope || {};
@@ -451,7 +500,7 @@ function checkCoverage(report, ledger) {
       }
     }
   } else {
-    fail('coverage: files_total/files_examined not reported — coverage has no denominator');
+    fail('coverage: files_total/files_examined must be non-negative integers — coverage has no valid denominator');
   }
   // The lens × area matrix (coverage-matrix.md): when lenses ran, per-lens
   // coverage must be stated, not implied. A run lens with no row is unmeasured;
@@ -464,23 +513,24 @@ function checkCoverage(report, ledger) {
     fail(`coverage: lenses ran (${run.join(', ')}) but coverage.matrix is ${rows ? 'empty' : 'missing'} — state each lens's coverage per area (coverage-matrix.md)`);
     return;
   }
-  // Object rows are matched on their lens field; string rows on their text.
-  const rowTexts = rows.map((r) => (typeof r === 'string' ? r : (r && typeof r.lens === 'string' ? r.lens : JSON.stringify(r))));
-  for (const lens of run) {
-    if (!rowTexts.some((t) => t.includes(lens))) {
-      fail(`coverage: lens "${lens}" ran but has no row in coverage.matrix — its coverage is unmeasured`);
-    }
-  }
+  // Exact row keys prevent prose such as "not-code-audit" claiming coverage.
+  // Keep the existing "lens: detail" string form and the object form.
+  const rowLenses = rows.map((r) => typeof r === 'string'
+    ? (r.match(/^\s*([a-z0-9-]+)\s*:/)?.[1] || null)
+    : (r && typeof r.lens === 'string' ? r.lens : null));
   const inScope = new Set([...run, ...deferred]);
-  for (const t of rowTexts) {
-    for (const lens of LENSES) {
-      if (t.includes(lens) && !inScope.has(lens)) {
-        fail(`coverage: matrix row mentions "${lens}", which neither ran nor was deferred — coverage claimed for a lens that did not run`);
-      }
-    }
+  const seen = new Set();
+  for (const lens of rowLenses) {
+    if (!LENSES.has(lens)) { fail(`coverage: matrix row has no exact registered lens (${lens})`); continue; }
+    if (seen.has(lens)) fail(`coverage: duplicate matrix row for ${lens}`);
+    seen.add(lens);
+    if (!inScope.has(lens)) fail(`coverage: matrix row names "${lens}", which neither ran nor was deferred`);
   }
-  if (!(typeof c.areas_total === 'number' && c.areas_total > 0)) {
-    fail('coverage: matrix present but areas_total is missing or not a positive number — the area denominator (coverage-matrix.md)');
+  for (const lens of run) {
+    if (!seen.has(lens)) fail(`coverage: lens "${lens}" ran but has no row in coverage.matrix — its coverage is unmeasured`);
+  }
+  if (!(Number.isSafeInteger(c.areas_total) && c.areas_total > 0)) {
+    fail('coverage: matrix present but areas_total is missing or not a positive integer — the area denominator (coverage-matrix.md)');
   }
 }
 
@@ -530,40 +580,63 @@ function checkRemediationOrder(report) {
 }
 
 // ---- INVARIANT 11: evidence file verification (requires --repo) -------------
-function checkEvidenceFiles(report, repoRoot) {
+function checkEvidenceFiles(report, repoRoot, ledgerById) {
   if (!repoRoot || !report) return;
-  if (!existsSync(repoRoot)) { warn(`evidence-files: --repo path "${repoRoot}" does not exist — skipping`); return; }
+  let root;
+  try {
+    root = realpathSync(repoRoot);
+    if (!statSync(root).isDirectory()) throw new Error('not a directory');
+  } catch {
+    fail('evidence-files: --repo must name an existing readable repository directory');
+    return;
+  }
+  const inside = (path) => {
+    const rel = relative(root, path);
+    return rel !== '..' && !rel.startsWith('../') && !rel.startsWith('..\\') && !isAbsolute(rel);
+  };
   const checked = new Set();
   const checkFile = (id, file, line, src) => {
-    const key = `${file}:${line || ''}`;
+    if (typeof file !== 'string' || !file.trim()) { fail(`${id}: ${src} has no file`); return; }
+    const key = `${file}:${line ?? ''}`;
     if (checked.has(key)) return;
     checked.add(key);
-    if (file.length < 2 || /^https?:?$/i.test(file)) return;
-    const fullPath = join(repoRoot, file);
-    if (!existsSync(fullPath)) {
-      fail(`${id}: ${src} cites ${file} but the file does not exist in the repo`);
-      return;
-    }
-    if (line != null) {
-      const lineCount = readFileSync(fullPath, 'utf8').split('\n').length;
-      if (line > lineCount) {
-        fail(`${id}: ${src} cites ${file}:${line} but the file has only ${lineCount} lines`);
+    if (isAbsolute(file) || win32.isAbsolute(file)) { fail(`${id}: ${src} must be repo-relative`); return; }
+    const path = resolve(root, file.replace(/\\/g, '/'));
+    if (!inside(path)) { fail(`${id}: ${src} escapes the repo`); return; }
+    try {
+      const real = realpathSync(path);
+      if (!inside(real)) { fail(`${id}: ${src} symlink escapes the repo`); return; }
+      if (!statSync(real).isFile()) { fail(`${id}: ${src} cites ${file}, which is not a regular file`); return; }
+      if (line != null) {
+        if (!Number.isSafeInteger(line) || line < 1) { fail(`${id}: ${src} line must be a positive integer`); return; }
+        const lineCount = readFileSync(real, 'utf8').split('\n').length;
+        if (line > lineCount) fail(`${id}: ${src} cites ${file}:${line} but the file has only ${lineCount} lines`);
       }
+    } catch {
+      fail(`${id}: ${src} cites ${file} but the file does not exist or cannot be read in the repo`);
+    }
+  };
+  const checkText = (id, text, src) => {
+    if (typeof text !== 'string') return;
+    for (const m of text.matchAll(/([\w.\/\\-]+):(\d+)/g)) {
+      const [, file, line] = m;
+      if (!/^https?$/i.test(file)) checkFile(id, file, Number(line), src);
     }
   };
   for (const f of report.findings || []) {
-    if (f.location && typeof f.location.file === 'string') {
+    if (f.location) {
       checkFile(f.id, f.location.file, f.location.line, 'location');
-    }
-    const v = f.verification || {};
-    if (v.status === 'verified' && typeof v.evidence === 'string') {
-      for (const m of v.evidence.matchAll(/([\w.\/\\-]+):(\d+)/g)) {
-        const [, file, lineStr] = m;
-        if (file.length >= 2 && !/^https?:?$/i.test(file)) {
-          checkFile(f.id, file, parseInt(lineStr, 10), 'evidence');
-        }
+      for (const other of f.location.others || []) {
+        if (typeof other !== 'string') { fail(`${f.id}: location.others must contain file:line strings`); continue; }
+        const match = other.match(/^(.*):(\d+)$/);
+        checkFile(f.id, match ? match[1] : other, match ? Number(match[2]) : null, 'location.others');
       }
     }
+    if (f.verification?.status === 'verified') checkText(f.id, f.verification.evidence, 'evidence');
+  }
+  for (const d of report.dropped || []) {
+    const verification = d.verification || ledgerById[d.id]?.verification;
+    checkText(d.id, verification?.evidence, 'refutation evidence');
   }
 }
 
@@ -646,6 +719,7 @@ function checkProse(report) {
   for (const d of report.dropped || []) {
     if (typeof d.reason === 'string') fields.push({ src: `dropped:${d.id}.reason`, text: d.reason });
   }
+  for (const [index, text] of (report.limitations || []).entries()) fields.push({ src: `limitations[${index}]`, text });
   for (const { src, text } of fields) {
     for (const [re, why] of SLOP_HARD) {
       const m = text.match(re);
@@ -659,14 +733,19 @@ function checkProse(report) {
 }
 
 // ---- run --------------------------------------------------------------------
-const args = parseArgs(process.argv);
-if (!args || !args.ledger || !args.report) {
-  console.error('usage: node audit-check.mjs <audit-dir>  |  --ledger <f.jsonl> --report <f.json>  [--repo <path>]');
+let args;
+try { args = parseArgs(process.argv); }
+catch (e) {
+  const message = `input: ${e.message}`;
+  if (process.argv.includes('--json')) console.log(JSON.stringify({ format_version: 1, ok: false, exit_code: 2, failures: [message], warnings: [] }));
+  else console.error(`${message}\nusage: node audit-check.mjs <audit-dir> | --ledger <f.jsonl> --report <f.json> [--repo <path>] [--json]`);
   process.exit(2);
 }
 
-const ledger = readLedger(args.ledger);
-const report = readReport(args.report);
+let ledger = [], report = null;
+try {
+ledger = readLedger(args.ledger);
+report = readReport(args.report);
 const ledgerById = Object.create(null);
 for (const f of ledger) { if (f && f.id) ledgerById[f.id] = f; }
 
@@ -687,10 +766,21 @@ checkRollCall(report);
 checkComplianceDuty(report);
 checkCoverage(report, ledger);
 checkRemediationOrder(report);
-checkEvidenceFiles(report, args.repo);
+checkEvidenceFiles(report, args.repo, ledgerById);
 checkProse(report);
 
+} catch (e) {
+  // Malformed optional blocks must fail closed, with a machine-readable result.
+  fail(`input: unable to validate artifact structure (${e.message})`);
+}
+
 // ---- output -----------------------------------------------------------------
+if (args.json) {
+  const exitCode = failures.length ? 1 : 0;
+  console.log(JSON.stringify({ format_version: 1, ok: exitCode === 0, exit_code: exitCode,
+    failures, warnings, counts: { raw: ledger.length, reported: report?.findings?.length ?? 0 } }));
+  process.exit(exitCode);
+}
 const line = '─'.repeat(70);
 console.log(line);
 console.log(`production-audit integrity check`);

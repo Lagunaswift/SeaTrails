@@ -41,3 +41,8 @@ The cells that matter most are `✗`: a lens that *should* have covered an area 
 ## On staged / interrupted runs
 
 A full sweep often will not finish in one session (see the budgeting section in `SKILL.md`). When that happens, the matrix is how a partial run stays honest: lenses that have not run yet are whole empty rows, visibly distinct from lenses that ran and covered everything. A reader glancing at the matrix sees immediately that the audit is one-third done — which is the point. A partial audit that says so plainly is useful; one that looks complete is dangerous.
+
+
+## Machine-checked count and identity rules
+
+File counts are non-negative integers, examined cannot exceed total, and areas_total is a positive integer when lenses ran. A row is either an object with an exact registered `lens` field or a string beginning `lens-name:` followed by its detail. Each lens has at most one row. Substring mentions do not establish coverage. The selected lens list is required. Selected, run and deferred ids must be registered and non-duplicated; a lens cannot be both run and deferred. Deferred work requires `scope.partial=true`.
