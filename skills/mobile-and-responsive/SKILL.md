@@ -21,14 +21,14 @@ Default to assessing where the interface breaks or degrades across screen sizes 
 
 ### 1. Responsive layout (the core)
 The interface must adapt its layout to the available width, not assume one size.
-- **No fixed widths that force horizontal scrolling** on small screens, the signature mobile breakage. Content should reflow to fit the viewport.
+- **Avoid unintended whole-page horizontal scrolling** on small screens. Content should reflow; a table, map or other necessary two-dimensional view can have contained, accessible scrolling. Investigate the overflowing element instead of masking it with global clipping.
 - **Fluid, flexible layouts** (relative units, flexbox/grid that wrap and reflow) rather than pixel-fixed layouts built for one width.
 - **Breakpoints** that adapt the layout at sensible sizes (a multi-column desktop layout collapsing to single-column on mobile), driven by content needs, not specific device models.
 `references/responsive-layout.md` covers fluid layout, breakpoints, avoiding fixed widths, and mobile-first ordering.
 
 ### 2. Touch targets and interaction
 Touch is not a mouse; fingers are bigger and less precise than a cursor.
-- **Tap targets large enough** to hit reliably (guidelines put a minimum around 44x44px), and spaced so adjacent targets are not mis-tapped. Tiny links/buttons designed for a mouse fail on touch.
+- **Tap targets large enough** for the actual task. WCAG 2.2 AA generally uses 24 × 24 CSS pixels with defined exceptions; larger targets around 44 × 44 are a useful comfort recommendation. Measure the target and evaluate exceptions before declaring a standards failure.
 - **No hover-dependent interactions** with no touch equivalent (a menu that only opens on hover is unusable on touch, which has no hover).
 - **Touch gestures** (swipe, pinch) where appropriate, and not breaking native ones (scrolling, zoom).
 `references/touch-and-interaction.md` covers target size/spacing, the hover problem, and touch gestures.
@@ -62,7 +62,7 @@ How to actually know it works, rather than assuming from the desktop view.
 `references/cross-device-testing.md` covers emulation vs real devices, the size/orientation/platform matrix, and a practical routine.
 
 ## How to report
-Order by severity: things that make the interface unusable on mobile (horizontal-scroll-forcing fixed widths, missing viewport tag, un-tappable targets, hover-only controls) before degradations (slightly tight spacing). For each: the device/size where it breaks, what the user experiences, the fix. Frame around "what happens on a phone, on touch, on a small screen", the conditions a desktop build never exercises. Note what needs real-device testing to confirm.
+Order by severity: things that make the interface unusable on mobile (horizontal-scroll-forcing fixed widths, missing viewport tag, un-tappable targets, hover-only controls) before degradations (slightly tight spacing). For each: the device/size where it breaks, what the user experiences, the fix. Frame around "what happens on a phone, on touch, on a small screen", the conditions a desktop build never exercises. Record the actual browser/device or emulation, viewport, orientation, input and tested state. Note what needs real-device testing to confirm; unavailable devices are a coverage limitation, not an invented pass.
 
 ## Scoping
 Match to the actual audience. An internal tool used only on desktops has little mobile need, say so. A public consumer app, where mobile is likely the majority of traffic, must work well on phones, and there the small-screen, touch case is the primary one, not an afterthought. The honest output for most public fast-built apps is "it was built and tested on desktop; on a phone it has horizontal scroll / tiny tap targets / a missing viewport tag / hover-only menus, fix those and it becomes usable where most of your users actually are."

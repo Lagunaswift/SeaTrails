@@ -1,6 +1,6 @@
 # CLAUDE.md — working on seatrial
 
-This repo is **seatrial**: a codebase-audit suite built as Claude skills. There is no application here. The product is prose — 32 skills (19 audit lenses, 1 orchestrator, 12 craft skills) — plus three zero-dependency Node scripts that make the audit's output trustworthy. Read `README.md` first; it is accurate and current.
+This repo is **seatrial**: a codebase-audit suite built as Claude skills. There is no application here. The product is prose: 34 skills (21 audit lenses, 1 orchestrator, 12 craft skills), supported by zero-dependency Node scripts for integrity checks, evidence capture, rendering and calibration. Read `README.md` first; it is accurate and current.
 
 The single most important idea: **skills run the audit; scripts gate it.** An agent executes the audit by reading the skills; `audit-check.mjs` hard-fails any report that violates the integrity invariants; `render-report.mjs` generates the human report from gated data. The harness assumes the auditing AI will cheat. That assumption extends to you: do not fight the harness, and never weaken it to make a failure go away.
 
@@ -8,9 +8,9 @@ The single most important idea: **skills run the audit; scripts gate it.** An ag
 
 ```
 skills/                         THE PRODUCT. Installed by copying into a target repo's .claude/skills/
-  production-audit/             the orchestrator: SKILL.md (6 stages), ARCHITECTURE.md, references/ (10 contracts),
+  production-audit/             the orchestrator: SKILL.md (6 stages), ARCHITECTURE.md, references/ (contracts and profiles),
                                 scripts/ (audit-check.mjs, run-tests.mjs, render-report.mjs, fixtures/)
-  <19 lens dirs>                one concern each; see the lens table in README.md
+  <21 lens dirs>                one concern each; see the lens table in README.md
   <12 craft dirs>               fix/design-phase skills (refactoring, testing-strategy, ui-ux-pro-max, …)
 docs/                           maintainer docs (tracked selectively — see .gitignore note below)
   HANDOVER.md                   current state, known drift, improvement backlog — read this second
@@ -28,6 +28,8 @@ docs/                           maintainer docs (tracked selectively — see .gi
 
 ```bash
 node skills/production-audit/scripts/run-tests.mjs            # harness regression suite; must end "0 failed"
+node skills/production-audit/scripts/test-assurance.mjs       # evidence capture and delivery
+node skills/production-audit/scripts/test-benchmark.mjs       # corpus/scorer checks, not detector accuracy
 node .claude/skills/release-check/scripts/check-consistency.mjs   # cross-file drift check (counts, enums, registry)
 node skills/production-audit/scripts/audit-check.mjs <audit-dir> [--repo <path>]   # gate an audit's artifacts
 node skills/production-audit/scripts/render-report.mjs <audit-dir>                 # render report.md from report.json
@@ -39,10 +41,12 @@ Both checks must pass before any commit that touches `skills/`. There is no pack
 
 Stages 0–5: detect stack → select lenses → run lenses (append every finding to `raw-findings.jsonl` in the canonical schema) → merge → adversarially verify → consolidate into `report.json` → **gate** → **render**. Every raw finding ends reported, merged, or dropped (`raw = reported + merged + dropped`). Critical/high findings must be verified with quoted code or capped. Chains build only on the reconciled set. Coverage has a denominator. Slop prose fails the build. The full reasoning: `skills/production-audit/ARCHITECTURE.md` and `docs/decisions/`.
 
-The 19 lenses split into two families you must not confuse:
+Website audits select the website-readiness profile and keep its topic/optional-feature coverage inside the ordinary report. Profile IDs are coverage labels, not new finding prefixes. The profile does not add lenses or change the report-by-default rule. Its gate changes follow the same attack-first discipline as other invariants.
+
+The 21 lenses split into two families you must not confuse:
 
 - **Family A (14 prose specialists)** — code-audit, ai-saas-security, scaling-audit, release-and-ops, data-privacy, performance, accessibility, email-deliverability, frontend-robustness, internationalisation, seo-discoverability, mobile-and-responsive, analytics-and-instrumentation, anti-slop-writing. Standalone craft-style skills whose primary output is a prose report; each also carries a `## What to produce under a production-audit` block naming its prefix and category, and the orchestrator's `lens-registry.md` repeats the same contract (the canonical schema overrides their "How to report" prose when run as lenses).
-- **Family B (5 audit-native)** — soc2-compliance, code-quality, dependency-audit, infrastructure-config, adversary-emulation. Written for this suite; each carries a bare `## What to produce` section. Either way, the consistency checker verifies every lens's declared prefix and primary category against the harness maps.
+- **Family B (7 audit-native)** — soc2-compliance, code-quality, dependency-audit, infrastructure-config, adversary-emulation, impeccable-audit, taste-audit. Written for this suite; each carries a bare `## What to produce` section. Either way, the consistency checker verifies every lens's declared prefix and primary category against the harness maps.
 
 ## Changing things: the registration points
 

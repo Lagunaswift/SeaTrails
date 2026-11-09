@@ -1,41 +1,29 @@
-# Data subject rights
+# Data subject rights and request handling
 
-People have enforceable rights over their personal data, and the app has to be able to honour them. The engineering-heavy ones are deletion and access; both require that the app can actually find and act on all of a person's data, which most fast-built apps cannot do completely.
+Check whether the organisation can fulfil applicable requests accurately and securely. Rights have conditions and exceptions; do not equate deleting an account with erasing every record, or assume every access request is a portability request.
 
-## Deletion (the "right to be forgotten")
+## The operational path
 
-A user can ask for their personal data to be deleted, and in many cases you must comply. The engineering challenge: **complete deletion across every place the data lives.** Fast-built apps usually delete the main user row and miss the rest. A real deletion has to account for:
-- The primary database, every table holding the user's data, not just the `users` row but related records (their posts, sessions, activity, anything keyed to them).
-- Logs that contain personal data (a frequent miss, request logs full of emails/IPs).
-- Caches and search indexes holding copies.
-- Backups, this is the hard one. You generally cannot surgically delete one user from a backup snapshot. The accepted approach is usually that backups age out on their retention schedule and the data is not restored to live systems; document the approach. This intersects with `scaling-audit`'s durability pass (backups exist precisely so you cannot easily erase things). **[LEGAL]** on the exact backup obligation.
-- Third-party processors, every external service you sent the data to (analytics, email, the AI provider) must also delete it; you are responsible for propagating the request.
+- Confirm a discoverable request/contact route, named owner, appropriate identity verification and tracked response deadlines under the applicable regime.
+- Trace relevant data through primary/related records, logs, caches, search indexes, exports and external recipients. Avoid exporting another person's data or overcollecting identity documents.
+- Access, correction, erasure, restriction and objection need their own handling. Portability has a narrower scope; under UK GDPR it generally concerns provided data processed automatically on consent/contract grounds, subject to the detailed rules.
+- A secure, documented manual process can be sufficient. Do not require new self-service screens unless the product promises them, the applicable obligation requires them or operational scale justifies them.
 
-The test: when a user asks to be deleted, can you actually remove them everywhere, and do you know everywhere is? If deletion misses collections or third parties, the right is not honoured.
+## Erasure and lawful retention
 
-## Access and portability
+Erasure is not absolute. Identify the requested scope and any applicable retention exception, such as required records or legal claims. Document the retained category, purpose, access restriction and expiry; do not present an account deletion as total erasure when records remain lawfully retained.
 
-A user can request a copy of the personal data you hold about them, and in some cases in a portable (machine-readable) format. The engineering job is being able to gather all of a person's data and export it. This relies on the same "know where all their data is" capability as deletion, build it once and both rights become feasible.
+Follow the request through relevant recipients according to their actual role and applicable obligations. A payment provider or other independent controller may have its own retention duties; not every third party is a processor that must blindly delete on command.
 
-## Other rights (briefly)
-Users may also have rights to correct inaccurate data, object to certain processing, and restrict processing. These are usually less engineering-heavy (correction is often just editing) but the app should not make them impossible (e.g. data the user can never correct).
+For backups, inspect documented expiry, access restrictions and measures to keep erased data beyond use until replacement. A restore must not silently reactivate erased or suppressed records; verify the restore/reconciliation procedure with safe fixtures or existing drill evidence. Do not promise surgical deletion from every immutable snapshot.
 
-## The request-handling process
+## Audit evidence
 
-Beyond the technical capability, there has to be a *process*:
-- A way for users to make a request (an email address, a form) that is findable (in the privacy policy).
-- Handling within the legal time limit (GDPR is generally one month; **[LEGAL]** for specifics and other regimes).
-- Identity verification before acting (so one user cannot request another's data or deletion).
+Use code/configuration, documented operations and synthetic-account tests in an authorised environment. Record which stores and external services were verified, any lawful exclusions, response tracking and untested parts. An audit does not authorise deleting live accounts, submitting real rights requests or contacting third parties.
 
-For a small app a manual process is fine, but it must exist and be honoured. For a larger app, self-service (a "download my data" / "delete my account" button) is better and scales.
+## Sources checked 9 November 2026
 
-## What to flag, by stage
-- No accounts / trivial data: rights may barely apply; confirm scope.
-- Has accounts: the high finding is **no deletion path at all**, or a deletion that only removes the main record and leaves data in related tables, logs, and third parties. This is common and it means the app cannot honour a legal right it (or its policy) claims to. Build complete deletion.
-- Worldwide / sensitive: self-service rights, documented backup-deletion approach, and processor propagation; involve a lawyer/DPO on the obligations. **[LEGAL]**
+- [ICO right to erasure](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/)
+- [ICO right to data portability](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-data-portability/)
 
-## The honest framing
-The deletion right is where policy meets reality most sharply. Many apps' privacy policies promise users can delete their data, while the app has no mechanism to do it completely, a broken promise repeated on every request. Building complete, cross-store deletion (and the access/export that reuses the same capability) is the core engineering work of data-subject rights. Backups are the legitimately hard part; handle them by retention-expiry-plus-no-restore and document it, rather than pretending you can surgically erase a snapshot.
-
-## Connection to other skills
-`scaling-audit` (durability) explains why backups make deletion hard, they exist to prevent erasure. `release-and-ops` covers logs that may hold personal data needing deletion. The capability to find all of a person's data also depends on a clean data inventory (see data-inventory-and-minimisation).
+Recheck current scope, exceptions and deadlines. Legal interpretation should use the actual data/processing facts. Backup durability belongs to `scaling-audit`; this reference owns the rights consequence.

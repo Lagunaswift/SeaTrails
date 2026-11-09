@@ -21,9 +21,17 @@ Linear cost (2x users = 2x bill) is at least predictable. Worse-than-linear is t
 
 ## Controls to check for
 - Per-user rate limits and quotas (caps the per-user blast radius).
-- A global spend cap or kill switch (the circuit breaker for cost, when spend crosses a threshold, something stops or alerts). `ai-saas-security` covers this for AI specifically.
+- Enforced cost limits or a scoped kill switch, with exhaustion behaviour that protects the intended service. Record alerts separately; notification alone does not prevent further spend. `ai-saas-security` covers AI-specific accounting.
 - Caching on expensive repeatable operations.
 - Monitoring on spend (you can't control what you don't watch, ties to observability).
+
+## Enforcement evidence
+
+For vulnerable or expensive operations, inspect identity/resource/network limits and whether rejection happens before costly work. A bounded burst/recovery check should cover the intended abuse case, legitimate bursts and users sharing an IP; an IP-only rule may not match the product's quota boundary.
+
+Inventory metered non-AI operations as well: uploads, video delivery, email, downloads and database work. For each control, record the provider/product, unit, scope, enforcement delay and remaining exposure. Verify actual settings when authorised access exists; otherwise state the external check required. [Google Cloud documents separate alerts-only and supported spend-cap budgets](https://docs.cloud.google.com/billing/docs/how-to/budgets), so a budget label alone proves neither behaviour.
+
+Inspect counter storage and coordination across instances/regions. Approximate local throttling can reduce abuse while still allowing concurrent work beyond a strict quota. [Cloudflare's Workers rate-limit binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/) is approximate and per location. For a strict global business quota, trace durable reservation/settlement and the behaviour when accounting is unavailable. Use bounded or mocked concurrency tests; do not exhaust a real billing budget.
 
 ## What to flag, by stage
 - Prototype: produce the per-request cost number and the "at scale" projection anyway, it's cheap and it's often the wake-up. Flag unbounded AI/spend paths even at prototype stage, because a bug or abuse can hit them at any scale.

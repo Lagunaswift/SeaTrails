@@ -1,44 +1,28 @@
 # Crawlability and rendering
 
-The gate before everything else. A search engine can only rank what its crawler can reach and read. If the crawler cannot access a page, or accesses it and sees nothing because the content has not rendered, the page is invisible, and no amount of good content or clever metadata changes that. This is where discoverability most often fails for fast-built apps, and it fails silently.
+Establish which public pages need discovery and which consumers need their content. An authenticated application shell can be intentional. A public article, search result and social preview may have different rendering requirements.
 
-## Can the crawler reach the pages?
+## Inspect access and content separately
 
-Basic access:
-- Pages must not be blocked by robots rules (robots.txt or meta robots) that you did not intend (indexing-and-canonical.md covers the accidental-block trap).
-- Content behind a login/auth wall is not publicly crawlable, fine if intended, a problem if you wanted those pages found.
-- Pages must be reachable by links a crawler can follow. A page with no internal links pointing to it (an "orphan" page) may never be discovered. Working internal linking is how crawlers traverse the site.
-- Broken links, server errors, and redirect chains impede crawling; keep the link graph clean.
+- Trace the public route, status code, redirects, internal links and required resources. Check origin and CDN/WAF rules as well as robots directives.
+- Compare the initial HTTP response with the rendered DOM and, where authorised access exists, the search engine's URL inspection. Record the route, revision and method used.
+- Google can render JavaScript. Some social-preview and other crawlers cannot. Missing text in View Source is a reason to investigate the intended consumer, not proof that Google sees a blank page.
+- Exercise direct navigation and client navigation to valid and missing resources. A styled error screen served as HTTP 200 can create a soft 404. Check server status and user recovery together.
+- Public links should have usable destinations. Inspect orphaned important pages and hash-only routing where distinct indexable pages are required.
 
-## The client-rendering trap (the big one)
+## Recommend a proportionate remedy
 
-The most damaging and most common technical-SEO failure in fast-built single-page apps:
+Use existing static rendering, server rendering or prerendering facilities when they address a demonstrated visibility, preview or delivery problem. Preserve equivalent content for users and crawlers. Bot-specific dynamic rendering is a workaround, not the default long-term recommendation. Do not require a framework migration merely to populate View Source.
 
-A fully client-rendered SPA serves an almost-empty HTML shell (a `<div id="root">` and a script bundle). The actual content is built by JavaScript in the browser *after* load. A human sees the content; a crawler may see a blank page. Search engines have varying and unreliable JavaScript execution, content that only exists after JS runs may be seen late, partially, or not at all. The result: a beautiful, content-rich app that appears empty to search engines and does not rank.
+An unavailable Search Console account, blocked preview tester or untested crawler is a coverage limitation. A browser user-agent string alone does not prove that a real crawler can pass the CDN's bot checks.
 
-The fixes, all about getting real content into the HTML the crawler first receives:
-- **Server-side rendering (SSR):** the server renders the full HTML for each request, so the crawler (and the user) gets real content immediately, then it hydrates into an interactive app.
-- **Static site generation (SSG):** pages are pre-rendered to static HTML at build time, ideal for content that does not change per request.
-- **Prerendering:** a fallback that serves pre-rendered HTML specifically to crawlers.
+## Findings and ownership
 
-Modern frameworks (Next.js, Nuxt, SvelteKit, Astro, and others) provide SSR/SSG precisely so content is in the initial HTML. The anti-pattern is a pure client-rendered app for content that needs to be found. (This also overlaps `performance`'s rendering-path: SSR/SSG help both discoverability and perceived speed.)
+Report an unintended access block, a rendered-content failure for the intended consumer, incorrect route/status behaviour or an evidenced discovery gap. State whether the failure is observed, inferred from source or awaiting live verification. Private data returned to an unauthorised consumer belongs to `code-audit` security; refer it there and keep the discovery consequence separately scoped.
 
-The test: fetch the page as a crawler would (view source / fetch the raw HTML, not the rendered DOM in devtools, or use a fetch-as-crawler tool). If the content is not in that raw HTML, crawlers may not see it.
+## Sources checked 9 November 2026
 
-## URLs and structure
+- [Google JavaScript SEO basics](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics)
+- [Google dynamic-rendering guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering)
 
-- **Clean, meaningful URLs** (readable paths reflecting content) are better for both crawlers and users than opaque query-string or hash-based ones. Hash-fragment routing (`#/page`) historically was not crawled as distinct pages; use real path-based routes.
-- **A sensible structure** (logical hierarchy, important pages not buried deep) helps crawlers understand and prioritise.
-- **One canonical URL per piece of content** (indexing-and-canonical.md), avoid the same content at many URLs.
-
-## What to flag
-- Content only present after client-side JS, with no SSR/SSG/prerender (the crawler-sees-blank trap, usually the top finding for an SPA).
-- Important pages blocked, orphaned (no internal links), or behind auth unintentionally.
-- Hash-based routing or opaque URLs where crawlable path-based routes are needed.
-- Broken links / redirect chains impeding crawl.
-
-## The honest framing
-Before any metadata or optimisation, confirm the crawler can both reach the page and see its content in the raw HTML. The defining fast-built failure is the client-rendered app that looks great to humans and blank to search engines, fixed by server-rendering or static-generating the content so it is in the HTML from the first byte. Check by viewing the raw fetched HTML, not the rendered page. Crawlability and rendering are the gate; nothing downstream matters until they pass.
-
-## Connection to other references
-Indexing permissions (robots/noindex) are indexing-and-canonical.md. SSR/SSG also serve `performance` (rendering path). The framework choice that enables SSR/SSG touches `frontend-design` and overall architecture.
+Recheck consumer and framework behaviour against current official documentation when executing the audit. Crawl policy is covered in `crawl-policy-and-ai.md`; indexing rules in `indexing-and-canonical.md`.

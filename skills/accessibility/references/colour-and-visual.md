@@ -1,50 +1,25 @@
-# Colour and visual accessibility
+# Colour, motion and visual adaptability
 
-What low-vision, colour-blind, and in fact most ordinary users need in order to perceive content. These issues affect a very wide group, not a small minority: poor contrast hurts anyone on a phone in sunlight, colour-only cues fail the ~8% of men with colour-blindness, and small fixed text excludes anyone who needs to zoom. The fixes are concrete and measurable.
+Record the actual component, state, theme and background when measuring a visual barrier. A screenshot or a nominal design token alone may not describe the rendered contrast.
 
-## Colour contrast
+## Contrast and meaning
 
-Text must have enough contrast against its background to be readable. WCAG AA, the usual target, sets measurable minimums:
-- **Normal text:** at least 4.5:1 contrast ratio.
-- **Large text** (roughly 18pt+, or 14pt+ bold): at least 3:1.
-- **Meaningful non-text** (icons, form borders, focus indicators, chart elements that carry meaning): at least 3:1.
+For WCAG 2.2 AA, normal text generally needs 4.5:1 and large text 3:1; large text means at least 18 pt or 14 pt bold. Meaningful non-text UI/graphics generally need 3:1 against adjacent colours. Apply the relevant exceptions, including inactive controls and purely decorative content, before declaring failure. Test text over imagery against the relevant background, and supported light/dark themes independently.
 
-Low-contrast text, light grey on white, mid-grey on a coloured background, a faint placeholder used as a label, is one of the most common failures, and it is fully measurable: contrast-checker tools (and browser DevTools) give the exact ratio. The frequent fast-built mistake is choosing text colours for how they look on the designer's good screen, where subtle grey reads fine, and not checking the ratio, where it fails for many users and in many conditions.
+Colour must not be the sole carrier of status, errors, required fields or chart distinctions. Check labels, shapes or patterns that preserve the meaning without colour. A greyscale check can help inspection but does not itself establish conformance.
 
-This overlaps `frontend-design`: the aesthetic choice of colours must clear the contrast threshold. A design that looks elegant in light grey but fails contrast is not finished; the colours need adjusting until they both look right and pass.
+## Resize, reflow and spacing are separate checks
 
-## Don't rely on colour alone
+- **Resize text, 1.4.4:** test up to 200% without loss of content or functionality, applying the criterion's exceptions.
+- **Reflow, 1.4.10:** inspect a 320 CSS-pixel-wide viewport for horizontal writing, or equivalent 400% zoom on a 1280 CSS-pixel-wide viewport. Avoid whole-page two-dimensional scrolling or lost content. Tables, maps and other content requiring two-dimensional layout can qualify for exceptions; contain necessary scrolling and preserve access.
+- **Text spacing, 1.4.12:** apply the specified line, paragraph, letter and word spacing overrides and check clipping, overlap and missing controls. This does not require a custom text-size widget.
 
-Meaning conveyed only by colour is invisible to colour-blind users and to anyone in conditions that wash colour out. The classic failures:
-- Red text for errors / green for success with no other indicator, a red-green colour-blind user cannot tell them apart.
-- A status shown only as a coloured dot.
-- A required field marked only by red.
-- Chart series distinguished only by colour.
+Record the viewport/zoom and tested state. Do not conflate a mobile screenshot or 200% browser zoom with all three checks.
 
-The fix is to pair colour with another cue: an icon, a text label, a shape, a pattern. Colour can reinforce meaning, it just cannot be the *only* carrier of it. The test: convert the interface to greyscale, is all the meaning still there?
+## Motion and timed content
 
-## Text resize and zoom (reflow)
+Inspect moving/auto-updating content, pause/stop/hide controls, flashing and time limits against their applicable criteria. Respect `prefers-reduced-motion`; test that a reduced-motion treatment preserves meaning and functionality. Distinguish AA requirements from enhanced recommendations such as animation-from-interaction controls.
 
-Users with low vision often zoom the page or increase text size. The interface must remain usable when they do:
-- Text should resize/zoom without being clipped, overlapping, or disappearing.
-- The layout should reflow to accommodate larger text rather than breaking (content cut off, horizontal scrolling appearing, elements overlapping).
-- Avoid fixing text at sizes that cannot grow, or layouts so rigid that zoom destroys them.
+## Sources checked 9 November 2026
 
-WCAG expects content to work up to 200% zoom without loss of content or function. The common failure is a rigid pixel-perfect layout that shatters when text grows.
-
-## Other visual considerations
-- **Don't convey information by sensory characteristic alone** ("click the round button on the right"), which fails users who cannot perceive shape/position.
-- **Respect reduced-motion preferences:** users who set "reduce motion" (vestibular disorders, distraction sensitivity) should not be subjected to large animations; honour the `prefers-reduced-motion` setting.
-- **Text over images** needs enough contrast against the busiest part of the image, not just the average.
-
-## What to flag
-- Text (or meaningful UI) below the contrast thresholds, with the measured ratio.
-- Meaning carried by colour alone (status, errors, required fields, charts).
-- Layouts that break or clip when text is zoomed to 200%.
-- Large motion with no reduced-motion alternative.
-
-## The honest framing
-These are the most measurable accessibility items, contrast is a number, colour-alone is a greyscale test, zoom is a thing you can just try. They also help far more than the disabled minority: everyone benefits from readable contrast and a layout that survives zoom. Check the contrast ratios against AA, make sure no meaning rides on colour alone, and confirm the layout reflows under zoom. Concrete, testable, and high-impact for a wide group of users.
-
-## Connection to other references
-`frontend-design` overlaps directly, the palette and type choices must clear these thresholds, so accessibility is a constraint on the visual design, not separate from it. Focus indicators (keyboard-and-focus) must also meet the non-text contrast minimum.
+[WCAG 2.2](https://www.w3.org/TR/WCAG22/) supplies the thresholds, definitions and exceptions. Recheck exact criteria when claiming a failure. Keyboard focus and pointer targets are covered in `keyboard-and-focus.md` and `wcag-22-checks.md`.

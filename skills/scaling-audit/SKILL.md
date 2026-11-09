@@ -23,7 +23,7 @@ Ordered by how catastrophically and how commonly each fails an early-growth app.
 
 ### Pass 1: Data durability and backups (highest priority)
 The failure that has no recovery. If the database dies, is corrupted, or is wrongly deleted, can the data come back? Most fast-built apps have no answer.
-- Is there an automated, tested backup of every datastore? Untested backups are not backups.
+- Is there an automated backup of each non-disposable datastore, and evidence that recovery works? Distinguish missing configuration from unverified restoration.
 - Single point of failure on the data layer (one container, one disk, one unreplicated instance)?
 - A wrong migration, bad delete, or bug, is there point-in-time recovery, or is the data simply gone?
 `references/data-durability.md` covers backups, recovery, replication, migration safety, and the connection to `data-modelling`.

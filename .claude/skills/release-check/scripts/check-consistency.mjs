@@ -125,6 +125,14 @@ for (const m of registrySrc.matchAll(/\.claude\/skills\/([A-Za-z0-9-]+)\/SKILL\.
   if (!skillDirs.includes(m[1])) fail(`lens-registry cites .claude/skills/${m[1]}/SKILL.md but skills/${m[1]}/ does not exist`);
 }
 
+// All lenses must also be named in the orchestrator and applicability map.
+for (const doc of ['SKILL.md', 'references/scope-and-lens-selection.md']) {
+  const text = read(join(PA, doc));
+  for (const lens of harnessLenses) {
+    if (!text.includes('`' + lens + '`')) fail(`${doc} omits registered lens "${lens}"`);
+  }
+}
+
 // ---- 4. README counts and tables --------------------------------------------
 const readmeSrc = read(join(ROOT, 'README.md'));
 const totals = readmeSrc.match(/(\d+) skills total \((\d+) lenses \+ (\d+) orchestrator \+ (\d+) craft\)/);
@@ -164,7 +172,7 @@ const runSrc = read(join(PA, 'references', 'running-the-lenses.md'));
 const atomic = runSrc.match(/the (\d+) atomic lenses/);
 if (atomic) {
   const expected = harnessLenses.filter((l) => !SYNTHESIS.has(l)).length;
-  if (Number(atomic[1]) !== expected) fail(`running-the-lenses.md says "${atomic[1]} atomic lenses"; harness set implies ${expected} (19 minus the ${SYNTHESIS.size} synthesis lenses)`);
+  if (Number(atomic[1]) !== expected) fail(`running-the-lenses.md says "${atomic[1]} atomic lenses"; harness set implies ${expected} (${harnessLenses.length} minus the ${SYNTHESIS.size} synthesis lenses)`);
 } else warn('running-the-lenses.md no longer states an atomic-lens count (anchor gone; update this script if intentional)');
 
 // ---- 7. every skill has frontmatter; name matches directory -----------------
@@ -184,13 +192,18 @@ for (const dir of skillDirs) {
   }
 }
 
-// ---- 8. no dead references/<file>.md inside production-audit ----------------
+// ---- 8. no dead local or skill-qualified reference paths in audit docs ------
 const paDocs = [join(PA, 'SKILL.md'), join(PA, 'ARCHITECTURE.md'), join(PA, 'scripts', 'audit-check.mjs'),
   ...readdirSync(join(PA, 'references')).map((f) => join(PA, 'references', f))];
 for (const doc of paDocs) {
   const src = readFileSync(doc, 'utf8');
-  for (const m of src.matchAll(/references\/([a-z0-9-]+\.md)/g)) {
-    if (!existsSync(join(PA, 'references', m[1]))) fail(`${doc.replace(ROOT + '/', '')} references references/${m[1]} which does not exist`);
+  for (const m of src.matchAll(/(?:([a-z0-9-]+)\/)?references\/([a-z0-9-]+\.md)/g)) {
+    // A qualified path belongs to that skill; a bare references/ path belongs
+    // to the orchestrator. Do not silently ignore either form.
+    const owner = m[1] || 'production-audit';
+    if (!existsSync(join(SKILLS, owner, 'references', m[2]))) {
+      fail(`${doc.replace(ROOT + '/', '')} references ${owner}/references/${m[2]} which does not exist`);
+    }
   }
 }
 

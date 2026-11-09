@@ -5,64 +5,63 @@ description: "Use this skill to make a web app findable and correctly represente
 
 # SEO and Discoverability
 
-The lens for one question: **can search engines and social platforms find, understand, and correctly represent this site?** A site that is not crawlable, has no useful metadata, or blocks indexing by accident is invisible no matter how good its content, and a page shared to social with no preview data looks broken and gets fewer clicks. This is the technical and structural side of discoverability: not "write better content" (that is `anti-slop-writing`) but "make the content findable and correctly understood by the machines that surface it." Fast-built apps frequently ship with discoverability broken in ways nobody notices, a client-rendered app that crawlers see as blank, a stray `noindex`, missing titles, no sharing previews.
+Assess whether intended public content can be discovered, indexed and represented accurately in search and sharing previews. Start with the owner's audience and indexing policy. Public marketing pages, documentation and authenticated application routes can require different treatment.
 
-This does not cover content quality (`anti-slop-writing`) or page speed (`performance`, though speed is a ranking factor and the two overlap). It is the technical-SEO and shareability lens.
+## Assessment by default
 
-## The cardinal principle
+This is a read-only audit unless implementation is explicitly requested. Inspect the existing stack, routes and deployed behaviour before proposing changes. A hosting subdomain, framework choice, missing optional feature or near-empty initial HTML response does not establish a defect by itself. Do not migrate frameworks, open crawler access or submit external configuration during an audit.
 
-**A page that cannot be crawled, rendered, and understood by a machine cannot be found, regardless of how good it is.** Discoverability fails first at the technical layer: the crawler cannot reach the page, cannot see the content (client-rendering with no fallback), is told not to index it, or cannot tell what it is about (no metadata). Content quality only matters once the technical layer lets the content be seen and understood. So the priority is always: can it be crawled, can it be rendered, is it allowed to be indexed, can its meaning be read, before any finer optimisation.
+## Areas, in dependency order
 
-## Assessment by default, fixes when asked
+### 1. Access, rendering and route behaviour
 
-Default to assessing discoverability in priority order, crawlability, rendering, indexing rules, metadata, structure, sharing, and flagging what blocks or weakens it. Give implementation guidance when asked to fix rather than assess.
+Trace representative public routes through HTTP status, redirects, origin/CDN/WAF rules, required resources and internal links. Compare initial HTML with the rendered DOM and available provider diagnostics. Google can render JavaScript; other consumers, including sharing bots, may have different capabilities. Separate an observed visibility failure from a rendering risk that still needs verification.
 
-## The areas, in priority order
+Check direct entry, client navigation and missing routes. A useful error page must also have appropriate HTTP behaviour. Recommend existing static/server rendering facilities when they address an evidenced need, without treating SSR as a universal requirement.
 
-### 1. Crawlability and rendering (the gate)
-If a crawler cannot reach and read the content, nothing else matters.
-- Can crawlers access the pages (not blocked by robots rules, auth walls, or broken links)?
-- **Client-rendering trap:** a fully client-rendered app may serve a near-empty HTML shell that crawlers see as blank, the content only appears after JS runs, which crawlers may not execute reliably. Server-side rendering, static generation, or prerendering ensures crawlers get real content. This is the single biggest technical-SEO failure in fast-built SPAs.
-- Clean, crawlable URLs and working internal linking so pages are reachable.
-`references/crawlability-and-rendering.md` covers crawler access, the client-rendering trap and its fixes, and URL/linking structure.
+Read `references/crawlability-and-rendering.md`.
 
-### 2. Indexing control: robots and canonical (where accidents hide)
-Telling search engines what to index, and not accidentally telling them not to.
-- **robots.txt** and **meta robots / `noindex`:** the accidental `noindex` (often left over from staging) that hides a whole site is a classic, devastating, silent bug. Check nothing important is unintentionally blocked.
-- **Canonical URLs:** when the same content is reachable at multiple URLs (with/without trailing slash, query params, http/https, www/non-www), a canonical tag tells search engines the authoritative one, avoiding duplicate-content dilution.
-`references/indexing-and-canonical.md` covers robots rules, the accidental-noindex trap, and canonicalisation.
+### 2. Indexing intent, canonical URLs and crawler policy
 
-### 3. Page metadata: titles and descriptions (per page)
-What search engines show in results and use to understand each page.
-- **Title tag:** unique, descriptive per page, the most important on-page SEO element and the clickable result heading. Missing, duplicated, or generic titles are a common, high-impact gap.
-- **Meta description:** the result snippet; not a direct ranking factor but drives click-through. Should be useful and per-page.
-- Each page distinct, not the same title/description sitewide (a single-page-app failure when routing does not update them).
-`references/metadata.md` covers titles, descriptions, per-page uniqueness, and the SPA title-update problem.
+Check production versus preview/staging indexing, robots rules, meta/HTTP robots directives, canonical targets and redirects together. Robots controls crawling, does not protect private content, and can prevent a crawler from seeing a `noindex` directive. Canonicals are signals, not a guaranteed engine decision; preserve distinct useful pages.
 
-### 4. Social sharing: Open Graph and previews
-How the page looks when shared to social/chat, which drives click-through from those channels.
-- **Open Graph tags** (og:title, og:description, og:image) and Twitter Card tags control the preview card shown when a link is shared. Without them, shares show a bare URL or broken/empty preview, looking untrustworthy and getting fewer clicks.
-- A representative preview image sized correctly.
-`references/social-sharing.md` covers Open Graph, Twitter Cards, preview images, and per-page sharing data.
+Treat search, model-training and user-triggered fetch policies separately. Respect the owner's choices. Missing `llms.txt` is not an automatic failure and no crawler allowance guarantees AI citations.
 
-### 5. Structured data (schema.org)
-Helping search engines understand *what* the content is, enabling rich results.
-- Structured data (schema.org, usually JSON-LD) marks up the meaning of content (an article, a product, an event, a recipe, an organisation, a FAQ) so search engines can understand it and potentially show rich results (ratings, prices, FAQs in the listing).
-- Use the right type for the content; keep it accurate to what is on the page (mismatched structured data can be penalised).
-`references/structured-data.md` covers schema.org types, JSON-LD, rich results, and accuracy.
+Read `references/indexing-and-canonical.md` and `references/crawl-policy-and-ai.md`.
 
-### 6. Sitemaps and crawl guidance
-Helping search engines find and prioritise pages efficiently.
-- An **XML sitemap** listing the indexable pages, submitted to search engines, helps discovery, especially for larger sites or those with poor internal linking.
-- Keep it current (no dead/removed URLs), and consistent with robots/canonical signals.
-- For large sites, crawl-budget awareness; for most, a current sitemap and clean linking suffice.
-`references/sitemaps-and-crawl.md` covers XML sitemaps, submission, keeping them current, and crawl efficiency.
+### 3. Metadata, page structure and public identity
+
+Check useful route-specific titles and descriptions, language declarations, descriptive headings and meaningful internal links. Assess content hierarchy around actual services and user questions. Do not create thin pages, an arbitrary number of posts or fabricated research. One primary H1 is a useful convention; multiple H1 elements alone do not prove an SEO or accessibility failure.
+
+Identify framework-default names, icons and factual inconsistencies. Use `ux-ui-patterns/website-completeness.md` for production identity, business pages and content completeness; this lens owns their discoverability consequences. Titles and descriptions influence representation but are not guaranteed to be displayed verbatim.
+
+Read `references/metadata.md`.
+
+### 4. Sharing previews
+
+Inspect route-specific Open Graph/card metadata and reachable representative images using the intended consumer where possible. Missing tags do not prove every platform displays a broken preview; record the actual preview or the unverified risk. Check for private information in public preview assets.
+
+Read `references/social-sharing.md`.
+
+### 5. Structured data
+
+Check applicable, factual markup against visible content and current engine support. Separate valid schema.org vocabulary from eligibility for a particular search feature. Markup cannot guarantee a rich result or AI citation. Google retired FAQ rich results on 7 May 2026; useful FAQ content can still serve readers.
+
+Read `references/structured-data.md` and recheck current provider guidance before making feature-specific claims.
+
+### 6. Sitemaps and search diagnostics
+
+Check whether a sitemap is useful for the site's size and link structure. Existing entries should reflect intended canonical, indexable URLs with truthful modification dates. Check the correct production Search Console property, sitemap processing and representative indexing/canonical diagnostics when access is available. Lack of account access is a limitation, not a claimed pass or failed ownership check.
+
+Read `references/sitemaps-and-crawl.md`.
 
 ## How to report
-Order by impact: an accidental `noindex` or a crawler-blank client-rendered app (which make the whole site invisible) before a missing structured-data type. For each: the issue, its effect on discoverability/sharing, and the fix. Distinguish "this makes the site/page unfindable" from "this is a missed optimisation." Note what needs verifying with real tooling (search console, the rich-results test, fetching as a crawler).
+
+Prioritise demonstrated access/indexing blocks and broken routes before representation gaps and optional enhancements. For each finding, record route/template, environment or revision, observed evidence, intended policy, effect and proportionate remedy. Distinguish source inspection, rendered-browser evidence and provider observations; state what remains unverified. Never promise rankings, indexing, click-through improvement or AI citations.
 
 ## Scoping
-Match to whether and how the site needs to be found. A purely internal or auth-walled app does not need public SEO at all, say so, do not gold-plate. A public site whose success depends on being found needs the full set, with crawlability and indexing-control first. Even an app not chasing search rankings usually wants correct sharing previews (Open Graph) and no accidental `noindex`. The honest output for most public fast-built apps is "you have an accidental indexing block / your content is invisible to crawlers because it is client-rendered / your titles and sharing previews are missing, fix those and you are findable; finer optimisation comes after."
+
+Public discovery work may be not applicable to private routes. Source/render differences, missing sitemaps or absent structured data require context before becoming findings. Keep content strategy with `anti-slop-writing` and `ux-ui-patterns`, speed with `performance`, and private-data exposure with `code-audit` security. References include dated primary sources for claims that can change.
 
 ## What to produce under a production-audit
 

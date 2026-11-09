@@ -20,9 +20,9 @@ Instrumentation that is wrong or inconsistent produces confident wrong conclusio
 ## From metric to action
 
 The discipline that ties it together, every metric should connect to a possible decision:
-- For each key metric, know: if this moves, what would I do? Activation drops, investigate onboarding. Retention improves after a change, that change worked. Drop-off concentrates at a step, fix that step.
+- For each key metric, know: if this moves, what would I do? Activation drops, investigate onboarding. Retention improves after a change, investigate whether the change, user mix, seasonality or another cause explains it. Drop-off concentrates at a step, fix that step.
 - If a metric would never change any decision, question why it is tracked (measuring-the-right-things.md, it is probably vanity/noise).
-- **Close the loop:** make a change, watch the relevant metric, learn whether it worked. Analytics is most valuable as a feedback loop on decisions, not a passive report. This connects to how changes ship and get evaluated (`release-and-ops`, and gradual rollout where a metric tells you if a release is healthy).
+- **Close the loop:** make a change, watch the relevant metric and evaluate the evidence, with a comparison design where a causal claim matters. Analytics is most valuable as a feedback loop on decisions, not a passive report. This connects to how changes ship and get evaluated (`release-and-ops`, and gradual rollout where a metric tells you if a release is healthy).
 
 ## What to flag
 - Data collected but never reviewed (instrumentation effort and privacy exposure for no decisions).
@@ -36,3 +36,13 @@ Analytics pays off only when it changes what you do. Put the few metrics that ma
 
 ## Connection to other references
 Ties together the whole skill: actionable (not vanity) metrics (measuring-the-right-things.md), trustworthy events (event-design.md), funnel and retention insight (funnels-and-dropoff.md, activation-and-retention.md). The feedback loop on shipped changes connects to `release-and-ops` (releasing and watching the effect). Operational health dashboards are the sibling, `scaling-audit` (observability).
+
+## Experiments when they can answer the question
+
+Do not add A/B testing by default. For an appropriate experiment, specify the hypothesis, eligibility, assignment unit, stable allocation, primary metric and guardrails before launch. Plan the sample/duration against a meaningful effect and the available baseline; inspect allocation and instrumentation before interpreting outcomes. Account for repeated looks or use a predeclared stopping/analysis method. Report uncertainty and practical effect size, not a winner selected from small samples or many unplanned metrics.
+
+Low traffic may not support a useful experiment. A task-based usability study, customer evidence or a clearly labelled observational comparison may answer the question better. Inspect that supported variants preserve accessibility and privacy; an audit does not launch a live experiment.
+
+## Cart reminders and other follow-up
+
+Treat reminders as optional. Check applicable eligibility with `data-privacy`, then suppression after purchase, withdrawal/unsubscribe, frequency, expiry and duplicate delivery. Use test fixtures and sandbox delivery evidence; do not send real marketing messages during an audit. `email-deliverability` owns transport/delivery checks.

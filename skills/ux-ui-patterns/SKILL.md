@@ -16,6 +16,7 @@ Before building any interface, read the relevant reference files:
 - `accessibility.md` — WCAG compliance, keyboard navigation, screen readers, colour contrast, touch targets, focus management, reduced motion, ARIA, semantic HTML
 - `responsive-and-mobile.md` — Breakpoints, touch targets, mobile navigation, bottom sheets, gestures, adaptive content, viewport considerations, thumb zones
 - `microcopy.md` — Button labels, error messages, empty state copy, onboarding text, tooltips, confirmation dialogs, placeholder text, success messages
+- `website-completeness.md` — Route/journey inventory, working navigation and contact actions, production identity, truthful commercial information, fulfilment and authentic business proof. Used by code-audit's UI/UX pass, including static websites.
 
 ---
 

@@ -23,14 +23,14 @@ The metrics that reflect what a user actually experiences (Core Web Vitals and r
 - **Largest Contentful Paint (LCP):** how long until the main content appears. The headline "is it slow to load" number.
 - **Interaction to Next Paint (INP):** how responsive it feels when the user interacts. Captures jank.
 - **Cumulative Layout Shift (CLS):** how much the page jumps around as it loads. Captures the annoying reflow.
-- **Time to Interactive / total blocking:** when the user can actually use the page, not just see it.
+- **Total Blocking Time and main-thread traces:** lab diagnostics for load-time blocking; they do not establish field INP or the exact moment a page becomes usable.
 - **Total weight and request count:** how much is downloaded and how many round-trips before the page is usable.
 
 `references/measuring-performance.md` covers these metrics, the tools (Lighthouse, the browser profiler, the network waterfall), and how to find the dominant bottleneck.
 
 ## The areas, in priority order
 
-Ordered by how often each is the dominant problem in a typical app.
+Use the measured bottleneck to choose the order below; asset or bundle size alone does not establish user impact.
 
 ### 1. Asset weight: images, fonts, media
 Usually the biggest and easiest win. Unoptimised images are the most common single cause of slow loads.
@@ -76,10 +76,16 @@ Why the app janks *after* it has loaded.
 `references/runtime-and-interaction.md` covers main-thread work, render optimisation, and large-list handling.
 
 ## How to report
-Lead with the measurement and the single biggest contributor. Order fixes by impact-per-effort: the 4MB hero image and the unsplit 2MB bundle are usually larger wins than any micro-optimisation. For each: what is slow, how much it is costing (a number from the measurement), and the fix. Distinguish "this is the bottleneck" from "this is minor." Resist listing every possible optimisation; name the few that move the number.
+Lead with the measurement and the single biggest contributor. Order fixes by impact-per-effort: the 4MB hero image and the unsplit 2MB bundle are usually larger wins than any micro-optimisation. For each: what is slow, the observed measurement and conditions, and the fix. If measurement is unavailable, label the source-derived hypothesis and required verification; never invent a latency or saving. Distinguish "this is the bottleneck" from "this is minor." Resist listing every possible optimisation; name the few that move the number.
 
 ## Scoping
 Match to the app and its users. A tiny internal tool does not need Core Web Vitals tuning; a public, consumer-facing app where load speed affects retention and conversion warrants the full pass. Mobile and slow-network users feel all of this far more than a developer on a fast machine, so measure under realistic conditions, not just on localhost. The honest output is often "your load is dominated by one unoptimised image and an oversized bundle; fix those two and you have most of the win."
+
+## Evidence and ownership
+
+Separate field Core Web Vitals from lab diagnostics. Record route, revision/environment, tool/version, device, network/CPU and cache state; compare repeated runs under equivalent conditions. A Lighthouse score cannot establish real-user INP or a whole-site pass. See `references/measuring-performance.md` for thresholds and field-data limitations.
+
+Before recommending caching, establish the intended audience and invalidation behaviour. A cache that exposes another user or tenant is a security finding owned by `code-audit` (`SEC`, category `security`), not a `PERF` finding. Keep this lens on measured speed; refer query-plan/index/load concerns to `scaling-audit`. Auditing does not authorise cache purges, new tracking or load tests.
 
 ## What to produce under a production-audit
 

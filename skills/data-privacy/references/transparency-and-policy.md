@@ -9,10 +9,10 @@ A privacy policy should cover, in plain language a normal user can follow:
 - Why each category is collected (the purpose).
 - The lawful basis, where required. **[LEGAL]**
 - How long data is kept (retention).
-- Who it is shared with: third-party processors (analytics, email, hosting, payment, the AI provider) and any other recipients.
+- Who receives it and for which activities: processors, independent controllers or joint controllers, according to the actual roles.
 - Whether data leaves the user's jurisdiction (international transfers). **[LEGAL]**
 - How users exercise their rights (access, deletion, correction, objection) and how to contact you.
-- For tracking: what cookies/identifiers are used and the consent choices.
+- For tracking/storage access: the actual purposes, technologies and applicable consent, objection or other choices (see lawful-basis-and-consent.md).
 
 ## The match-reality principle (the engineering job)
 
@@ -27,7 +27,7 @@ A lawyer drafts the binding text; the engineering side ensures the facts the tex
 
 ## Accessibility of the notice
 
-The policy and any privacy information must be genuinely accessible: findable (linked, not buried), readable (plain language, not only dense legalese), and presented before or at the point data is collected, not hidden after the fact. Just-in-time notices (a short explanation at the moment a specific data use happens) are good practice alongside the full policy.
+The policy and any privacy information must be accessible: findable (linked, not buried), readable (plain language, not only dense legalese), and presented before or at the point data is collected, not hidden after the fact. Just-in-time notices (a short explanation at the moment a specific data use happens) are good practice alongside the full policy.
 
 ## What to flag, by stage
 - Collects nothing meaningful: a short honest statement may suffice; confirm with a lawyer whether a full policy is needed. **[LEGAL]**

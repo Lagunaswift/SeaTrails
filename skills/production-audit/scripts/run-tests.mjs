@@ -13,7 +13,7 @@
 // Exit 0 = all cases behave as expected. Exit 1 = a regression.
 // =============================================================================
 
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, mkdirSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -50,6 +50,61 @@ function report(over = {}) {
     out.coverage = { files_total: 1, files_examined: 1, areas_total: 1, matrix: runLenses.map((l) => `${l}: all areas examined`) };
   }
   return out;
+}
+
+
+// One atomic finding with a matching roll-call and exact reconciliation.
+function single(over = {}, reportOver = {}) {
+  const f = finding(over);
+  return { ledger: [f], report: report({
+    scope: { lenses_selected: [f.lens], lenses_run: [f.lens] },
+    reconciliation: { raw: 1, reported: 1, merged: 0, dropped: 0 },
+    findings: [f], ...reportOver,
+  }) };
+}
+function evidenceRepo(dir) {
+  mkdirSync(join(dir, 'repo'));
+  writeFileSync(join(dir, 'repo', 'a.ts'), 'const x = 1;\n');
+  writeFileSync(join(dir, 'outside.ts'), 'const outside = true;\n');
+}
+const VERIFIED = { status: 'verified', evidence: GOOD_EVIDENCE };
+
+// Website coverage is a scoped review record, not another findings ledger.
+const WEBSITE_TOPICS = [
+  'journeys', 'identity-navigation', 'access-security', 'commerce',
+  'reliability-cost', 'interaction-states', 'mobile-accessibility', 'performance',
+  'discovery-sharing', 'privacy-measurement', 'content-brand', 'layout-features',
+];
+function websiteAudit(change = () => {}) {
+  const r = report();
+  r.scope.review_profiles = ['website-readiness'];
+  const website = {
+    topics: WEBSITE_TOPICS.map((id) => ({
+      id, owner: 'code-audit', applicability: 'applicable',
+      reason: 'Review the recorded fixture surface.', status: 'assessed',
+      surfaces: ['/fixture: initial state'],
+      evidence: [{ mode: 'source', ref: 'a.ts:1, fixture source review' }],
+      finding_ids: [], limitations: [],
+    })),
+    features: Array.from({ length: 24 }, (_, i) => ({
+      id: `OPT-${String(i + 1).padStart(2, '0')}`, presence: 'absent',
+      decision: 'not_needed', reason: 'The fixture product has no approved task requiring this feature.',
+      finding_ids: [], evidence: [], limitations: [],
+    })),
+  };
+  r.coverage.website_readiness = website;
+  const ledger = [];
+  change(website, r, ledger);
+  return { ledger, report: r };
+}
+function deferWebsiteOwner(w, r) {
+  r.scope.lenses_selected.push('performance');
+  r.scope.lenses_deferred = ['performance'];
+  r.scope.partial = true;
+  Object.assign(w.topics[7], {
+    owner: 'performance', status: 'partial',
+    limitations: ['Performance measurements are pending on the supported phone.'],
+  });
 }
 
 // ---- the cases --------------------------------------------------------------
@@ -698,7 +753,604 @@ const cases = [
     expectExit: 1,
     fixtureDir: 'fixtures/fail',
   },
+
+  // ---- design lenses: category ownership and the consequence boundary --------
+  {
+    name: 'impeccable: design-system finding at medium PASSES',
+    expect: 'pass',
+    ...single({ id: 'IMP-001', lens: 'impeccable-audit', category: 'design-aesthetic' }),
+  },
+  {
+    name: 'taste: contextual visual finding at medium PASSES',
+    expect: 'pass',
+    ...single({ id: 'TASTE-001', lens: 'taste-audit', category: 'design-aesthetic', confidence_type: 'reasoning' }),
+  },
+  {
+    name: 'impeccable: security cannot be hidden in a design lens FAILS',
+    expect: 'fail',
+    ...single({ id: 'IMP-001', lens: 'impeccable-audit', category: 'security' }),
+  },
+  {
+    name: 'taste: cannot claim frontend ownership to evade the polish cap FAILS',
+    expect: 'fail',
+    ...single({ id: 'TASTE-001', lens: 'taste-audit', category: 'frontend', severity: 'high', verification: VERIFIED }, { remediation_order: [{ id: 'TASTE-001', reason: 'test order' }] }),
+  },
+  {
+    name: 'impeccable: verified access barrier keeps high severity PASSES',
+    expect: 'pass',
+    ...single({ id: 'IMP-001', lens: 'impeccable-audit', category: 'accessibility', severity: 'high', verification: VERIFIED }, { remediation_order: [{ id: 'IMP-001', reason: 'restore keyboard access' }] }),
+  },
+  {
+    name: 'taste: visual preference at high FAILS',
+    expect: 'fail',
+    ...single({ id: 'TASTE-001', lens: 'taste-audit', category: 'design-aesthetic', severity: 'high', verification: VERIFIED }),
+  },
+  {
+    name: 'impeccable: borrowing the taste prefix FAILS',
+    expect: 'fail',
+    ...single({ id: 'TASTE-001', lens: 'impeccable-audit', category: 'design-aesthetic' }),
+  },
+  // ---- evidence: local fixtures, not existence checks against the maintainer's repo
+  {
+    name: 'evidence: a supplied nonexistent repo cannot skip verification FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'missing-repo',
+    ...single(),
+  },
+  {
+    name: 'evidence: a real in-repo file and line PASSES',
+    expect: 'pass',
+    repo: 'repo', setup: evidenceRepo,
+    ...single({ verification: VERIFIED }),
+  },
+  {
+    name: 'evidence: relative traversal outside the repo FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: evidenceRepo,
+    ...single({ location: { file: '../outside.ts', line: 1 } }),
+  },
+  {
+    name: 'evidence: symlink escape outside the repo FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: (dir) => { evidenceRepo(dir); symlinkSync('../outside.ts', join(dir, 'repo', 'escape.ts')); },
+    ...single({ location: { file: 'escape.ts', line: 1 } }),
+  },
+  {
+    name: 'evidence: directory cannot stand in for a cited file FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: (dir) => { evidenceRepo(dir); mkdirSync(join(dir, 'repo', 'folder')); },
+    ...single({ location: { file: 'folder', line: null } }),
+  },
+  {
+    name: 'evidence: zero is not a source line FAILS',
+    expect: 'fail',
+    ...single({ location: { file: 'a.ts', line: 0 } }),
+  },
+  {
+    name: 'evidence: secondary citations are checked too FAILS',
+    expect: 'fail',
+    repo: 'repo', setup: evidenceRepo,
+    ...single({ location: { file: 'a.ts', line: 1, others: ['missing.ts:1'] } }),
+  },
+  {
+    name: 'evidence: dropped high refutation cannot cite a missing file FAILS',
+    expect: 'fail',
+    repo: 'repo', setup: evidenceRepo,
+    ledger: [finding({ severity: 'high' })],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 },
+      dropped: [{ id: 'SEC-001', reason: 'Guard prevents the reported failure', verification: { status: 'refuted', evidence: 'missing.ts:1 contains the rejecting guard' } }] }),
+  },
+  // ---- reconciliation: sets must not conceal duplicate or invented entries ---
+  {
+    name: 'reconciliation: missing declared counts FAILS',
+    expect: 'fail',
+    ...single({}, { reconciliation: {} }),
+  },
+  {
+    name: 'reconciliation: duplicate report id cannot disappear into a Set FAILS',
+    expect: 'fail',
+    ...single({}, { findings: [finding(), finding()] }),
+  },
+  {
+    name: 'reconciliation: duplicate dropped id FAILS',
+    expect: 'fail',
+    ledger: [finding()],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 }, dropped: [
+      { id: 'SEC-001', reason: 'Not reachable from this application' },
+      { id: 'SEC-001', reason: 'Not reachable from this application' },
+    ] }),
+  },
+  {
+    name: 'reconciliation: a merged id has exactly one survivor FAILS',
+    expect: 'fail',
+    ledger: [finding(), finding({ id: 'SEC-002' }), finding({ id: 'SEC-003' })],
+    report: report({ reconciliation: { raw: 3, reported: 2, merged: 1, dropped: 0 }, findings: [
+      finding({ dedup: { merged_from: ['SEC-003'] } }), finding({ id: 'SEC-002', dedup: { merged_from: ['SEC-003'] } }),
+    ] }),
+  },
+  // ---- coverage: a denominator must be a real count, and a lens an exact id ---
+  {
+    name: 'coverage: negative file counts FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: -1, files_examined: -1, areas_total: 1, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: examined cannot exceed total FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 2, areas_total: 1, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: fractional counts FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1.5, files_examined: 1.5, areas_total: 1, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: fractional area count FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 0.5, matrix: ['code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: substring in a prose row cannot impersonate a lens FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['not-code-audit: complete'] } }),
+  },
+  {
+    name: 'coverage: exact lens in an object row PASSES',
+    expect: 'pass',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: [{ lens: 'code-audit', areas: { source: 'covered' } }] } }),
+  },
+  {
+    name: 'coverage: duplicate lens rows FAILS',
+    expect: 'fail',
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['code-audit: complete', 'code-audit: complete'] } }),
+  },
+  {
+    name: 'roll-call: unknown selected and run lens FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { lenses_selected: ['code-audit', 'invented'], lenses_run: ['code-audit', 'invented'] } }),
+  },
+  {
+    name: 'roll-call: a lens cannot be both run and deferred FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { partial: true, lenses_selected: ['code-audit'], lenses_run: ['code-audit'], lenses_deferred: ['code-audit'] } }),
+  },
+  {
+    name: 'roll-call: deferred work cannot masquerade as complete FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { lenses_selected: ['code-audit', 'performance'], lenses_run: ['code-audit'], lenses_deferred: ['performance'] } }),
+  },
+  // ---- machine-readable output and argument validation -----------------------
+  {
+    name: 'json: passing gate emits a single result object PASSES',
+    expect: 'pass',
+    args: ['--json'], json: true,
+    ...single(),
+  },
+  {
+    name: 'json: failing gate retains exit 1 and structured failures FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    args: ['--json'], json: true,
+    ...single({ severity: 'high' }),
+  },
+  {
+    name: 'json: unknown flag is an input error with structured output FAILS',
+    expect: 'fail',
+    expectExit: 2,
+    args: ['--json', '--typo'], json: true,
+    ...single(),
+  },
+  {
+    name: 'args: missing repo argument is not silently ignored FAILS',
+    expect: 'fail',
+    expectExit: 2,
+    args: ['--repo'],
+    ...single(),
+  },
+  {
+    name: 'shape: invalid findings array yields a diagnostic instead of a crash FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    args: ['--json'], json: true,
+    ledger: [], report: { findings: {}, dropped: [], reconciliation: {} },
+  },
+  {
+    name: 'evidence: dropped refutation inherited from ledger is still checked FAILS',
+    expect: 'fail',
+    expectExit: 1,
+    repo: 'repo', setup: evidenceRepo,
+    ledger: [finding({ severity: 'high', verification: { status: 'refuted', evidence: 'missing.ts:1 contains the rejecting guard' } })],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 }, dropped: [{ id: 'SEC-001', reason: 'Guard prevents the reported failure' }] }),
+  },
+  {
+    name: 'evidence: symlink to a file inside the repository PASSES',
+    expect: 'pass',
+    repo: 'repo', setup: (dir) => { evidenceRepo(dir); symlinkSync('a.ts', join(dir, 'repo', 'alias.ts')); },
+    ...single({ location: { file: 'alias.ts', line: 1 } }),
+  },
+  {
+    name: 'roll-call: missing selection cannot skip deferred-work checks FAILS',
+    expect: 'fail',
+    ...single({}, { scope: { lenses_run: ['code-audit'], lenses_deferred: ['performance'] } }),
+  },
+  {
+    name: 'reconciliation: duplicate raw id with a fabricated merge to balance counts FAILS',
+    expect: 'fail',
+    ledger: [finding(), finding()],
+    report: report({ reconciliation: { raw: 2, reported: 1, merged: 1, dropped: 0 }, findings: [finding({ dedup: { merged_from: ['SEC-404'] } })] }),
+  },
+  {
+    name: 'limitations: named visual gaps survive the renderer PASSES',
+    expect: 'pass',
+    renderIncludes: 'Dark-theme screenshots were not available.',
+    ...single({}, { limitations: ['Dark-theme screenshots were not available.'] }),
+  },
+  {
+    name: 'limitations: a non-array must not disappear in rendering FAILS',
+    expect: 'fail',
+    ...single({}, { limitations: 'No browser was available' }),
+  },
+  {
+    name: 'limitations: empty entries are not coverage explanations FAILS',
+    expect: 'fail',
+    ...single({}, { limitations: [''] }),
+  },
+  {
+    name: 'limitations: generated filler in the delivered gap section FAILS',
+    expect: 'fail',
+    ...single({}, { limitations: ['In conclusion no browser was available.'] }),
+  },
 ];
+
+// Delivery must invoke the gate even when the caller skips it.
+cases.push({ name: 'renderer: invalid audit cannot claim a passed harness FAILS',
+  expect: 'fail', renderReject: true, ...single({}, { reconciliation: {} }) });
+cases.push({ name: 'renderer: report without ledger cannot claim a passed harness FAILS',
+  expect: 'pass', renderReject: true, removeLedgerBeforeRender: true, ...single() });
+
+cases.push({ name: 'assurance: versioned report without independent records FAILS',
+  expect: 'fail',
+  ...single({}, { assurance_version: 1 }) });
+
+// Profile bypasses first: the old gate ignored this whole coverage block.
+cases.push(
+  {
+    name: 'website: complete declared coverage and optional omissions render without creating findings PASSES',
+    expect: 'pass',
+    renderIncludes: ['Website readiness coverage', ...WEBSITE_TOPICS, 'OPT-01', 'OPT-24',
+      '| OPT-12 Autosave/drafts | absent | not_needed |',
+      'a.ts:1, fixture source review', 'not a global pass'],
+    ...websiteAudit(),
+  },
+  {
+    name: 'website: coverage cannot hide behind an absent profile declaration FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { delete r.scope.review_profiles; }),
+  },
+  {
+    name: 'website: declared profile without its coverage FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { delete r.coverage.website_readiness; }),
+  },
+  {
+    name: 'website: null profile selection fails cleanly FAILS',
+    expect: 'fail', expectExit: 1, args: ['--json'], json: true,
+    ...websiteAudit((w, r) => { r.scope.review_profiles = null; }),
+  },
+  {
+    name: 'website: duplicate profile selection FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { r.scope.review_profiles.push('website-readiness'); }),
+  },
+  {
+    name: 'website: an unknown profile cannot masquerade as an audited profile FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { r.scope.review_profiles.push('invented-profile'); }),
+  },
+  {
+    name: 'website: null coverage block fails cleanly FAILS',
+    expect: 'fail', expectExit: 1, args: ['--json'], json: true,
+    ...websiteAudit((w, r) => { r.coverage.website_readiness = null; }),
+  },
+  {
+    name: 'website: omitted topic cannot disappear from the denominator FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics.pop(); }),
+  },
+  {
+    name: 'website: duplicate topic cannot pad coverage FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics.push({ ...w.topics[0] }); }),
+  },
+  {
+    name: 'website: unknown topic cannot substitute for required coverage FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].id = 'invented-topic'; }),
+  },
+  {
+    name: 'website: null topic fails cleanly FAILS',
+    expect: 'fail', expectExit: 1, args: ['--json'], json: true,
+    ...websiteAudit((w) => { w.topics[0] = null; }),
+  },
+  {
+    name: 'website: assessed topic without evidence FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].evidence = []; }),
+  },
+  {
+    name: 'website: assessed topic without recorded surfaces FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].surfaces = []; }),
+  },
+  {
+    name: 'website: invented evidence mode FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].evidence[0].mode = 'assumed'; }),
+  },
+  {
+    name: 'website: not-applicable topic may name an unselected registered owner PASSES',
+    expect: 'pass',
+    renderIncludes: ['commerce', 'not_applicable', 'The fixture has no purchase or subscription flow.'],
+    ...websiteAudit((w) => { Object.assign(w.topics[3], {
+      owner: 'frontend-robustness', applicability: 'not_applicable', status: 'not_applicable',
+      reason: 'The fixture has no purchase or subscription flow.', evidence: [], surfaces: [],
+    }); }),
+  },
+  {
+    name: 'website: not-applicable topic cannot claim assessed status FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].applicability = 'not_applicable'; }),
+  },
+  {
+    name: 'website: not-applicable topic needs a contextual reason FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { Object.assign(w.topics[0], {
+      applicability: 'not_applicable', status: 'not_applicable', reason: ' ', evidence: [], surfaces: [],
+    }); }),
+  },
+  {
+    name: 'website: excluded topic cannot claim evidence or findings FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { Object.assign(w.topics[0], {
+      applicability: 'not_applicable', status: 'not_applicable', surfaces: [],
+    }); }),
+  },
+  {
+    name: 'website: invented topic owner FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].owner = 'invented-lens'; }),
+  },
+  {
+    name: 'website: applicable owner that never ran or was selected FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].owner = 'performance'; }),
+  },
+  {
+    name: 'website: deferred owner cannot claim an assessed topic FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { deferWebsiteOwner(w, r); w.topics[7].status = 'assessed'; }),
+  },
+  {
+    name: 'website: named deferred topic and its limitation survive rendering PASSES',
+    expect: 'pass',
+    renderIncludes: ['PARTIAL audit', 'partial', 'Performance measurements are pending on the supported phone.'],
+    ...websiteAudit(deferWebsiteOwner),
+  },
+  {
+    name: 'website: partial topic cannot masquerade as complete FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { Object.assign(w.topics[0], {
+      status: 'partial', limitations: ['The payment retry state was not available.'],
+    }); }),
+  },
+  {
+    name: 'website: blocked topic must name its limitation FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { r.scope.partial = true; w.topics[0].status = 'blocked'; }),
+  },
+  {
+    name: 'website: dangling canonical finding reference FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.topics[0].finding_ids = ['SEC-404']; }),
+  },
+  {
+    name: 'website: merged-away finding reference cannot survive reconciliation FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r, ledger) => {
+      ledger.push(finding(), finding({ id: 'SEC-002' }));
+      r.findings = [finding({ dedup: { merged_from: ['SEC-002'], also_seen_by_lenses: [] } })];
+      r.reconciliation = { raw: 2, reported: 1, merged: 1, dropped: 0 };
+      w.topics[0].finding_ids = ['SEC-002'];
+    }),
+  },
+  {
+    name: 'website: existing feature can cite a surviving canonical finding PASSES',
+    expect: 'pass',
+    renderIncludes: ['OPT-01', 'improve', 'SEC-001', 'The existing setting contradicts its documented behaviour.'],
+    ...websiteAudit((w, r, ledger) => {
+      ledger.push(finding()); r.findings = [finding()];
+      r.reconciliation = { raw: 1, reported: 1, merged: 0, dropped: 0 };
+      Object.assign(w.features[0], { presence: 'present', decision: 'improve',
+        reason: 'The existing setting contradicts its documented behaviour.',
+        finding_ids: ['SEC-001'], evidence: [{ mode: 'interactive', ref: '/fixture, setting reproduction in test session 1' }],
+      });
+    }),
+  },
+  {
+    name: 'website: omitted optional-feature decision FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.features.pop(); }),
+  },
+  {
+    name: 'website: duplicate optional-feature decision FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.features.push({ ...w.features[0] }); }),
+  },
+  {
+    name: 'website: null optional-feature record fails cleanly FAILS',
+    expect: 'fail', expectExit: 1, args: ['--json'], json: true,
+    ...websiteAudit((w) => { w.features[0] = null; }),
+  },
+  {
+    name: 'website: present optional feature cannot be excused as not needed FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.features[0].presence = 'present'; }),
+  },
+  {
+    name: 'website: keeping a present feature requires evidence FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { Object.assign(w.features[0], { presence: 'present', decision: 'keep' }); }),
+  },
+  {
+    name: 'website: scoped evidence can support an improvement without inventing a defect PASSES',
+    expect: 'pass',
+    ...websiteAudit((w) => { Object.assign(w.features[0], { presence: 'present', decision: 'improve',
+      reason: 'The reviewed settings screen could expose the existing theme choice more clearly.',
+      evidence: [{ mode: 'rendered', ref: '/settings, 390 by 844, light theme, capture 1' }],
+    }); }),
+  },
+  {
+    name: 'website: absent recommendations and approved or pending choices are not assessment gaps PASSES',
+    expect: 'pass',
+    renderIncludes: ['recommend', 'approved', 'decision_required'],
+    ...websiteAudit((w) => { ['recommend', 'approved', 'decision_required'].forEach((decision, i) => {
+      w.features[i].decision = decision;
+      w.features[i].reason = 'The owner is considering this addition for a future reading workflow.';
+    }); }),
+  },
+  {
+    name: 'website: unknown feature presence cannot be treated as absent FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.features[0].presence = 'unknown'; }),
+  },
+  {
+    name: 'website: unknown blocked feature requires a partial audit FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { Object.assign(w.features[0], { presence: 'unknown', decision: 'blocked',
+      limitations: ['The authenticated settings route could not be opened.'],
+    }); }),
+  },
+  {
+    name: 'website: unknown blocked feature needs a named limitation FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { r.scope.partial = true;
+      Object.assign(w.features[0], { presence: 'unknown', decision: 'blocked' });
+    }),
+  },
+  {
+    name: 'website: unknown feature and its access blocker remain visible PASSES',
+    expect: 'pass',
+    renderIncludes: ['unknown', 'blocked', 'The authenticated settings route could not be opened.'],
+    ...websiteAudit((w, r) => { r.scope.partial = true;
+      Object.assign(w.features[0], { presence: 'unknown', decision: 'blocked',
+        limitations: ['The authenticated settings route could not be opened.'],
+      });
+    }),
+  },
+  {
+    name: 'website: malformed feature evidence fails cleanly FAILS',
+    expect: 'fail', expectExit: 1, args: ['--json'], json: true,
+    ...websiteAudit((w) => { w.features[0].evidence = [null]; }),
+  },
+  {
+    name: 'website: profile prose cannot bypass the report prose gate FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.features[0].reason = 'In conclusion this feature is not needed.'; }),
+  },
+  {
+    name: 'website: invented optional-feature id FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { w.features[0].id = 'OPT-99'; }),
+  },
+  {
+    name: 'website: malformed topic arrays fail cleanly FAILS',
+    expect: 'fail', expectExit: 1, args: ['--json'], json: true,
+    ...websiteAudit((w) => { w.topics[0].limitations = null; }),
+  },
+  {
+    name: 'website: assessed topic cannot hide outstanding work in limitations FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r) => { r.scope.partial = true;
+      w.topics[0].limitations = ['The retry journey still needs an interactive check.'];
+    }),
+  },
+  {
+    name: 'website: keeping a feature cannot conceal its linked defect FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r, ledger) => {
+      ledger.push(finding()); r.findings = [finding()];
+      r.reconciliation = { raw: 1, reported: 1, merged: 0, dropped: 0 };
+      Object.assign(w.features[0], { presence: 'present', decision: 'keep', finding_ids: ['SEC-001'],
+        evidence: [{ mode: 'source', ref: 'a.ts:1, source observation' }],
+      });
+    }),
+  },
+  {
+    name: 'website: unknown feature presence cannot claim a known defect FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r, ledger) => {
+      ledger.push(finding()); r.findings = [finding()];
+      r.reconciliation = { raw: 1, reported: 1, merged: 0, dropped: 0 }; r.scope.partial = true;
+      Object.assign(w.features[0], { presence: 'unknown', decision: 'blocked', finding_ids: ['SEC-001'],
+        limitations: ['The settings route is inaccessible to the test account.'],
+      });
+    }),
+  },
+  {
+    name: 'website: justified optional absence cannot also claim a defect FAILS',
+    expect: 'fail',
+    ...websiteAudit((w, r, ledger) => {
+      ledger.push(finding()); r.findings = [finding()];
+      r.reconciliation = { raw: 1, reported: 1, merged: 0, dropped: 0 };
+      w.features[0].finding_ids = ['SEC-001'];
+    }),
+  },
+  {
+    name: 'website: known feature cannot hide an assessment gap in a complete audit FAILS',
+    expect: 'fail',
+    ...websiteAudit((w) => { Object.assign(w.features[0], { presence: 'present', decision: 'keep',
+      evidence: [{ mode: 'source', ref: 'a.ts:1, existing theme setting' }],
+      limitations: ['Keyboard operation remains untested on the settings route.'],
+    }); }),
+  },
+  {
+    name: 'website: scoped keep decision with a visible partial assessment PASSES',
+    expect: 'pass',
+    renderIncludes: ['PARTIAL audit', 'keep', 'Keyboard operation remains untested on the settings route.'],
+    ...websiteAudit((w, r) => { r.scope.partial = true;
+      Object.assign(w.features[0], { presence: 'present', decision: 'keep',
+        evidence: [{ mode: 'source', ref: 'a.ts:1, existing theme setting' }],
+        limitations: ['Keyboard operation remains untested on the settings route.'],
+      });
+    }),
+  },
+  {
+    name: 'website: not-applicable topic cannot hide unfinished assessment in limitations FAILS',
+    expect: 'fail', expectExit: 1, args: ['--json'], json: true,
+    ...websiteAudit((w) => { Object.assign(w.topics[3], {
+      applicability: 'not_applicable', status: 'not_applicable',
+      reason: 'The payment integration was unavailable to the reviewer.',
+      surfaces: [], evidence: [], finding_ids: [],
+      limitations: ['Payment provider settings and the retry journey remain unassessed.'],
+    }); }),
+  },
+  {
+    name: 'website: unavailable required commerce assessment is applicable blocked and visibly partial PASSES',
+    expect: 'pass',
+    renderIncludes: ['PARTIAL audit', 'commerce', 'applicable', 'blocked',
+      'Payment provider settings and the retry journey remain unassessed.'],
+    ...websiteAudit((w, r) => { r.scope.partial = true;
+      Object.assign(w.topics[3], { status: 'blocked', surfaces: ['/checkout: retry state'], evidence: [],
+        reason: 'The product sells access but the payment test environment is unavailable.',
+        limitations: ['Payment provider settings and the retry journey remain unassessed.'],
+      });
+    }),
+  },
+);
 
 // ---- run --------------------------------------------------------------------
 let passed = 0, failed = 0;
@@ -712,10 +1364,33 @@ for (const c of cases) {
       writeFileSync(join(dir, 'raw-findings.jsonl'), ledgerText);
       writeFileSync(join(dir, 'report.json'), c.rawReport != null ? c.rawReport : JSON.stringify(c.report));
     }
-    const res = spawnSync(process.execPath, [HARNESS, dir], { encoding: 'utf8' });
+    if (c.setup) c.setup(dir);
+    const argv = [HARNESS, dir, ...(c.repo ? ['--repo', join(dir, c.repo)] : []), ...(c.args || [])];
+    const res = spawnSync(process.execPath, argv, { encoding: 'utf8', timeout: 10000 });
     const got = res.status === 0 ? 'pass' : 'fail';
     const exitOk = c.expectExit == null || res.status === c.expectExit;
-    const ok = got === c.expect && exitOk;
+    let jsonOk = true;
+    if (c.json) {
+      try {
+        const out = JSON.parse(res.stdout);
+        jsonOk = out.format_version === 1 && out.exit_code === res.status && out.ok === (res.status === 0)
+          && Array.isArray(out.failures) && Array.isArray(out.warnings)
+          && (res.status === 0 ? out.failures.length === 0 : out.failures.length > 0)
+          && !res.stderr.trim();
+      } catch { jsonOk = false; }
+    }
+    let renderOk = true;
+    if (c.renderReject) {
+      if (c.removeLedgerBeforeRender) rmSync(join(dir, 'raw-findings.jsonl'));
+      const rendered = spawnSync(process.execPath, [join(HERE, 'render-report.mjs'), dir, '--legacy'], { encoding: 'utf8' });
+      renderOk = rendered.status !== 0 && rendered.stdout === '';
+    }
+    if (c.renderIncludes && res.status === 0) {
+      const rendered = spawnSync(process.execPath, [join(HERE, 'render-report.mjs'), dir, '--legacy'], { encoding: 'utf8', timeout: 10000 });
+      const wanted = Array.isArray(c.renderIncludes) ? c.renderIncludes : [c.renderIncludes];
+      renderOk = rendered.status === 0 && wanted.every((text) => rendered.stdout.includes(text));
+    }
+    const ok = got === c.expect && exitOk && jsonOk && renderOk && !res.error;
     if (ok) { passed++; console.log(`✔  ${c.name}  (expected ${c.expect}${c.expectExit != null ? `, exit ${c.expectExit}` : ''})`); }
     else {
       failed++;

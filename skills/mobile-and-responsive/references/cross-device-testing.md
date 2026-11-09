@@ -20,7 +20,7 @@ Cover the range, not one point:
 You cannot test every device, but testing across this matrix (a couple of sizes, both orientations, both platforms, real touch) catches the vast majority of cross-device issues.
 
 ## A practical routine
-1. **During build:** browser responsive mode, check the layout reflows cleanly across widths and at the in-between sizes (no horizontal scroll, no overflow).
+1. **During build:** browser responsive mode, check the layout reflows cleanly across widths and at the in-between sizes (no unintended page-level overflow; preserve legitimate contained two-dimensional scrolling).
 2. **Interaction check:** on a real device (or careful emulation), verify tap targets are hittable, no hover-only traps, gestures work, forms get the right keyboard and the field stays visible.
 3. **Performance check:** throttle CPU/network (or use a mid-range device) to confirm it is usable, not just fast on the desktop (mobile-performance.md).
 4. **Platform check:** look at it on both iOS and Android, since they differ.
@@ -37,3 +37,9 @@ Almost every mobile and responsive bug exists because nobody looked at the app o
 
 ## Connection to other references
 This verifies everything else in the skill, layout (responsive-layout.md), touch (touch-and-interaction.md), viewport/orientation (viewport-and-rendering.md), forms (mobile-input.md), performance (mobile-performance.md). The realistic-conditions principle is shared with `performance`'s measuring approach.
+
+## Report actual coverage
+
+Record route/state, revision, viewport, browser/OS, device or emulation, orientation and input method for each executed check. Include navigation/menu, forms, overlays, loading/error/success and any sticky controls relevant to the task. A screenshot does not establish touch, keyboard or form completion.
+
+Choose representative devices from the supported audience. If a real iOS/Android device, screen reader or deployment is unavailable, state the unverified combinations and the remaining test; do not fabricate a pass or call the limitation an observed interface failure. Avoid requiring a particular platform matrix for an explicitly narrower supported product.

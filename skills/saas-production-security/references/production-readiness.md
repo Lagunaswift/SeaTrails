@@ -196,13 +196,13 @@ A user sends an AI request. Your system must:
 4. Receive response
 5. Reconcile budget (refund unused reservation)
 
-If step 3 fails after step 2, you have deducted budget for work that was not done. If step 2 and step 3 are not atomic, a race condition allows two concurrent requests to both pass the check before either deduction is committed, exceeding the budget.
+If the provider result is unknown after step 3, reconcile it before releasing the reservation or repeating the call; a timeout does not prove no work occurred. Steps 1 and 2 must check and reserve atomically, otherwise concurrent requests can both pass before either deduction is committed.
 
 ### Solutions
 
 **Optimistic locking with version check.** Read the budget with a version number. Deduct and write back with a version check. If the version changed between read and write (another request modified it), retry.
 
-**Atomic decrement.** Use an atomic operation (Redis DECRBY, Firestore transaction, SQL UPDATE ... WHERE balance >= cost) that checks and deducts in one operation. No race window.
+**Atomic reservation.** Check available balance and reserve usage in the same conditional transaction or script. A plain [Redis DECRBY](https://redis.io/docs/latest/commands/decrby/) decrements a value; it does not enforce a non-negative balance. Keep external side effects outside retryable transaction callbacks, then settle or reconcile the reservation against the actual outcome.
 
 **Saga pattern for multi-step operations.** For agent executions that span multiple AI calls, use a saga: each step has a compensating action. If step 4 fails, execute compensating actions for steps 3, 2, 1 (refund budget, clean up partial results).
 
@@ -218,14 +218,14 @@ If your rate limit counters are in Redis and your budget tracking is in Firestor
 
 Every state-changing operation that touches money or AI usage should be idempotent. If a network timeout causes a retry, the retry should produce the same result as the original, not double the charge or double the AI call.
 
-Implementation: assign a unique idempotency key to each operation. Before executing, check if that key has already been processed. If yes, return the stored result.
+Assign a stable operation identity scoped to the actor and intended business action. Claim it durably with an atomic constraint/transaction; a separate read-before-write check races under concurrency. Persist pending/completed state and reuse the identity on retries and after restarts. Reconcile unknown provider outcomes before issuing another charge. Provider idempotency does not replace durable business uniqueness; use the acceptance probes and provider references in `../../code-audit/references/website-boundaries.md`.
 
 ```
 Idempotency scope:
   AI request submission: idempotency key = client-generated UUID
   Budget deduction: idempotency key = request ID
-  Stripe charge: idempotency key = invoice ID + line item ID
-  Webhook processing: idempotency key = webhook event ID
+  Payment creation: stable server-assigned payment operation ID
+  Webhook processing: provider event ID plus business-state transition checks
 ```
 
 ---
@@ -262,25 +262,17 @@ Use a dedicated lightweight health check endpoint that does not share resources 
 
 ### Data Residency Requirements
 
-GDPR and similar regulations may require that EU user data stays within the EU. This affects:
+Establish actual residency and transfer requirements from the product's contracts and applicable rules. Do not infer an EU-only storage requirement from a user's location. Verify the relevant data flows through:
 
 - Where your databases are hosted
-- Which AI provider region you call (OpenAI and Anthropic offer EU endpoints)
+- Which AI provider regions and subprocessors receive data
 - Where your caches store data
 - Where your logs are stored
 - Where backups are replicated
 
 ### AI Provider Region Routing
 
-Route AI requests to the provider region that matches the user's data residency requirement:
-
-```
-User in EU → call AI provider's EU endpoint
-User in US → call AI provider's US endpoint
-User in APAC → call AI provider's US endpoint (if no APAC region available)
-```
-
-Check your AI provider's data processing terms for each region. Some providers process data in a specific region but may transfer it for model improvement unless you opt out.
+Compare the configured region, actual processing/storage flows and provider terms with those requirements, including fallback routing. Record unavailable settings as evidence gaps. Route transfer safeguards and legal determinations through `../../data-privacy/references/retention-and-third-parties.md`; geography alone does not establish compliance.
 
 ### Multi-Region Architecture Considerations
 
@@ -330,13 +322,13 @@ Action: deploy rollback procedure, point-in-time database recovery. This is the 
 
 ### DR Testing
 
-Test disaster recovery quarterly. Simulate each scenario:
+Inspect the recovery-test schedule and evidence against the product's recovery targets. Execute a drill only within its authorised environment and bounds. Before restoring or starting recovered services, apply the isolation rules in `../../scaling-audit/references/data-durability.md`: sandbox production jobs, outbound effects and credentials. Relevant scenarios include:
 - Kill the AI provider connection and verify failover
 - Restore from backup to a separate environment and verify data integrity
 - Roll back a deployment and verify the previous version works
 - Verify that monitoring and alerting fire correctly during each simulation
 
-An untested DR plan is fiction.
+Record configuration, a demonstrated restore and missing evidence separately. A plan alone cannot establish recovery time or data integrity.
 
 ---
 

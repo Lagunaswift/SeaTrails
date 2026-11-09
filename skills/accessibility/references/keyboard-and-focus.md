@@ -16,7 +16,7 @@ The test: Tab through the whole interface. Can you reach every control? Can you 
 Keyboard users need to see where focus is, which element will respond to their next keypress. Browsers provide a default focus outline; the common, damaging mistake is removing it for aesthetics (`outline: none`) without providing a replacement, which leaves keyboard users with no idea where they are, the interface becomes unusable for them even though nothing is technically broken.
 - Never remove focus indication without replacing it with something at least as clear.
 - A custom focus style is fine and often better, but it must be clearly visible against the background (this overlaps contrast).
-- Focus indication should be obvious, not a subtle one-pixel change.
+- Focus indication should be clear. Check that author-created sticky headers, notices or overlays do not entirely hide a focused component (WCAG 2.2 AA 2.4.11); a recommendation for complete visibility can go beyond this minimum.
 
 ## Focus order
 
@@ -45,3 +45,9 @@ A keyboard trap is focus that gets stuck somewhere the user cannot Tab out of, a
 
 ## The honest framing
 The keyboard test is the cheapest, highest-value accessibility check you can run: put the mouse aside and try to complete every task. Most keyboard barriers come from fake controls (fixed by semantic markup) and from dynamic UI that does not manage focus (fixed by moving and trapping focus deliberately). Add a clearly visible focus indicator and a sensible tab order, and the interface becomes usable for a large group it would otherwise exclude entirely.
+
+## Pointer and hover additions
+
+Check the WCAG 2.2 target-size exceptions and a non-drag single-pointer alternative using `wcag-22-checks.md`. For tooltips and other content appearing on hover/focus, inspect keyboard access and the applicable dismissible, hoverable and persistent behaviour; essential instructions must not depend on hover alone.
+
+Source checked 9 November 2026: [WCAG 2.2](https://www.w3.org/TR/WCAG22/).

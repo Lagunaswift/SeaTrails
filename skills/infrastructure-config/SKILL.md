@@ -77,7 +77,7 @@ Read `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/conf
 - **Excessive permissions** — `permissions: write-all` or `contents: write` on workflows that only need read access.
 - **Self-hosted runners on public repos** — any fork can run code on your infrastructure.
 - **No branch protection** — check if the pipeline runs on push to main without requiring PR review.
-- **Artifact leakage** — uploading build artifacts that contain `.env` files, credentials, or source maps.
+- **Artifact leakage**: inspect build artefacts and source maps for actual secrets or unintended private content. A public source map alone is not a vulnerability; assess its contents and the intended debugging policy. Disabling maps does not protect a secret still delivered in browser code.
 
 ### Pass 5: Reverse proxy and server config
 

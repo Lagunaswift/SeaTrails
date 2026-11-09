@@ -13,7 +13,11 @@ If a piece of data can be linked back to an individual, treat it as personal dat
 
 ## Special-category data (much stricter) [LEGAL]
 
-Some data carries far heavier obligations: health data, biometric data (face, fingerprint), genetic data, sexual orientation, racial/ethnic origin, religious or political beliefs, trade-union membership. Processing these generally requires a stronger lawful basis (often explicit consent) and more care. An app handling any of these (a fitness app storing health metrics, for instance) is in special-category territory and should involve a lawyer/DPO. Children's data is similarly elevated, services likely to be used by minors have extra duties (age-appropriate design, parental consent thresholds that vary by jurisdiction).
+Classify the actual information and purpose. UK GDPR special categories include health, genetic information and biometrics used to uniquely identify a person, along with the other Article 9 categories. A photograph is not automatically identification biometrics, financial information is not a special category solely because it is sensitive, and fitness-tracker data is not necessarily health data.
+
+Where special-category processing applies, identify both an Article 6 lawful basis and an Article 9 condition; explicit consent is one possible condition, not the universal answer. Children's data may require additional protections under the applicable regime without itself being an Article 9 category. Record facts for **[LEGAL]** review where scope or conditions remain unresolved.
+
+Sources checked 9 November 2026: [ICO special-category overview](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/a-guide-to-lawful-basis/special-category-data/) and [ICO category definitions](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/special-category-data/what-is-special-category-data/).
 
 ## The minimisation test
 

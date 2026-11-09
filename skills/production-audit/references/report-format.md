@@ -5,7 +5,7 @@ This file is the contract for the final deliverable. Stage 5 produces `report.js
 ## The two closing scripts, in order
 
 1. **Gate.** `node .claude/skills/production-audit/scripts/audit-check.mjs <audit-dir> [--repo <path>]` must exit zero. Pass `--repo` whenever the target repo is on disk — it validates every cited file and line against reality.
-2. **Render.** `node .claude/skills/production-audit/scripts/render-report.mjs <audit-dir> > report.md` generates the human-readable report *from* the validated `report.json`. Never hand-write `report.md`, and never edit the rendered file — every count a reader trusts is computed from the gated data so the prose cannot diverge. To change the report, change `report.json` (then re-gate) or the renderer (then see `run-tests.mjs`).
+2. **Render.** `node .claude/skills/production-audit/scripts/render-report.mjs <audit-dir> --repo <path> --assurance <evidence-dir> > report.md` generates the human-readable report *from* the validated `report.json`. Never hand-write `report.md`, and never edit the rendered file — every count a reader trusts is computed from the gated data so the prose cannot diverge. To change the report, change `report.json` (then re-gate) or the renderer (then see `run-tests.mjs`).
 
 The report is not delivered until the harness exits zero. There is no "mostly passed".
 
@@ -24,6 +24,8 @@ One JSON object with these top-level keys (the harness and renderer read exactly
 | `remediation_order` | when gating findings exist | `[{id, reason}]` covering **every** gating finding (critical/high, excluding polish categories and re-narrated chains). Sequenced by damage-rate-per-effort: `live blast-radius × likelihood ÷ fix cost` — not by severity label, not by data-sensitivity. Each entry's `reason` says why it sits where it does. |
 | `summary` | optional | Free-text executive summary. The one hand-written prose slot — it passes through the slop gate like everything else. Omit it and the renderer generates a summary from the counts. |
 
+For website audits, `scope.review_profiles` includes `website-readiness`, and `coverage.website_readiness` contains the twelve topic records and twenty-four feature decisions defined in `website-readiness-profile.md`. A coverage block without its declaration, or a declared profile without its complete block, fails the gate. Older/non-website reports with neither retain their existing contract. The profile IDs are coverage labels, not canonical finding IDs.
+
 ## The rendered structure (what the reader sees, in order)
 
 1. **Title + method line.** Stack, lenses run, the reconciliation arithmetic, verification counts, "integrity harness passed", "report mode (no code changed)". A partial run gets "**This is a PARTIAL audit**" stamped here with the deferred lenses named — never buried below.
@@ -34,7 +36,7 @@ One JSON object with these top-level keys (the harness and renderer read exactly
 6. **Remediation order.** The sequenced list with per-entry reasons.
 7. **Findings by severity.** Tiers count distinct defects: re-narrated attack chains (chains whose `chain.root_cause_finding` points at a reported finding) fold into that finding's entry as "also surfaced as an attack path", and are excluded from tier counts. Each finding: id, title, location, issue, consequence, lens(es), confidence type, fix. Reasoning-typed critical/highs carry the "confirm the inference against the code before acting" warning.
 8. **Design & copy quality.** The polish axes — `design-aesthetic` and `content` — in their own capped section, never in the readiness tiers. Credibility and conversion risks, addressed after the readiness findings.
-9. **Coverage matrix.** When provided.
+9. **Coverage matrix and selected profiles.** The website profile, when selected, renders every topic, owner, applicability/status, route/state, evidence reference, finding link and limitation, then every optional-feature decision and reason. Assessed means scoped review, not a global pass.
 10. **Reconciliation.** The identity spelled out, plus every dropped finding with its reason.
 11. **What could not be assessed.** Deferred lenses, unexamined files, and always: live/runtime state is not determinable from a repository.
 
@@ -48,3 +50,21 @@ One JSON object with these top-level keys (the harness and renderer read exactly
 ## Related references
 
 `finding-schema.md` (the record shape) · `ledger-and-reconciliation.md` (the ledger and the identity) · `verification-and-severity.md` (what verified means) · `coverage-matrix.md` (the denominator) · `merge-and-deduplicate.md` (survivors and `merged_from`).
+
+
+## Machine-readable gate results
+
+`audit-check.mjs <audit-dir> [--repo <path>] --json` prints one JSON object and no progress prose. The additive output contract is `format_version: 1`, boolean `ok`, numeric `exit_code`, string arrays `failures` and `warnings`, and `counts.raw` / `counts.reported` when validation ran. Exit codes remain 0 for a passing gate, 1 for validation failure and 2 for invalid command arguments. Do not treat a JSON-shaped failure as a passing report. Unknown flags, repeated path options and missing option values are rejected.
+
+The audit-directory positional form and explicit `--ledger` / `--report` form are alternatives. A supplied `--repo` must be an existing directory; primary, secondary and refutation citations are checked inside its realpath boundary. A passing gate verifies artifact integrity, not completeness of the underlying audit or truth of a visual judgement.
+
+
+## Named assessment limits
+
+The optional `limitations` array contains non-empty strings naming unassessed routes, themes, states, evidence modes or scope assumptions. The gate validates the field and its prose; the renderer includes every entry in "What could not be assessed". Use it for source-only design reviews so missing browser evidence remains visible in the delivered report. It supplements the matrix and partial flag; it does not make missing coverage complete.
+
+Website-profile partial/blocked topics and any feature assessment limitations also appear in that rendered section. They require `scope.partial=true` even if all source files were delivered. Missing browser/provider access is an evidence limit, not a pass or a reason to declare an applicable topic inapplicable. Pending optional product recommendations do not imply missing audit evidence.
+
+## Evidence assurance
+
+New delivery requires the capture and semantic-review contract in `evidence-assurance.md`. The renderer invokes the gate itself on a private ledger/report snapshot. Historical `--legacy` delivery explicitly labels self-reported coverage and review. Gate warnings and manifest exclusions are printed; integrity success never implies measured detection accuracy.

@@ -4,42 +4,82 @@
 // -----------------------------------------------------------------------------
 // The method line, counts, severity tiers, coverage matrix, and reconciliation
 // are all computed from the validated report.json, so the prose a reader trusts
-// cannot diverge from the data the harness gated. Run this AFTER audit-check.mjs
-// passes; pipe its output to report.md.
+// cannot diverge from the data the harness gated. This command gates its own
+// input snapshot before printing any report.
 //
-//   node render-report.mjs <audit-dir>        > report.md
-//   node render-report.mjs --report <f.json>  > report.md
+//   node render-report.mjs <audit-dir> --repo <repo> --assurance <evidence-dir>
+//   node render-report.mjs <historical-audit-dir> --legacy
 //
 // Pure Node, zero dependencies.
 // =============================================================================
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 
 const SEV_ORDER = ['critical', 'high', 'medium', 'low', 'info'];
 const SEV_RANK = Object.fromEntries(SEV_ORDER.map((s, i) => [s, i]));
-
-function parseArgs(argv) {
-  const a = argv.slice(2);
-  if (!a.length) return null;
-  if (a[0] === '--report') return { report: a[1] };
-  return { report: join(a[0], 'report.json') };
-}
-const args = parseArgs(process.argv);
-if (!args || !args.report || !existsSync(args.report)) {
-  console.error('usage: node render-report.mjs <audit-dir>  |  --report <report.json>');
-  process.exit(2);
-}
-let R;
-try { R = JSON.parse(readFileSync(args.report, 'utf8')); }
-catch (e) { console.error(`cannot read report.json: ${e.message}`); process.exit(2); }
+// Presentation labels from the website profile catalogue, not report input.
+const WEBSITE_FEATURE_NAMES = new Map([
+  'Dark mode', 'Language switcher', 'Back-to-top', 'Reading progress/time',
+  'Copy/share', 'Save-for-later/recently-viewed', 'Shortcuts', 'Custom text sizing',
+  'Interactive tables', 'Search/filter/sort', 'Expandable/searchable FAQs', 'Autosave/drafts',
+  'Password visibility', 'Contents navigation', 'Offline access', 'Rich tooltips',
+  'Loading animation', 'Sticky header/CTA or floating contact', 'Print treatment', 'Confirmation',
+  'Before-and-after gallery', 'Cart reminders', 'A/B tests', 'llms.txt',
+].map((name, index) => [`OPT-${String(index + 1).padStart(2, '0')}`, name]));
+let R, gate, args = {};
+let snapshot;
+try {
+  const argv = process.argv.slice(2);
+  let dir;
+  for (let i = 0; i < argv.length; i++) {
+    const flag = argv[i];
+    if (flag === '--legacy') { if (args.legacy) throw Error('duplicate --legacy'); args.legacy = true; }
+    else if (['--report', '--ledger', '--repo', '--assurance'].includes(flag)) {
+      const key = flag.slice(2);
+      if (args[key] || !argv[i + 1] || argv[i + 1].startsWith('-')) throw Error(`invalid ${flag}`);
+      args[key] = argv[++i];
+    } else if (flag.startsWith('-') || dir) throw Error(`unexpected argument ${flag}`);
+    else dir = flag;
+  }
+  if (dir) {
+    if (args.report || args.ledger) throw Error('use directory OR --report/--ledger');
+    args.report = join(dir, 'report.json'); args.ledger = join(dir, 'raw-findings.jsonl');
+  }
+  if (!args.report || !args.ledger) throw Error('supply audit directory or --report and --ledger');
+  if (!args.legacy && (!args.repo || !args.assurance)) throw Error('delivery requires --repo and --assurance; --legacy explicitly renders a limited historical audit');
+  if (args.legacy && args.assurance) throw Error('--legacy and --assurance are mutually exclusive');
+  // Gate and render the SAME bytes. A report replaced during validation cannot be delivered.
+  const reportBytes = readFileSync(args.report);
+  const ledgerBytes = readFileSync(args.ledger);
+  snapshot = mkdtempSync(join(tmpdir(), 'seatrial-render-'));
+  writeFileSync(join(snapshot, 'report.json'), reportBytes);
+  writeFileSync(join(snapshot, 'raw-findings.jsonl'), ledgerBytes);
+  const command = [fileURLToPath(new URL('./audit-check.mjs', import.meta.url)), snapshot, '--json'];
+  if (args.repo) command.push('--repo', args.repo);
+  if (args.assurance) command.push('--assurance', args.assurance);
+  const result = spawnSync(process.execPath, command, { encoding: 'utf8', timeout: 120000, maxBuffer: 16 * 1024 * 1024 });
+  if (result.error) throw result.error;
+  gate = JSON.parse(result.stdout);
+  if (result.status !== 0 || !gate.ok) {
+    console.error((gate.failures || ['validation failed']).join('\n'));
+    process.exitCode = 1;
+  } else R = JSON.parse(reportBytes.toString('utf8'));
+} catch (e) { console.error(`cannot render report: ${e.message}`); process.exitCode = 2; }
+finally { if (snapshot) rmSync(snapshot, { recursive: true, force: true }); }
+if (!R) process.exit(process.exitCode || 1);
 
 const findings = Array.isArray(R.findings) ? R.findings : [];
 const dropped = Array.isArray(R.dropped) ? R.dropped : [];
 const scope = R.scope || {};
 const cov = R.coverage || {};
 const rec = R.reconciliation || {};
+const website = cov.website_readiness;
+const websiteGaps = [];
 
 // ---- chain collapse: re-narrated attack chains fold into their root-cause finding ----
 // A chain carrying chain.root_cause_finding (pointing at a reported finding) is the attack-path
@@ -93,11 +133,13 @@ const methodBits = [
   `${(scope.lenses_run || []).length} lens(es) run (${lensesRun})`,
   `${rec.raw ?? findings.length + dropped.length} raw findings → ${findings.length} reported, ${rec.merged ?? 0} merged, ${dropped.length} dropped`,
   `critical/high adversarially verified (${verified} verified, ${capped} capped, ${downgraded} severity-calibrated, ${dropped.length} dropped as false positives)`,
-  `integrity harness passed`,
+  `integrity harness passed on the rendered snapshot (${args.assurance ? 'evidence records checked' : 'legacy structural checks only'})`,
   `report mode (no code changed)`,
 ];
 w(`**Method.** Stack: ${stack}. ${methodBits.join('; ')}.` +
-  (partial ? ` **This is a PARTIAL audit** — ${deferred.length} applicable lens(es) deferred (${deferred.join(', ')}); a follow-up run is required.` : ''));
+  (partial ? (website && !deferred.length
+    ? ' **This is a PARTIAL audit** — required website assessment work remains; see coverage and limitations.'
+    : ` **This is a PARTIAL audit** — ${deferred.length} applicable lens(es) deferred (${deferred.join(', ')}); a follow-up run is required.`) : ''));
 w();
 
 // ---- 1b. by the numbers — lead with the GATING SET, not the raw total -------
@@ -112,7 +154,11 @@ w();
 
 // ---- 2. scope ---------------------------------------------------------------
 w(`## Scope`);
+w(`- **Evidence assurance:** ${args.assurance ? 'source quotes, finding-bound review records and recorded file deliveries checked. Semantic conclusions remain reviewer judgements; reads do not prove comprehension.' : 'LIMITED historical mode: coverage and semantic verification are self-reported.'}`);
+for (const entry of gate.assurance?.exclusions || []) w(`- **Excluded tracked file:** \`${entry.file}\` — ${entry.reason}`);
+for (const warning of gate.warnings || []) w(`- **Gate warning:** ${warning}`);
 w(`- **Lenses run:** ${lensesRun}`);
+if (scope.review_profiles?.length) w(`- **Review profiles:** ${scope.review_profiles.join(', ')}`);
 if (deferred.length) w(`- **Lenses deferred (NOT yet run):** ${deferred.join(', ')} — open coverage gap, follow-up required.`);
 // Regulated data class → a legal data-protection duty is in scope regardless of any stated goal.
 const dataClasses = Array.isArray(R.stack_profile?.data_classes) ? R.stack_profile.data_classes : [];
@@ -133,7 +179,7 @@ if (regulatedClasses.length) {
   w(`- **Regulated data class(es) detected:** ${regulatedClasses.join(', ')} — a **legal data-protection duty** under the applicable framework${fwHint} is in scope *by data class*, independent of any stated compliance goal. SOC 2 *certification* may be deferred; this duty may not. See the compliance findings.`);
 }
 if (typeof cov.files_examined === 'number' && typeof cov.files_total === 'number') {
-  w(`- **Files examined:** ${cov.files_examined} of ${cov.files_total}` + (cov.files_examined < cov.files_total ? ` (${cov.files_total - cov.files_examined} not examined — see "what could not be assessed")` : ' (full coverage)'));
+  w(`- **Files examined:** ${cov.files_examined} of ${cov.files_total}` + (cov.files_examined < cov.files_total ? ` (${cov.files_total - cov.files_examined} not examined — see "what could not be assessed")` : ' (all inventoried files recorded)'));
 }
 w();
 
@@ -181,7 +227,7 @@ for (const sev of SEV_ORDER) {
     w(`- **${f.id} — ${f.title}**  \`${loc}\``);
     w(`  - Issue: ${f.issue}`);
     w(`  - Consequence: ${f.consequence}`);
-    w(`  - Lens(es): ${lenses} · confidence: ${f.confidence_type}` + (f.verification?.verifier_disagreed ? ` · severity calibrated (${f.verification?.note || 'see note'})` : ''));
+    w(`  - Lens(es): ${lenses} · confidence: ${f.confidence_type} · review status: ${f.verification?.status}` + (f.verification?.verifier_disagreed ? ` · severity calibrated (${f.verification?.note || 'see note'})` : ''));
     if (f.category === 'attack-path' && f.chain) {
       w(`  - Attack path: ${(f.chain.steps || []).join(' → ')}`);
       if (f.chain.detection_gap) w(`  - Detection gap: ${f.chain.detection_gap}`);
@@ -216,7 +262,53 @@ if (polish.length) {
   w();
 }
 
-// ---- 6. coverage matrix -----------------------------------------------------
+// ---- 6. declared website coverage and product decisions ---------------------
+if (website) {
+  const text = (value) => String(value).replace(/[\r\n]+/g, ' ').replace(/\|/g, '\\|').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const evidence = (items) => items.map((entry) => `${entry.mode}: ${text(entry.ref)}`).join('; ');
+  const featureLabel = (id) => `${id} ${WEBSITE_FEATURE_NAMES.get(id)}`;
+  w('## Website readiness coverage');
+  w();
+  w('Assessed records a review of the listed surfaces with the stated evidence, not a global pass or proof that the product is safe. Evidence references describe recorded observations; the profile gate checks their structure, not their truth.');
+  w();
+  for (const topic of website.topics) {
+    w(`- **${topic.id}** · ${topic.applicability} · ${topic.status} · owner: ${topic.owner}`);
+    w(`  - Basis: ${text(topic.reason)}`);
+    w(`  - Surfaces: ${topic.surfaces.length ? topic.surfaces.map(text).join('; ') : 'none recorded'}`);
+    w(`  - Evidence: ${topic.evidence.length ? evidence(topic.evidence) : 'none claimed'}`);
+    w(`  - Finding references: ${topic.finding_ids.join(', ') || 'none linked'}`);
+    for (const limitation of topic.limitations) {
+      w(`  - Limitation: ${text(limitation)}`);
+      websiteGaps.push(`Website ${topic.id}: ${text(limitation)}`);
+    }
+  }
+  w();
+  w('### Optional feature decisions');
+  w();
+  w('Absence alone is not a defect. Recommendations and existing approvals do not authorise implementation during this read-only audit. Keep is a scoped recommendation, not a certification.');
+  w();
+  w('| Feature | Presence | Decision | Basis |');
+  w('| --- | --- | --- | --- |');
+  for (const feature of website.features) {
+    w(`| ${featureLabel(feature.id)} | ${feature.presence} | ${feature.decision} | ${text(feature.reason)} |`);
+  }
+  const details = website.features.filter((feature) => feature.evidence.length || feature.finding_ids.length || feature.limitations.length);
+  if (details.length) {
+    w();
+    for (const feature of details) {
+      w(`- **${featureLabel(feature.id)} evidence and limits**`);
+      if (feature.evidence.length) w(`  - Evidence: ${evidence(feature.evidence)}`);
+      if (feature.finding_ids.length) w(`  - Finding references: ${feature.finding_ids.join(', ')}`);
+      for (const limitation of feature.limitations) {
+        w(`  - Limitation: ${text(limitation)}`);
+        websiteGaps.push(`Website ${featureLabel(feature.id)}: ${text(limitation)}`);
+      }
+    }
+  }
+  w();
+}
+
+// ---- 6b. coverage matrix ----------------------------------------------------
 if (Array.isArray(cov.matrix) && cov.matrix.length) {
   w(`## Coverage matrix`);
   w('```');
@@ -242,7 +334,10 @@ if (deferred.length) gaps.push(`**Lenses not yet run (follow-up required):** ${d
 if (typeof cov.files_examined === 'number' && typeof cov.files_total === 'number' && cov.files_examined < cov.files_total) {
   gaps.push(`**${cov.files_total - cov.files_examined} source file(s) not examined.**`);
 }
+gaps.push(`**Detection accuracy:** integrity checks do not measure recall or false positives. Use a separately scored benchmark run; no accuracy claim follows from this report.`);
 gaps.push(`**Live/runtime state** (deployed env vars, infra state, runtime behaviour) is not determinable from the repository.`);
+for (const limitation of R.limitations || []) gaps.push(limitation);
+gaps.push(...websiteGaps);
 for (const g of gaps) w(`- ${g}`);
 w();
 

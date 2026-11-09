@@ -1,37 +1,35 @@
 # Measuring performance
 
-Performance work starts with measurement, always. The most common waste in optimisation is fixing something that was never the bottleneck. Before changing anything, find what is actually slow and how slow, then you know what is worth fixing and you can prove the fix worked.
+Measure the relevant route and task before selecting an optimisation. Source inspection can identify a plausible bottleneck but cannot establish runtime latency or a numerical saving without measurement.
 
-## The user-facing metrics
+## Field metrics and thresholds
 
-These reflect what a user actually experiences, not internal numbers:
+Current Core Web Vitals good thresholds are **LCP ≤ 2.5 seconds, INP ≤ 200 milliseconds and CLS ≤ 0.1**, assessed at the 75th percentile and segmented by mobile/desktop. Inspect the available route/origin scope, collection period and sample coverage. Do not present origin-wide data as proof about every individual page.
 
-- **Largest Contentful Paint (LCP):** time until the largest content element (usually the main image or heading) renders. The headline load-speed number. Good is under ~2.5s; over ~4s feels slow.
-- **Interaction to Next Paint (INP):** how quickly the page responds to user input. Captures jank and unresponsiveness after load.
-- **Cumulative Layout Shift (CLS):** how much visible content jumps around during load (an image loading and shoving text down, a banner appearing). Low is good; high is the maddening "I tapped the wrong thing because it moved" experience.
-- **First Contentful Paint (FCP):** when anything first appears. Earlier than LCP; the "is it even loading" moment.
-- **Time to Interactive / Total Blocking Time:** when the user can actually use the page, not just see it. A page can paint fast but be frozen while JS executes.
-- **Total transferred weight and request count:** how many bytes and round-trips before the page is usable.
+Use available CrUX or appropriately governed real-user monitoring when authorised. A small/new site may lack sufficient field data; report that limitation. Do not install a tracker during an audit or infer that absent field data means a pass or failure.
 
-## The tools
+## Lab diagnostics
 
-- **Lighthouse** (in Chrome DevTools or as CI): scores the Core Web Vitals and lists concrete issues with estimated savings. The fastest way to a prioritised list.
-- **The Network waterfall** (DevTools Network tab): shows every request, its size, when it started, and what blocked it. This is where you see the 4MB image, the sequential request chain, the render-blocking script.
-- **The Performance profiler** (DevTools): for runtime/interaction issues, shows what the main thread is doing and where time goes after load.
-- **Bundle analysers** (for JS): show what is actually in the bundle and what is bloating it (see javascript-bundle).
-- **Real-user monitoring (field data):** lab tools measure one run on your machine; field data (e.g. Chrome UX Report, or RUM in your analytics) measures real users on real devices and networks, which is what actually matters.
+Lighthouse, a network waterfall, bundle analysis and main-thread/interaction traces can explain a reproducible problem. A Lighthouse score or Total Blocking Time is not field INP. A load-only run may miss later layout shifts and interactions. Exercise the actual navigation, menu, search, form or checkout task implicated by the finding.
 
-## Measure under realistic conditions
+Record:
 
-The single biggest measurement mistake: testing only on a fast machine on a fast connection (the developer's setup). Real users are often on mid-range phones on mobile networks, where a heavy bundle or large images hurt many times more. Use throttling (DevTools can simulate slow CPU and network) and test on the conditions your actual users have. A page that is fine on localhost can be unusable on a mid-range phone on 4G.
+- URL/route, build revision and environment;
+- tool/version, browser/device or emulation, viewport, CPU/network settings;
+- cold/warm cache, authentication state and relevant fixture/data size;
+- repeated comparable runs, their spread and the chosen summary, not the best score alone.
 
-## Finding the dominant bottleneck
+Capture asset transfer sizes, resource timing and expensive work supporting the proposed cause. Separate initial load from repeat navigation and interaction costs. Controlled lab throttling is an approximation, not a claim that a real device was tested.
 
-Most apps have one or two problems that dominate. The method:
-1. Run Lighthouse for the prioritised list with estimated savings.
-2. Look at the network waterfall for the biggest items and the longest chains.
-3. Identify the single largest contributor to LCP (often one image or one blocking resource) and the total JS weight.
-4. Fix the biggest thing, then measure again, the numbers should move. If they do not, you fixed the wrong thing.
+## Recommendations and verification
 
-## The honest framing
-Do not optimise on a hunch and do not optimise everything. Measure, find the one or two things that dominate the slowness, fix those, and re-measure to prove it. A single measurement before and after turns performance work from guessing into engineering. The rest of this skill's references are the fixes; this is how you know which ones you actually need.
+Choose the largest evidenced contributor that can be changed without breaking function, accessibility or privacy. Set a route/task-specific budget when useful; no universal JavaScript-byte cap fits every product. Re-measure under the same conditions after an authorised change and report variation. A one-run improvement is weak evidence when its size is within normal noise.
+
+Field data takes time to reflect a release. Describe lab improvement and any still-pending field validation separately. If tools or deployment access are unavailable, state the exact test needed instead of manufacturing results.
+
+## Sources checked 9 November 2026
+
+- [Core Web Vitals thresholds](https://web.dev/articles/defining-core-web-vitals-thresholds)
+- [Web Vitals: field and lab measurement](https://web.dev/articles/vitals)
+
+Recheck current metric definitions and provider reporting at execution time.
