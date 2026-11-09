@@ -4,6 +4,8 @@ This is the integration map for the supplied Website Audit and Remediation Brief
 
 The brief's IDs below are provenance labels only. They are not SeaTrails finding IDs and must never enter raw-findings.jsonl as findings. SeaTrails keeps its existing lenses, severity rules, evidence assurance, report-by-default mode and canonical output. Read website-readiness-profile.md for runtime selection, topic coverage and optional decisions.
 
+Brief version 1.1 also adds a journey review informed by [Jakob Nielsen's ten usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/). Read [nielsen-usability-review.md](../../ux-ui-patterns/nielsen-usability-review.md) for the ten perspectives, original task probes and existing-control crosswalk. HEUR-01 through HEUR-10 are review labels, not additional controls. This source is separate from the screenshot material; the 119 controls and original 201 source entries remain unchanged.
+
 ## Reuse and additions
 
 Most security, operations, state handling, performance and accessibility checks already had owners. The integration adds the website profile and commercial completeness reference, makes boundary tests more explicit, updates requirements that could produce incorrect findings and aligns design guidance with purpose. Existing design/evidence work is retained. An entry marked "existing" still has to be assessed when applicable; it is not a claim that a target website passed.
@@ -30,10 +32,10 @@ Paths in this table are relative to the installed .claude/skills/ directory. Rea
 | REL-04 | code-audit; performance/references/caching.md | Adds private cache isolation and consequence routing |
 | REL-05, REL-06, REL-07 | scaling-audit/references/data-durability.md, scaling-audit/references/observability.md, scaling-audit/references/concurrency-and-load.md | Adds restore side-effect isolation, demonstrated alerts and bounded evidence |
 | REL-08 | scaling-audit; code-audit; frontend-robustness | Existing consistency/race/recovery checks, stronger interruption evidence |
-| UX-01, UX-02, UX-07, UX-08, UX-09 | code-audit; ux-ui-patterns/website-completeness.md | Adds focused website navigation, contact, identity and missing-page review |
+| UX-01, UX-02, UX-07, UX-08, UX-09 | code-audit; ux-ui-patterns/website-completeness.md; ux-ui-patterns/nielsen-usability-review.md | Adds focused website navigation, contact, identity, missing-page and task-help review |
 | UX-03 | mobile-and-responsive; impeccable-audit | Existing responsive/content stress review, contextual layout guidance |
-| UX-04, UX-06 | code-audit; ux-ui-patterns/forms-and-input.md; accessibility | Existing field/action semantics, real result and validation review |
-| UX-05, UX-10 | frontend-robustness/references/form-submission.md; production-audit/references/website-readiness-profile.md | Adds precise saved/submitted/delivered and conditional draft decisions |
+| UX-04, UX-06 | code-audit; ux-ui-patterns/forms-and-input.md; ux-ui-patterns/nielsen-usability-review.md; accessibility | Existing field/action semantics and validation; explicit exits, error prevention and memory review across steps |
+| UX-05, UX-10 | frontend-robustness/references/form-submission.md; ux-ui-patterns/nielsen-usability-review.md; production-audit/references/website-readiness-profile.md | Adds precise saved/submitted/delivered, cancellation/recovery outcomes and conditional draft decisions |
 | A11Y-01, A11Y-02 | accessibility/references/semantic-structure.md; accessibility/references/screen-readers-and-text.md | Existing semantics/alternatives; removes H1-count-only failures |
 | A11Y-03, A11Y-04, A11Y-05 | accessibility; ux-ui-patterns/accessibility.md | Existing keyboard/focus/form checks; explicit focus-obscuring states |
 | A11Y-06, A11Y-07, A11Y-08 | accessibility/references/colour-and-visual.md; mobile-and-responsive | Corrects resize/reflow and target-size requirements and exceptions |
@@ -49,7 +51,7 @@ Paths in this table are relative to the installed .claude/skills/ directory. Rea
 | PRIV-05 | data-privacy; code-audit; frontend-robustness | Existing retention/deletion/export, stronger cache/draft boundaries |
 | BRAND-01, BRAND-02, BRAND-06 | taste-audit; anti-slop-writing; ux-ui-patterns/website-completeness.md | Existing provenance/brand review, adds commercial facts and evidence |
 | BRAND-03, BRAND-04, BRAND-05 | impeccable-audit; taste-audit; frontend-design | Retains design-system review, adds layout vocabulary and preservation rule |
-| BRAND-07 | production-audit/references/design-review-context.md; anti-slop-writing; frontend-design | Adds keep/rewrite/restyle/remove with contextual eyebrow examples |
+| BRAND-07 | production-audit/references/design-review-context.md; ux-ui-patterns/nielsen-usability-review.md; anti-slop-writing; frontend-design | Adds keep/rewrite/restyle/remove with contextual eyebrow examples; relevance review preserves useful detail and brand |
 | CONV-01, CONV-02, CONV-03, CONV-04, CONV-05 | code-audit; ux-ui-patterns/website-completeness.md | Adds truthful offer/checkout/fulfilment and task-based friction review |
 | CONV-06 | analytics-and-instrumentation ; production-audit/references/website-readiness-profile.md | Connects observed friction to conditional, measured experiments |
 | OPT-01 through OPT-24 | production-audit/references/website-readiness-profile.md, optional-feature catalogue | Records every feature decision and routes existing functionality to native owners |

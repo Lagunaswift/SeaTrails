@@ -78,6 +78,8 @@ The code's shape, where bad structure makes it hard to understand, change, or sa
 
 For code with a user interface, apply the following references, including static brochure sites. Skip entirely for non-UI code. Read `../ux-ui-patterns/website-completeness.md` for route/navigation, identity/contact and commercial/content checks. Keep these in this pass even when `frontend-robustness` is inapplicable to a static site.
 
+Read `../ux-ui-patterns/nielsen-usability-review.md` and apply its ten perspectives across selected complete tasks, including relevant correction and failure paths. Record the surfaces, observations and limits in the ordinary coverage notes. Use existing consequence ownership and deduplicate the root cause; HEUR labels are review provenance only. A source-only review leaves any required interactive assessment explicitly outstanding.
+
 - **`ux-ui-patterns`** for usability and interaction patterns: form design, navigation structure, accessibility, responsive behaviour, data display, error states, empty states, loading states, and microcopy. This lens asks "can the user accomplish their task correctly and efficiently?"
 - **`frontend-design`** for typography, colour, composition, motion and brand fit. Judge the rendered page against its purpose and established design rules. A familiar layout, eyebrow label, font or gradient is not a finding by itself. Identify the actual mismatch, repetition or hierarchy problem and its consequence; preserve conventions that help the task.
 

@@ -156,9 +156,9 @@ Do not include in URL:
 
 ### Back Button Behaviour
 
-The back button should undo the last meaningful navigation action. Opening a modal is not navigation — back should not close a modal (Escape does that). Changing tabs may or may not be navigation depending on context.
+The back button should follow the product's navigation history. An overlay or tab represented by a history entry should restore the preceding view on Back; an in-page disclosure without an entry uses its own close control. Provide the appropriate Escape behaviour and preserve focus when closing an overlay.
 
-Test your back button behaviour. If pressing back produces a surprising result, the user's mental model does not match your URL state management.
+Test direct entry, Back and Forward for routed modals as well as ordinary pages. A directly opened detail route may have no earlier in-app list entry, so its close action needs a defined destination. Check that returning restores relevant filters or work, and distinguish leaving a view from cancelling an operation still running on the server.
 
 ---
 

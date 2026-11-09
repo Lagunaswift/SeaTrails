@@ -127,6 +127,8 @@ For websites and web applications, production-audit selects a [website-readiness
 
 The profile covers real journeys, navigation and contact actions, truthful commercial information, privacy/measurement and contextual design. Existing security, accessibility, performance and operational checks remain with their native owners. Familiar fonts, gradients, cards and eyebrows receive a keep/rewrite/restyle/remove decision based on their purpose. Missing optional features do not become defects automatically.
 
+The [Nielsen usability review](skills/ux-ui-patterns/nielsen-usability-review.md) applies ten perspectives across complete tasks, including memory between screens, meaningful exits and help at the point of need. Its observations and limitations feed the existing coverage records. The review preserves useful detail and brand choices; it adds no lens, score or mandatory component list.
+
 Ask Claude or Codex:
 
 > Read `.claude/skills/production-audit/SKILL.md` and run a production audit with the website-readiness profile. Check existing coverage before proposing additions. Preserve useful design conventions and approved brand choices. Record evidence, optional-feature decisions and gaps, then deliver the gated report with fixes ordered by risk and dependency. Keep this run in report mode.
