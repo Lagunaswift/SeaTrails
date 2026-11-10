@@ -1,0 +1,126 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "read-only",
+  "split": "A",
+  "seed": "s1",
+  "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-09",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 104377,
+    "tool_calls": 27,
+    "duration_ms": 69733
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task."
+  ],
+  "cases": [
+    {
+      "id": "c-bd233e2ade",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1321",
+          "line": 8,
+          "explanation": "Input line 'a.constructor.prototype.polluted=yes'. KEY_FORMAT accepts it and the '__proto__' check does not match it. config is null-prototype so the root is safe, but the nested node created at 'a' is an ordinary object, so node['constructor'] resolves to the inherited Object function and node['prototype'] to Object.prototype. The write at line 9 then sets Object.prototype.polluted, which violates the contract that Object.prototype stays unmodified."
+        }
+      ]
+    },
+    {
+      "id": "c-dc71d8ff94",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-09ea58cab4",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 13,
+          "explanation": "Off-by-one. With limit 1, the first call sees count 0 and returns true, and the second call sees count 1, which is not greater than 1, so it also returns true. The check should be entry.count >= limit. Each window therefore allows limit+1 calls per key, not limit."
+        }
+      ]
+    },
+    {
+      "id": "c-ef105d7135",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-400",
+          "line": 18,
+          "explanation": "Input is a single page of a large array, for example items of length 300000 with pageSize 300000. out.push(...result.items) passes every element as a call argument, which exceeds the engine's argument limit and throws RangeError. collectAll then fails to return every element for an array the contract says it must handle."
+        }
+      ]
+    },
+    {
+      "id": "c-e0f2fb17e2",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-1ca019aebb",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-59ff80e140",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-ba112af5f7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-20",
+          "line": 3,
+          "explanation": "NaN and Infinity pass this check because Math.trunc(NaN) < NaN and Math.trunc(Infinity) < Infinity are both false. Also, no Number.isSafeInteger test is applied, so an unsafe integer such as 2**60 passes. deposit(acc, Infinity) or withdraw(acc, NaN) leaves balance non-finite or unsafe, violating the contract that balance stays a non-negative safe integer and that amounts must be safe integers."
+        }
+      ]
+    },
+    {
+      "id": "c-f62bd5b595",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-9f3949e4c7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-362",
+          "line": 7,
+          "explanation": "The inflight check at line 6 runs before the await at line 7, and the entry is registered only after the await. Two concurrent charge calls for the same orderId both see no entry, both call gateway.charge, and the contract's at-most-once guarantee fails."
+        }
+      ]
+    },
+    {
+      "id": "c-66c2647db2",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-22",
+          "line": 11,
+          "explanation": "The containment check uses a plain startsWith on base. With root '/data/up' and name '../upload2/x', full resolves to '/data/upload2/x', which starts with '/data/up', so the call returns a path outside root. The contract requires a throw for sibling directories that share the prefix. The check needs a separator, for example startsWith(base + '/')."
+        }
+      ]
+    },
+    {
+      "id": "c-94a852e41f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-639",
+          "line": 13,
+          "explanation": "Ownership is checked on params.id, but line 13 takes the write target from body.id, which is attacker-controlled. A request with params.id 'd1' owned by alice and body.id 'd2' owned by bob renames bob's document d2. If body.id is unknown, line 15 creates a document with no owner. The contract forbids changing any document other than the one whose ownership was checked."
+        }
+      ]
+    }
+  ]
+}

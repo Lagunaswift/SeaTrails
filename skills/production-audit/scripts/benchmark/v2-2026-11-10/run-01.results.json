@@ -1,0 +1,120 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "read-only",
+  "split": "A",
+  "seed": "s1",
+  "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-01",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 92323,
+    "tool_calls": 5,
+    "duration_ms": 37421
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task."
+  ],
+  "cases": [
+    {
+      "id": "c-09ea58cab4",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 13,
+          "explanation": "The check `entry.count > limit` should be `>=`. With limit=2, the third call in a window sees count 2, which is not greater than 2, so it returns true. Each key gets limit+1 allowed calls per window instead of limit."
+        }
+      ]
+    },
+    {
+      "id": "c-1ca019aebb",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-59ff80e140",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-66c2647db2",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-22",
+          "line": 11,
+          "explanation": "`full.startsWith(base)` has no path-separator boundary. With root '/data/uploads' and name '../uploads-evil/x', the result '/data/uploads-evil/x' starts with the root string and is accepted. That path is in a sibling directory outside the root, so the function should have thrown."
+        }
+      ]
+    },
+    {
+      "id": "c-94a852e41f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-639",
+          "line": 13,
+          "explanation": "Ownership is checked only for params.id. The write target is then `body.id ?? params.id`, which the attacker controls. Alice can own d1, send body.id='d2' (another user's document), and the code sets d2's title. This changes a document whose ownership was never checked. If body.id does not exist, it also creates a new document."
+        }
+      ]
+    },
+    {
+      "id": "c-9f3949e4c7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-362",
+          "line": 6,
+          "explanation": "The inflight check happens before `await gateway.quote`, but inflight.set only runs after the await, at line 9. Two concurrent charge calls for the same orderId both pass the has() check, and both call gateway.charge. The result is a double charge."
+        }
+      ]
+    },
+    {
+      "id": "c-ba112af5f7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1284",
+          "line": 3,
+          "explanation": "assertAmount accepts NaN, Infinity and unsafe large integers. For NaN and Infinity, `amount<=0` is false and `Math.trunc(x)<x` is false, so both pass. deposit(acc, Infinity) sets balance to Infinity, and deposit of a huge number can push balance past the safe-integer range. withdraw(acc, NaN) passes the funds check (NaN > balance is false) and sets balance to NaN. The contract requires a positive safe integer, and the code never checks Number.isSafeInteger(amount)."
+        }
+      ]
+    },
+    {
+      "id": "c-bd233e2ade",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1321",
+          "line": 8,
+          "explanation": "Only the literal `__proto__` segment is blocked. The key 'a.constructor.prototype.polluted=1' passes KEY_FORMAT. `node['a'] ??= {}` creates a plain object. Then `a.constructor` is the inherited Object function, which `??=` keeps. Next, `.prototype` is Object.prototype. Finally `node[last]=value` sets Object.prototype.polluted."
+        }
+      ]
+    },
+    {
+      "id": "c-dc71d8ff94",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-e0f2fb17e2",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-ef105d7135",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-f62bd5b595",
+      "status": "complete",
+      "findings": []
+    }
+  ]
+}

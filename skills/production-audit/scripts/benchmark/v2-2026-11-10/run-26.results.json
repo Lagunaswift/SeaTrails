@@ -1,0 +1,98 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "task": "verify",
+  "arm": "read-only",
+  "split": "B",
+  "seed": "s2",
+  "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-26",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 102744,
+    "tool_calls": 39,
+    "duration_ms": 50547
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task.",
+    "Verdicts are recorded as returned; the free-text explanations were not retained."
+  ],
+  "cases": [
+    {
+      "id": "c-0d655596e0",
+      "status": "complete",
+      "verdict": "refuted",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-373849d51d",
+      "status": "complete",
+      "verdict": "supported",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-3cf838be42",
+      "status": "complete",
+      "verdict": "supported",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-49d7446e50",
+      "status": "complete",
+      "verdict": "supported",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-54b6d4d00b",
+      "status": "complete",
+      "verdict": "supported",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-58cfd7e160",
+      "status": "complete",
+      "verdict": "refuted",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-5ff20bb521",
+      "status": "complete",
+      "verdict": "refuted",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-690a6891e1",
+      "status": "complete",
+      "verdict": "refuted",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-6b071669b6",
+      "status": "complete",
+      "verdict": "supported",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-71329fa2a5",
+      "status": "complete",
+      "verdict": "supported",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-73623c193f",
+      "status": "complete",
+      "verdict": "supported",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    },
+    {
+      "id": "c-e9839f2cf6",
+      "status": "complete",
+      "verdict": "refuted",
+      "explanation": "Worker explanation not retained; verdict recorded as returned."
+    }
+  ]
+}

@@ -27,6 +27,7 @@ The first four are the spine; the rest hang off them.
 | [0015](0015-design-audits-and-evidence-boundaries.md) | Design audits and evidence boundaries | Read-only design integrations, contained evidence, exact coverage and machine-readable gate results |
 | [0016](0016-evidence-assurance-and-detection.md) | Evidence assurance and detection | Captured source delivery, independent finding review and separate detection calibration |
 | [0017](0017-website-readiness-profile.md) | Website readiness profile | Existing lenses assess website topics; explicit optional decisions and evidence gaps stay in the gated report |
+| [0018](0018-observation-records-and-evidence-kinds.md) | Observation records and evidence kinds | Findings name their kind of evidence; searches and probes are recorded against the snapshot and re-derived by the gate |
 
 ## Format
 

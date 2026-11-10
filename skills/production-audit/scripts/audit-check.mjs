@@ -28,6 +28,7 @@ import { readFileSync, existsSync, realpathSync, statSync } from 'node:fs';
 import { join, resolve, relative, isAbsolute, win32 } from 'node:path';
 import process from 'node:process';
 import { checkAssurance } from './assurance.mjs';
+import { checkObservations, claimsObservations, BASES } from './observation.mjs';
 
 const LENSES = new Set([
   'code-audit', 'ai-saas-security', 'scaling-audit', 'release-and-ops', 'data-privacy',
@@ -46,6 +47,7 @@ const SEV_RANK = Object.fromEntries(SEVERITIES.map((s, i) => [s, i]));
 const CONFIDENCE = new Set(['factual', 'reasoning']);
 const VSTATUS = new Set(['unverified', 'verified', 'refuted', 'capped']);
 const ID_RE = /^[A-Z0-9]+-\d{3,}$/;
+const OBSERVATION_ID = /^OBS-\d{3,}$/;
 // "Real evidence" must reference code: a file:line, or a backtick-quoted span.
 const EVIDENCE_LOC = /[\w./\\-]+:\d+/;
 const EVIDENCE_CODE = /`[^`]+`/;
@@ -203,6 +205,15 @@ function checkSchema(f, where) {
   // verification block
   if (!f.verification || typeof f.verification !== 'object') fail(`${tag}: verification block missing`);
   else if (!VSTATUS.has(f.verification.status)) fail(`${tag}: verification.status "${f.verification?.status}" invalid`);
+  else {
+    // Evidence kinds stay distinct: a quote, a replayed search, an executed probe
+    // and a simulated test are named, never substituted for one another.
+    const v = f.verification;
+    if (v.basis != null && !BASES.includes(v.basis)) fail(`${tag}: verification.basis "${v.basis}" is not one of ${BASES.join(', ')}`);
+    if (v.observations != null && !(Array.isArray(v.observations) && v.observations.every((o) => typeof o === 'string' && OBSERVATION_ID.test(o)))) {
+      fail(`${tag}: verification.observations must be an array of observation ids (OBS-001)`);
+    }
+  }
   // id prefix must belong to the owning lens (provenance is traceable)
   if (LENSES.has(f.lens) && ID_RE.test(f.id || '')) {
     const allowed = LENS_PREFIXES[f.lens] || [];
@@ -917,9 +928,20 @@ checkRemediationOrder(report);
 checkEvidenceFiles(report, args.repo, ledgerById);
 checkProse(report);
 if (args.assurance || report?.assurance_version != null) {
-  try { assurance = checkAssurance(report, ledger, args.repo, args.assurance); }
-  catch (e) { fail(`assurance: ${e.message}`); }
-} else warn('legacy audit: source delivery and semantic review evidence were not independently checked');
+  try {
+    assurance = checkAssurance(report, ledger, args.repo, args.assurance);
+    const observed = checkObservations(report, ledger, args.repo, args.assurance);
+    if (observed) {
+      assurance = { ...assurance, observations: observed.observations };
+      for (const message of observed.warnings) warn(`observations: ${message}`);
+    }
+  } catch (e) { fail(`assurance: ${e.message}`); }
+} else {
+  // INVARIANT 13: a legacy report holds no observation records, so it cannot
+  // claim a search, a reproduction or an interactive observation as evidence.
+  if (claimsObservations(report)) fail('observations: the report cites observation-backed evidence (verification.basis, observations, an observation head or a website observation) but no evidence run was supplied; validate with --repo and --assurance under assurance_version 2, or remove the claim');
+  warn('legacy audit: source delivery and semantic review evidence were not independently checked');
+}
 
 } catch (e) {
   // Malformed optional blocks must fail closed, with a machine-readable result.

@@ -29,7 +29,7 @@ const equalSet = (a, b) => Array.isArray(a) && a.length === new Set(a).size && a
 
 export function checkAssurance(report, ledger, repo, directory) {
   if (!repo || !directory) throw Error('--repo and --assurance are required');
-  if (report.assurance_version !== 1) throw Error('report.assurance_version must be 1');
+  if (![1, 2].includes(report.assurance_version)) throw Error('report.assurance_version must be 1 or 2');
   const readJSON = name => JSON.parse(readFileSync(resolve(directory, name), 'utf8'));
   const manifest = readJSON('manifest.json');
   const reads = readFileSync(resolve(directory, 'reads.jsonl'), 'utf8').split('\n').filter(Boolean).map(JSON.parse);
@@ -102,5 +102,5 @@ export function checkAssurance(report, ledger, repo, directory) {
   }
   if (canonical(inventory(repo)) !== canonical(actual)) throw Error('source changed during validation');
   return { files_total: files.size - excluded.size, files_delivered: examined.size,
-    exclusions: manifest.exclusions, reviews: reviews.length, run_id: manifest.run_id };
+    exclusions: manifest.exclusions, reviews: reviews.length, run_id: manifest.run_id, manifest_sha256: manifestHash };
 }

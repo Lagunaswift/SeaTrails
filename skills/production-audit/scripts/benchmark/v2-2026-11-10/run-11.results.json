@@ -1,0 +1,148 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "observe",
+  "split": "A",
+  "seed": "s1",
+  "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-11",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 137351,
+    "tool_calls": 66,
+    "duration_ms": 179173
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task.",
+    "The worker acted as its own controller when recording observations."
+  ],
+  "cases": [
+    {
+      "id": "c-bd233e2ade",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1321",
+          "line": 9,
+          "explanation": "Input line 'a.constructor.prototype.polluted=yes' passes KEY_FORMAT and the '__proto__' segment check. applyOverride creates a plain object at 'a', then 'constructor' resolves to the inherited Object function and 'prototype' to Object.prototype, so the write sets Object.prototype.polluted = 'yes'. Probe: ({}).polluted becomes 'yes'.",
+          "observations": [
+            "OBS-008"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-dc71d8ff94",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-09ea58cab4",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 13,
+          "explanation": "The check 'entry.count > limit' should be '>='. With limit 2, three calls for one key in one window at time 0 return [true,true,true] instead of [true,true,false]; the limiter admits limit+1 calls per window. Probe: observed [true,true,true] against expected [true,true,false].",
+          "observations": [
+            "OBS-002"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-ef105d7135",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-770",
+          "line": 18,
+          "explanation": "out.push(...result.items) passes a whole page as call arguments. With a 200000-element array and pageSize 200000 the call throws (a RangeError from the argument-count limit) instead of returning all 200000 elements. The contract requires success for any array and any positive integer pageSize. Probe: collectAll did not return the expected 200000 elements.",
+          "observations": [
+            "OBS-013"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-e0f2fb17e2",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-1ca019aebb",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-59ff80e140",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-ba112af5f7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-20",
+          "line": 3,
+          "explanation": "assertAmount rejects only amount <= 0 and non-whole values, but NaN and Infinity pass because NaN comparisons are false and Math.trunc(NaN) and Math.trunc(Infinity) are not less than the input. deposit(acct, NaN) sets balance to NaN, withdraw(acct, NaN) sets balance to NaN, and deposit(acct, Infinity) sets balance to Infinity; each returns without throwing, breaking the contract. Probe: 3 of 4 steps deviated; withdraw(250) on balance 1000 conformed (returned 750).",
+          "observations": [
+            "OBS-012"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-f62bd5b595",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-9f3949e4c7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-362",
+          "line": 6,
+          "explanation": "The in-flight check on line 6 and the inflight.set on line 9 are separated by the await on line 7. Concurrent charge('order-1', 5) calls all pass the check before any entry is stored, so gateway.charge runs once per call instead of once. Probe: three concurrent calls produced gateway.charge calls other than 1.",
+          "observations": [
+            "OBS-009"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-66c2647db2",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-22",
+          "line": 11,
+          "explanation": "The containment check is a plain string prefix test, so a sibling directory sharing the root's prefix passes. resolveUpload('/srv/uploads', '../uploads-old/a.pdf') returns '/srv/uploads-old/a.pdf' instead of throwing. The valid name 'invoices/2024/a.pdf' conformed. Probe: 1 of 2 steps deviated.",
+          "observations": [
+            "OBS-010"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-94a852e41f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-639",
+          "line": 13,
+          "explanation": "const id = body.id ?? params.id takes the target id from the request body after the ownership check ran on params.id. renameDocument(store, 'alice', {id:'d1'}, {id:'d2', title:'Pwned'}) passes the check for alice's d1 but rewrites bob's d2 title, breaking the requirement that no other document changes. Probe: d2.title changed from 'Bob plan'.",
+          "observations": [
+            "OBS-011"
+          ]
+        }
+      ]
+    }
+  ]
+}

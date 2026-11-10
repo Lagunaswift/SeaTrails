@@ -16,6 +16,8 @@ jobs:
         run: node skills/production-audit/scripts/run-tests.mjs
       - name: Evidence capture and delivery integration
         run: node skills/production-audit/scripts/test-assurance.mjs
+      - name: Observation records, gate rules and findings export
+        run: node skills/production-audit/scripts/test-observation.mjs
       - name: Benchmark corpus and scorer (not detector accuracy)
         run: node skills/production-audit/scripts/test-benchmark.mjs
       - name: Repo consistency check (registration-point drift)

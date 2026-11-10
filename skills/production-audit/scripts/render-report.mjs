@@ -118,6 +118,16 @@ const backlogReasoning = backlog.filter((f) => f.confidence_type === 'reasoning'
 const bySev = (s) => findings.filter((f) => f.severity === s && visible(f)).sort((a, b) => (a.id < b.id ? -1 : 1));
 const out = [];
 const w = (s = '') => out.push(s);
+// Observation summaries come from the gate's own result, never from report prose.
+const observations = gate.assurance?.observations || [];
+const observationById = new Map(observations.map((o) => [o.id, o]));
+const BASIS_LABEL = { 'source-quote': 'source quotation', 'static-search': 'replayed static search', 'runtime-observation': 'runtime observation (no control; behaviour seen, not tied to the cited code)',
+  'runtime-reproduction': 'runtime reproduction (deviation on the snapshot, gone under a control change to the cited code)', 'simulated-test': 'simulated test (the snapshot code was not executed)' };
+const describeObservation = (o) => o.kind === 'search'
+  ? `${o.id} search /${o.pattern}/ expected ${o.expect}: ${o.match_count} match(es), expectation ${o.holds ? 'held' : 'FAILED'}`
+  : `${o.id} ${o.surface} probe (${o.fidelity}${o.stubs?.length ? `; stubs: ${o.stubs.join(', ')}` : ''}): ${o.result}` +
+    (o.result === 'deviation' || o.result === 'conforms' ? `, ${o.deviations} of ${o.steps} step(s) deviated` : '') +
+    (o.reason ? ` — ${o.reason}` : '') + `; control ${o.control_status.replace('_', ' ')}` + (o.control_changes?.length ? ` (${o.control_changes.join(', ')})` : '');
 
 const lensesRun = (scope.lenses_run || []).join(', ') || 'unspecified';
 const deferred = scope.lenses_deferred || [];
@@ -155,6 +165,7 @@ w();
 // ---- 2. scope ---------------------------------------------------------------
 w(`## Scope`);
 w(`- **Evidence assurance:** ${args.assurance ? 'source quotes, finding-bound review records and recorded file deliveries checked. Semantic conclusions remain reviewer judgements; reads do not prove comprehension.' : 'LIMITED historical mode: coverage and semantic verification are self-reported.'}`);
+if (observations.length) w(`- **Observations:** ${observations.length} recorded against the captured snapshot (${observations.filter((o) => o.kind === 'search').length} replayed search(es), ${observations.filter((o) => o.kind === 'execution').length} probe run(s)). Each finding names its evidence basis; a quotation, a search, an executed probe and a simulated test are different kinds of evidence.`);
 for (const entry of gate.assurance?.exclusions || []) w(`- **Excluded tracked file:** \`${entry.file}\` — ${entry.reason}`);
 for (const warning of gate.warnings || []) w(`- **Gate warning:** ${warning}`);
 w(`- **Lenses run:** ${lensesRun}`);
@@ -232,6 +243,8 @@ for (const sev of SEV_ORDER) {
       w(`  - Attack path: ${(f.chain.steps || []).join(' → ')}`);
       if (f.chain.detection_gap) w(`  - Detection gap: ${f.chain.detection_gap}`);
     }
+    if (args.assurance && f.verification?.status === 'verified') w(`  - Evidence basis: ${BASIS_LABEL[f.verification.basis ?? 'source-quote']}`);
+    for (const id of f.verification?.observations || []) if (observationById.has(id)) w(`    - ${describeObservation(observationById.get(id))}`);
     w(`  - Fix: ${f.fix}`);
     if ((f.severity === 'critical' || f.severity === 'high') && f.confidence_type === 'reasoning') {
       w(`  - ⚠ reasoning finding — confirm the inference against the code before acting.`);
@@ -317,13 +330,22 @@ if (Array.isArray(cov.matrix) && cov.matrix.length) {
   w();
 }
 
+// ---- 6c. observations: every record, including the ones that supported nothing ----
+if (observations.length) {
+  w(`## Observations`);
+  w('Recorded by the controller against the captured snapshot. The gate replayed each search and re-derived each probe result from its stored steps; it did not execute any probe. A probe shows behaviour for the inputs it used, not for all inputs. Whether a probe exercises the cited code is the reviewer\'s judgement, except where a control change to that code removed the deviation.');
+  w();
+  for (const o of observations) w(`- ${describeObservation(o)} · subject ${o.subject} · by ${o.actor} · targets ${o.targets.join(', ')}`);
+  w();
+}
+
 // ---- 7. reconciliation ------------------------------------------------------
 w(`## Reconciliation`);
 w(`raw ${rec.raw ?? '?'} = reported ${rec.reported ?? findings.length} + merged ${rec.merged ?? 0} + dropped ${rec.dropped ?? dropped.length}  _(verified by audit-check.mjs)_`);
 if (dropped.length) {
   w();
   w(`**Dropped as false positives:**`);
-  for (const d of dropped) w(`- ${d.id}: ${d.reason}`);
+  for (const d of dropped) w(`- ${d.id}: ${d.reason}` + ((d.observations || []).length ? ` (observations: ${d.observations.join(', ')})` : ''));
 }
 w();
 
@@ -336,6 +358,9 @@ if (typeof cov.files_examined === 'number' && typeof cov.files_total === 'number
 }
 gaps.push(`**Detection accuracy:** integrity checks do not measure recall or false positives. Use a separately scored benchmark run; no accuracy claim follows from this report.`);
 gaps.push(`**Live/runtime state** (deployed env vars, infra state, runtime behaviour) is not determinable from the repository.`);
+for (const o of observations.filter((entry) => entry.result === 'unavailable' || entry.result === 'error')) {
+  gaps.push(`**Observation ${o.id} (${o.subject}) produced no result:** ${o.reason || o.result}.`);
+}
 for (const limitation of R.limitations || []) gaps.push(limitation);
 gaps.push(...websiteGaps);
 for (const g of gaps) w(`- ${g}`);

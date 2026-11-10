@@ -1,0 +1,126 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "read-only",
+  "split": "B",
+  "seed": "s1",
+  "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-02",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 91221,
+    "tool_calls": 5,
+    "duration_ms": 33693
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task."
+  ],
+  "cases": [
+    {
+      "id": "c-5d30df9f61",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-185",
+          "line": 2,
+          "explanation": "replace('.', '\\\\.') with a string pattern escapes only the first dot. For 'eu.pay.example' the second dot stays a regex wildcard, so 'https://eu.pay-example' or 'https://eu.payXexample' is allowed. The contract allows only exact domains."
+        }
+      ]
+    },
+    {
+      "id": "c-6e38a33039",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-7c21c6acdc",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-89",
+          "line": 1,
+          "explanation": "SORT_PATTERN has the m flag, so ^ and $ match at line breaks. A sort like 'name\\n; DROP TABLE orders' passes the test because the first line matches. The whole string is then split on ',' and concatenated into the ORDER BY text, so attacker SQL ends up in the query instead of the function throwing."
+        }
+      ]
+    },
+    {
+      "id": "c-a302926525",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-a8f7762361",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 10,
+          "explanation": "hasMore uses end < items.length - 1, which is off by one. When exactly one element remains after the page, hasMore is false and that element is lost. For example, 5 items with pageSize 2 gives collectAll missing the last item. It should be end < items.length."
+        }
+      ]
+    },
+    {
+      "id": "c-baceb8d80f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-190",
+          "line": 24,
+          "explanation": "deposit adds amount to balance without checking that the sum is a safe integer. With balance near Number.MAX_SAFE_INTEGER and a positive amount, the balance becomes an unsafe, imprecise value instead of throwing. This breaks the post-condition that balance is a non-negative safe integer."
+        }
+      ]
+    },
+    {
+      "id": "c-da7b495546",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-697",
+          "line": 9,
+          "explanation": "When the provider supplies role as a string, rolesOf returns that string and .includes does a substring match. hasRole({role:'owner'}, 'own') or 'ner' returns true. A user with role 'billing-admin-readonly' passes the billing-admin check, so canManageBilling is true. The contract requires exact equality."
+        }
+      ]
+    },
+    {
+      "id": "c-eb696f9b2b",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-681",
+          "line": 5,
+          "explanation": "Math.trunc(amount * 100) truncates floating-point error. 19.99 * 100 is 1998.9999999999998, so toPence(19.99) returns 1998 instead of 1999. splitAmount inherits the wrong total. It should round, for example Math.round."
+        }
+      ]
+    },
+    {
+      "id": "c-f25d3a7e9e",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-601",
+          "line": 7,
+          "explanation": "The check only rejects a leading '//'. '/\\\\evil.example' passes, and the WHATWG parser treats the backslash as a slash for https, so it resolves to https://evil.example. '/\\t/evil.example' passes too, because the parser strips the tab and gets '//evil.example'. Both are open redirects."
+        }
+      ]
+    },
+    {
+      "id": "c-f6c62de162",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-f8ff9caaa6",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-fbe6bf7024",
+      "status": "complete",
+      "findings": []
+    }
+  ]
+}

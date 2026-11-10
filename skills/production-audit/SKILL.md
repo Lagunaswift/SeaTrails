@@ -11,7 +11,7 @@ It wraps rather than replaces the specialists. `code-audit` remains the deep sec
 
 ## Evidence protocol for new audits
 
-Read `references/evidence-assurance.md` before Stage 0. Have the controller initialise source capture, route every source read through it, and collect separate finding-bound review records. Deliver with `render-report.mjs <audit-dir> --repo <target-repo> --assurance <evidence-dir>`; this command gates its own snapshot. Use `--legacy` only to label historical audits whose independent evidence was never captured. Do not present quotation matching as semantic proof or file delivery as comprehension.
+Read `references/evidence-assurance.md` before Stage 0. Have the controller initialise source capture, route every source read through it, and collect separate finding-bound review records. Deliver with `render-report.mjs <audit-dir> --repo <target-repo> --assurance <evidence-dir>`; this command gates its own snapshot. Use `--legacy` only to label historical audits whose independent evidence was never captured. Do not present quotation matching as semantic proof or file delivery as comprehension. Where a quotation cannot settle a claim (an absence, or behaviour at run time), record a search or probe with `observe.mjs` and name the finding's `verification.basis`; `references/observation-contract.md` defines the records and what each kind of evidence shows. `export-findings.mjs` hands the gated findings to another tool (`references/findings-interchange.md`).
 
 ## The cardinal principle
 

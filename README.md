@@ -57,7 +57,7 @@ What it catches:
   ("delve", "game-changer", "experts agree") hard-fail the build. 10 borderline
   terms warn. Plain deterministic code with no model in the loop.
 
-147 adversarial test cases lock the harness. Each is a way a past audit tried to
+154 adversarial test cases lock the harness. Each is a way a past audit tried to
 look clean while hiding something. They are not happy-path tests; they are
 attacks. A few of the actual case names from `run-tests.mjs`:
 
@@ -176,6 +176,10 @@ MIT.
 ## Evidence and detection measurement
 
 New reports use captured source deliveries and exact, finding-bound review records. The renderer invokes validation before emitting the report. See [the evidence protocol](skills/production-audit/references/evidence-assurance.md) for controller isolation, capture, review and delivery commands. Legacy reports remain explicitly labelled as self-reported.
+
+Findings name their kind of evidence. `observe.mjs` records a replayable search or an executed probe against the captured snapshot, with an optional control change to the cited file. The gate replays searches, re-derives probe results from stored steps, and rejects a report that claims a reproduction it has no record of, leaves out a failed attempt, or drops a reproduced defect. A probe shows behaviour for the inputs it used; the [observation contract](skills/production-audit/references/observation-contract.md) lists what each kind of evidence does and does not show. `export-findings.mjs` writes a sealed bundle of gated findings for [another tool to consume](skills/production-audit/references/findings-interchange.md).
+
+A second corpus compares a read-only protocol with one that may execute probes, on twelve harder pairs. In the first twenty blinded runs the two protocols detected the same defects, and independent adjudication found the corpus labels wrong four times and the workers' findings wrong never. [The protocol and results](skills/production-audit/references/evidence-assurance.md#detection-benchmark) say what that does and does not establish.
 
 The detection benchmark exports a label-free worker packet and scores precision, recall and false-positive rate separately from integrity regression tests. Its initial eight synthetic cases cover four security weaknesses; they do not establish production accuracy or coverage of every lens.
 

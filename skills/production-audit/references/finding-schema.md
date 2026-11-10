@@ -27,6 +27,8 @@ Each finding is one JSON object. The raw findings ledger (`ledger-and-reconcilia
   "verification": {
     "status": "unverified",         // unverified | verified | refuted | capped
     "evidence": "",                 // for status=verified: a real quote of the code read. Harness requires ≥12 chars AND a file:line ref or a `backtick-quoted` span — "x" or "checked" will hard-fail.
+    "basis": "source-quote",        // optional. source-quote (default) | static-search | runtime-observation | runtime-reproduction | simulated-test — observation-contract.md
+    "observations": [],             // optional. Observation ids (OBS-001) recorded for this finding; every one recorded must be listed
     "verifier_disagreed": false,    // did Stage 4 change the severity or reachability the lens claimed?
     "note": ""                      // why this status; for capped, why it could not be verified
   },
@@ -142,6 +144,8 @@ The harness does not auto-cap reasoning findings, but the report must visibly di
 ## Evidence and design-review limits
 
 `location.line` is a positive integer or null; `location.others` contains repo-relative `file:line` strings (or a file without a line). With `--repo`, every primary and secondary citation and every refutation-evidence citation must resolve to an existing regular file within the repository. Absolute paths, traversal and symlink escapes fail. For missing-file findings, cite an existing caller/configuration and identify the absent path in `issue`.
+
+**`verification.basis` and `verification.observations`** name the kind of evidence behind a verified finding and the recorded observations that back it. A basis other than `source-quote` needs observation records under `assurance_version: 2`; the gate checks the claim against them and a legacy report cannot make it. A quotation, a replayed search, an executed probe and a simulated test are different kinds of evidence and are never reported as one another. `observation-contract.md` has the rules.
 
 The design lenses also read `design-review-context.md`. Rendered evidence supplements source citations through `verification.note`; it never replaces the source-location contract. Taste owns only `design-aesthetic`. Impeccable owns that primary category plus demonstrated `frontend`/`accessibility` consequences. Purely visual judgements remain capped at medium.
 

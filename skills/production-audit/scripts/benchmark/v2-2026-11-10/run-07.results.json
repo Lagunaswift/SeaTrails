@@ -1,0 +1,148 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "observe",
+  "split": "A",
+  "seed": "s1",
+  "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-07",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 118313,
+    "tool_calls": 9,
+    "duration_ms": 94346
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task.",
+    "The worker acted as its own controller when recording observations."
+  ],
+  "cases": [
+    {
+      "id": "c-09ea58cab4",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 13,
+          "explanation": "The guard is `entry.count > limit`, but count starts at 0 and is incremented after the check, so the check admits limit+1 calls per key per window. With limit 2, calls at now=0,1,2 return true,true,true. Observed on the probe: [true,true,true,false]. Expected [true,true,false,false].",
+          "observations": [
+            "OBS-001"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-1ca019aebb",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-59ff80e140",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-66c2647db2",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-22",
+          "line": 11,
+          "explanation": "The containment test is `full.startsWith(base)` with no separator check, so a sibling directory sharing the root's string prefix passes. resolveUpload('/data/up', '../up2/secret.pdf') returns '/data/up2/secret.pdf' instead of throwing. The same test is also what keeps '../../etc/passwd' out, which it does correctly.",
+          "observations": [
+            "OBS-002"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-94a852e41f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-639",
+          "line": 13,
+          "explanation": "The written document id is taken from body.id, but ownership was checked only on params.id. alice renames her d1 with body {id:'d2', title:'Pwned'}: the call returns normally and bob's d2 becomes {title:'Pwned', updatedBy:'alice'}. With body.id set to a nonexistent id, the function also creates a new document that has no ownerId. Both break the requirement to change only the checked document.",
+          "observations": [
+            "OBS-003"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-9f3949e4c7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-362",
+          "line": 7,
+          "explanation": "The in-flight check at line 6 runs before the await on gateway.quote at line 7, and the entry is stored only at line 9. Concurrent charge('o1', 5) calls all pass the check while the first is awaiting quote, so each calls gateway.charge. Three concurrent calls produced chargeCalls 3, which is a double charge.",
+          "observations": [
+            "OBS-004"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-ba112af5f7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-190",
+          "line": 24,
+          "explanation": "assertAmount accepts any finite whole number, including values above Number.MAX_SAFE_INTEGER and Infinity, so deposit can push balance past the safe-integer range. deposit(balance 1000, 2**53) returns 9007199254741992, deposit(balance 1000, 1e300) returns 1e+300, and deposit(balance 1000, Infinity) returns Infinity. The contract requires a safe-integer balance after every returning call.",
+          "observations": [
+            "OBS-005"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-bd233e2ade",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1321",
+          "line": 8,
+          "explanation": "The traversal `node = node[segment] ??= {}` walks through inherited properties of plain objects. The key 'a.constructor.prototype.polluted' with value 'yes' resolves to Object.prototype, and the final assignment at line 9 writes 'polluted' onto it. The only guard is the '__proto__' check at line 4. Afterwards ({}).polluted === 'yes'.",
+          "observations": [
+            "OBS-006"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-dc71d8ff94",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-e0f2fb17e2",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-ef105d7135",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-400",
+          "line": 18,
+          "explanation": "out.push(...result.items) passes each page as spread arguments. For 300000 items with pageSize 300000, collectAll throws RangeError: Maximum call stack size exceeded. The contract requires every element to be returned for any array and any positive pageSize. Smaller page sizes (1000) and small arrays conform.",
+          "observations": [
+            "OBS-007"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-f62bd5b595",
+      "status": "complete",
+      "findings": []
+    }
+  ]
+}

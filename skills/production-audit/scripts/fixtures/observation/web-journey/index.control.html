@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Order a sample</title></head>
+<body>
+<h1>Order a sample</h1>
+<form id="order">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required>
+  <button id="place" type="submit">Place order</button>
+</form>
+<p id="status" role="status"></p>
+<script>
+const orders = [];
+document.getElementById('order').addEventListener('submit', (event) => {
+  event.preventDefault();
+  document.getElementById('place').disabled = true;
+  setTimeout(() => {
+    orders.push(Date.now());
+    document.getElementById('status').textContent = `${orders.length} order(s) placed`;
+  }, 150);
+});
+</script>
+</body>
+</html>

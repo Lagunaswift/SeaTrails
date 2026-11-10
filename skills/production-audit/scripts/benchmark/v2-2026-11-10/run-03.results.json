@@ -1,0 +1,139 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "observe",
+  "split": "A",
+  "seed": "s1",
+  "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-03",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 97094,
+    "tool_calls": 5,
+    "duration_ms": 42612
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task.",
+    "The worker acted as its own controller when recording observations."
+  ],
+  "cases": [
+    {
+      "id": "c-09ea58cab4",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 13,
+          "explanation": "The check `entry.count > limit` should be `>=`. With limit 2, three calls in one window all return true, so the limiter allows limit+1 calls.",
+          "observations": [
+            "OBS-001"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-1ca019aebb",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-59ff80e140",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-66c2647db2",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-22",
+          "line": 11,
+          "explanation": "`full.startsWith(base)` has no path-separator boundary. With root '/srv/uploads', the name '../uploads-evil/x' resolves to '/srv/uploads-evil/x', which passes the check instead of throwing.",
+          "observations": [
+            "OBS-002"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-94a852e41f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-639",
+          "line": 13,
+          "explanation": "Ownership is checked on params.id, but the write uses attacker-controlled body.id. Alice can rename Bob's document, or create a new one, by sending params.id of her own document and body.id of another.",
+          "observations": [
+            "OBS-003"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-9f3949e4c7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-362",
+          "line": 6,
+          "explanation": "The in-flight promise is stored only after `await gateway.quote`, so the `inflight.has` check at line 6 does not cover that gap. Two concurrent charge calls for the same orderId both reach gateway.charge, which is called twice.",
+          "observations": [
+            "OBS-004"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-ba112af5f7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-20",
+          "line": 3,
+          "explanation": "assertAmount accepts NaN and Infinity, because both comparisons are false for them. deposit(account, NaN) or deposit(account, Infinity) leaves balance as NaN or Infinity. Large values also push balance past the safe-integer range.",
+          "observations": [
+            "OBS-005"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-bd233e2ade",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1321",
+          "line": 8,
+          "explanation": "Only `__proto__` segments are rejected. The key 'x.constructor.prototype.pwned' walks x.constructor to Object and then to Object.prototype, so `node[last] = value` sets pwned on Object.prototype.",
+          "observations": [
+            "OBS-006"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-dc71d8ff94",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-e0f2fb17e2",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-ef105d7135",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-f62bd5b595",
+      "status": "complete",
+      "findings": []
+    }
+  ]
+}
