@@ -107,6 +107,7 @@ Expected at that date: 147 core cases, 20 assurance checks and 17 corpus/scorer 
 | 2026-07-03 | this branch | anti-slop-writing gains a discourse-level "Shape of the Piece" layer from the StoryScope research (below) |
 | 2026-11-07 | `anti-slop-writing-v2` | anti-slop-writing moves to version 2.0: the Root Problem tests (provenance, asymmetry, friction), the stop rule, the anti-forgery guard and late-2026 current-model tells replace the shape layer; frontmatter and the lens contract unchanged |
 | 2026-11-10 | `claude/new-session-qljzjh` | observation records, named evidence kinds, findings export, corpus v2 with split packets, two tasks, two arms and adjudication; twenty blinded runs recorded (ADR 0018) |
+| 2026-11-10 | `claude/new-session-qljzjh` | licence changed from MIT to Apache-2.0: `LICENSE`, `NOTICE` (LagunaForge), a header on every project-owned `.mjs` file; the vendored Python in `ui-ux-pro-max` carries no header because its origin and terms are unrecorded |
 
 ## What this branch changed
 

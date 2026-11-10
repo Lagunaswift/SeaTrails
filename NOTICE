@@ -1,0 +1,23 @@
+seatrial (SeaTrails)
+Copyright 2026 LagunaForge
+
+This product includes software developed at LagunaForge.
+
+Third-party material
+--------------------
+
+The following directories hold material that originated outside this
+project. They are not covered by the copyright notice above and remain
+under their original terms:
+
+  skills/ui-ux-pro-max/
+      Imported design-intelligence toolkit. Its upstream origin was not
+      recorded at import; see skills/ui-ux-pro-max/INTAKE.md.
+
+  skills/stripe-best-practices/
+      Vendored integration guidance, kept in its upstream form.
+
+skills/impeccable-audit/ and skills/taste-audit/ are independently written
+and informed by the Impeccable (https://github.com/pbakaus/impeccable) and
+Taste Skill (https://github.com/Leonxlnx/taste-skill) methods. No upstream
+code or assets are bundled; see the INTAKE.md file in each directory.

@@ -171,7 +171,7 @@ can focus on the hard stuff.
 
 ## Licence
 
-MIT.
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Two vendored skills, `ui-ux-pro-max` and `stripe-best-practices`, are third-party material and keep their original terms.
 
 ## Evidence and detection measurement
 
