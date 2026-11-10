@@ -1,0 +1,131 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "read-only",
+  "split": "A",
+  "seed": "s1",
+  "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-05",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 103221,
+    "tool_calls": 27,
+    "duration_ms": 63443
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task."
+  ],
+  "cases": [
+    {
+      "id": "c-09ea58cab4",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 13,
+          "explanation": "Off-by-one in the window check. With limit 2, the first two calls in a window return true and count reaches 2. The third call sees 2 > 2 as false, so it returns true and count becomes 3. Every key therefore gets limit + 1 allowed calls per window, not limit."
+        }
+      ]
+    },
+    {
+      "id": "c-bd233e2ade",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1321",
+          "line": 8,
+          "explanation": "KEY_FORMAT accepts the segments 'constructor' and 'prototype'; only '__proto__' is blocked. The config root is Object.create(null), but nested objects are ordinary objects. For the key 'x.constructor.prototype.polluted=1', node.x is a plain object, so node['constructor'] resolves to the inherited Object function and then .prototype is Object.prototype. The assignment on line 9 then sets Object.prototype.polluted, which violates the contract."
+        }
+      ]
+    },
+    {
+      "id": "c-dc71d8ff94",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-ef105d7135",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-400",
+          "line": 18,
+          "explanation": "out.push(...result.items) passes each page as spread arguments. With a large pageSize, for example 200000 on an array of 200000 elements, the argument count exceeds the engine's argument limit and throws RangeError. collectAll then fails for a valid array and a valid positive integer pageSize, which the contract requires it to handle."
+        }
+      ]
+    },
+    {
+      "id": "c-e0f2fb17e2",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-1ca019aebb",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-59ff80e140",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-ba112af5f7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-20",
+          "line": 3,
+          "explanation": "assertAmount does not reject NaN or Infinity. NaN fails both comparisons, and Math.trunc(Infinity) equals Infinity, so both pass. deposit(account, NaN) sets balance to NaN, and deposit(account, Infinity) sets it to Infinity. Both break the requirement that balance stays a non-negative safe integer and that invalid amounts throw."
+        },
+        {
+          "weakness": "CWE-190",
+          "line": 24,
+          "explanation": "deposit adds amount to balance with no safe-integer bound check. deposit({balance: 9007199254740990, history: []}, 10) returns without throwing and leaves balance at 9007199254740999, which is not a safe integer. The contract requires an unchanged account and a throw in that case."
+        }
+      ]
+    },
+    {
+      "id": "c-f62bd5b595",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-9f3949e4c7",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-362",
+          "line": 7,
+          "explanation": "The inflight check on line 6 runs, then the await on line 7 yields before inflight.set on line 9. Two concurrent charge('o1', amount) calls both pass the check while the quote is pending, so both call gateway.charge for the same orderId. The contract allows at most one charge call per orderId while a charge succeeded or is in progress."
+        }
+      ]
+    },
+    {
+      "id": "c-66c2647db2",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-22",
+          "line": 11,
+          "explanation": "The containment test startsWith(base) has no path-separator boundary. With root '/srv/uploads', the name '../uploads-evil/a.pdf' resolves to '/srv/uploads-evil/a.pdf', which passes the check and is returned. The contract requires a throw for a sibling directory that shares the root's name prefix."
+        }
+      ]
+    },
+    {
+      "id": "c-94a852e41f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-639",
+          "line": 15,
+          "explanation": "The owner check runs on params.id, but line 13 takes the write target from attacker-controlled body.id. Alice, who owns d1, sends body {id: 'd2', title: 'x'}. The check passes on d1, and line 15 then overwrites d2 with that title, even when alice does not own d2. A body.id that does not exist creates a new document with no ownerId. The contract forbids changing any document other than the checked one."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,432 @@
+{
+ "note": "Scored comparisons for the runs in this directory. Reproduce with benchmark.mjs score-v2 (add --adjudications ../adjudications-v2.json for the adjudicated detection scores; put a run's observations.jsonl in a directory and pass --evidence) and compare-v2.",
+ "detection_as_labelled": {
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "adjudicated": false,
+  "groups": [
+   {
+    "group": "detect / read-only / claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "task": "detect",
+    "arm": "read-only",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 0.9166666666666666,
+    "false_positive_rate": 0.08333333333333333,
+    "accuracy": 0.9166666666666666,
+    "trap_recall": 0.875,
+    "trap_false_positive_rate": 0.125,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 91772,
+     "tool_calls": 5,
+     "duration_ms": 35557,
+     "observations_recorded": null
+    }
+   },
+   {
+    "group": "detect / observe / claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "task": "detect",
+    "arm": "observe",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 0.9166666666666666,
+    "false_positive_rate": 0.08333333333333333,
+    "accuracy": 0.9166666666666666,
+    "trap_recall": 0.875,
+    "trap_false_positive_rate": 0.125,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 97377,
+     "tool_calls": 5,
+     "duration_ms": 45003,
+     "observations_recorded": 6.5
+    }
+   },
+   {
+    "group": "detect / read-only / claude-haiku (Claude Code subagent alias \"haiku\")",
+    "task": "detect",
+    "arm": "read-only",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "runs": 4,
+    "distinct_cases": 24,
+    "case_verdicts": 48,
+    "recall": 0.875,
+    "false_positive_rate": 0.20833333333333334,
+    "accuracy": 0.8333333333333334,
+    "trap_recall": 0.875,
+    "trap_false_positive_rate": 0.1875,
+    "repeated_cases": 24,
+    "repeat_agreement": 0.9166666666666666,
+    "mean_effort": {
+     "tokens": 105592,
+     "tool_calls": 27,
+     "duration_ms": 73794.75,
+     "observations_recorded": null
+    }
+   },
+   {
+    "group": "detect / observe / claude-haiku (Claude Code subagent alias \"haiku\")",
+    "task": "detect",
+    "arm": "observe",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "runs": 4,
+    "distinct_cases": 24,
+    "case_verdicts": 48,
+    "recall": 0.875,
+    "false_positive_rate": 0.25,
+    "accuracy": 0.8125,
+    "trap_recall": 0.8125,
+    "trap_false_positive_rate": 0.1875,
+    "repeated_cases": 24,
+    "repeat_agreement": 0.875,
+    "mean_effort": {
+     "tokens": 126907.5,
+     "tool_calls": 33,
+     "duration_ms": 146144.5,
+     "observations_recorded": 12.75
+    }
+   }
+  ],
+  "paired": [
+   {
+    "task": "detect",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "arms": [
+     "read-only",
+     "observe"
+    ],
+    "shared_cases": 24,
+    "both_correct": 22,
+    "only_read-only_correct": 0,
+    "only_observe_correct": 0,
+    "neither_correct": 2,
+    "disagreements": []
+   },
+   {
+    "task": "detect",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "arms": [
+     "read-only",
+     "observe"
+    ],
+    "shared_cases": 24,
+    "both_correct": 17,
+    "only_read-only_correct": 2,
+    "only_observe_correct": 1,
+    "neither_correct": 4,
+    "disagreements": [
+     {
+      "case": "v2-04-b",
+      "correct_in": "read-only"
+     },
+     {
+      "case": "v2-09-b",
+      "correct_in": "observe"
+     },
+     {
+      "case": "v2-05-b",
+      "correct_in": "read-only"
+     }
+    ]
+   }
+  ],
+  "limitations": [
+   "Counts this small do not support a significance claim; read the paired disagreements case by case.",
+   "Majority verdict per case when a case was run more than once in an arm; ties count as incorrect."
+  ]
+ },
+ "detection_adjudicated": {
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "adjudicated": true,
+  "groups": [
+   {
+    "group": "detect / read-only / claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "task": "detect",
+    "arm": "read-only",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 0.8125,
+    "false_positive_rate": 0,
+    "accuracy": 0.875,
+    "trap_recall": 0.9,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 91772,
+     "tool_calls": 5,
+     "duration_ms": 35557,
+     "observations_recorded": null
+    }
+   },
+   {
+    "group": "detect / observe / claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "task": "detect",
+    "arm": "observe",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 0.8125,
+    "false_positive_rate": 0,
+    "accuracy": 0.875,
+    "trap_recall": 0.9,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 97377,
+     "tool_calls": 5,
+     "duration_ms": 45003,
+     "observations_recorded": 6.5
+    }
+   },
+   {
+    "group": "detect / read-only / claude-haiku (Claude Code subagent alias \"haiku\")",
+    "task": "detect",
+    "arm": "read-only",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "runs": 4,
+    "distinct_cases": 24,
+    "case_verdicts": 48,
+    "recall": 0.90625,
+    "false_positive_rate": 0,
+    "accuracy": 0.9375,
+    "trap_recall": 0.95,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 24,
+    "repeat_agreement": 0.9583333333333334,
+    "mean_effort": {
+     "tokens": 105592,
+     "tool_calls": 27,
+     "duration_ms": 73794.75,
+     "observations_recorded": null
+    }
+   },
+   {
+    "group": "detect / observe / claude-haiku (Claude Code subagent alias \"haiku\")",
+    "task": "detect",
+    "arm": "observe",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "runs": 4,
+    "distinct_cases": 24,
+    "case_verdicts": 48,
+    "recall": 0.90625,
+    "false_positive_rate": 0,
+    "accuracy": 0.9375,
+    "trap_recall": 0.9,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 24,
+    "repeat_agreement": 0.875,
+    "mean_effort": {
+     "tokens": 126907.5,
+     "tool_calls": 33,
+     "duration_ms": 146144.5,
+     "observations_recorded": 12.75
+    }
+   }
+  ],
+  "paired": [
+   {
+    "task": "detect",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "arms": [
+     "read-only",
+     "observe"
+    ],
+    "shared_cases": 24,
+    "both_correct": 21,
+    "only_read-only_correct": 0,
+    "only_observe_correct": 0,
+    "neither_correct": 3,
+    "disagreements": []
+   },
+   {
+    "task": "detect",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "arms": [
+     "read-only",
+     "observe"
+    ],
+    "shared_cases": 24,
+    "both_correct": 21,
+    "only_read-only_correct": 1,
+    "only_observe_correct": 0,
+    "neither_correct": 2,
+    "disagreements": [
+     {
+      "case": "v2-04-b",
+      "correct_in": "read-only"
+     }
+    ]
+   }
+  ],
+  "limitations": [
+   "Counts this small do not support a significance claim; read the paired disagreements case by case.",
+   "Majority verdict per case when a case was run more than once in an arm; ties count as incorrect."
+  ]
+ },
+ "verification": {
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "adjudicated": false,
+  "groups": [
+   {
+    "group": "verify / read-only / claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "task": "verify",
+    "arm": "read-only",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 1,
+    "false_positive_rate": 0,
+    "accuracy": 1,
+    "trap_recall": 1,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 91505.5,
+     "tool_calls": 4,
+     "duration_ms": 23820,
+     "observations_recorded": null
+    }
+   },
+   {
+    "group": "verify / observe / claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "task": "verify",
+    "arm": "observe",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 1,
+    "false_positive_rate": 0,
+    "accuracy": 1,
+    "trap_recall": 1,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 102139,
+     "tool_calls": 6,
+     "duration_ms": 42845,
+     "observations_recorded": 12.5
+    }
+   },
+   {
+    "group": "verify / read-only / claude-haiku (Claude Code subagent alias \"haiku\")",
+    "task": "verify",
+    "arm": "read-only",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 1,
+    "false_positive_rate": 0,
+    "accuracy": 1,
+    "trap_recall": 1,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 103910,
+     "tool_calls": 39,
+     "duration_ms": 53700,
+     "observations_recorded": null
+    }
+   },
+   {
+    "group": "verify / observe / claude-haiku (Claude Code subagent alias \"haiku\")",
+    "task": "verify",
+    "arm": "observe",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "runs": 2,
+    "distinct_cases": 24,
+    "case_verdicts": 24,
+    "recall": 1,
+    "false_positive_rate": 0,
+    "accuracy": 1,
+    "trap_recall": 1,
+    "trap_false_positive_rate": 0,
+    "repeated_cases": 0,
+    "repeat_agreement": null,
+    "mean_effort": {
+     "tokens": 130224.5,
+     "tool_calls": 53,
+     "duration_ms": 145670.5,
+     "observations_recorded": 30
+    }
+   }
+  ],
+  "paired": [
+   {
+    "task": "verify",
+    "model": "claude-sonnet (Claude Code subagent alias \"sonnet\")",
+    "arms": [
+     "read-only",
+     "observe"
+    ],
+    "shared_cases": 24,
+    "both_correct": 24,
+    "only_read-only_correct": 0,
+    "only_observe_correct": 0,
+    "neither_correct": 0,
+    "disagreements": []
+   },
+   {
+    "task": "verify",
+    "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+    "arms": [
+     "read-only",
+     "observe"
+    ],
+    "shared_cases": 24,
+    "both_correct": 24,
+    "only_read-only_correct": 0,
+    "only_observe_correct": 0,
+    "neither_correct": 0,
+    "disagreements": []
+   }
+  ],
+  "limitations": [
+   "Counts this small do not support a significance claim; read the paired disagreements case by case.",
+   "Majority verdict per case when a case was run more than once in an arm; ties count as incorrect."
+  ]
+ },
+ "post_hoc": {
+  "note": "Computed after seeing the results; small counts; not a pre-registered comparison.",
+  "adjudicated_defective_cases": 16,
+  "located_by_at_least_one_run": {
+   "sonnet, either arm (4 runs)": 13,
+   "haiku read-only (4 runs, each case twice)": 15,
+   "sonnet read-only plus haiku read-only": 15,
+   "all 12 runs": 16
+  },
+  "cases_missed_by_every_sonnet_run": [
+   "v2-05-b",
+   "v2-07-a",
+   "v2-10-b"
+  ],
+  "findings_after_adjudication": {
+   "reported": 86,
+   "on_sound_cases": 0,
+   "at_unaccepted_locations": 0
+  },
+  "observe_arm_citations": {
+   "findings": 43,
+   "cited_observations": 43,
+   "cited_observations_that_are_deviations_on_the_same_case": 43,
+   "observations_recorded": 64,
+   "recorded_but_not_cited_by_the_worker": 21
+  }
+ }
+}

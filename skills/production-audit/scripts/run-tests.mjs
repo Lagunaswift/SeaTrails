@@ -1352,6 +1352,56 @@ cases.push(
   },
 );
 
+// Evidence kinds are distinct. A legacy report has no observation records, so
+// it cannot say a defect was reproduced, searched for or interactively observed.
+cases.push(
+  {
+    name: 'evidence-kind laundering: legacy report claims runtime-reproduction with no observation record FAILS',
+    expect: 'fail', expectExit: 1,
+    ...single({ severity: 'high', verification: { ...VERIFIED, basis: 'runtime-reproduction', observations: ['OBS-001'] } },
+      { remediation_order: [{ id: 'SEC-001', reason: 'Close the reproduced defect first.' }] }),
+  },
+  {
+    name: 'evidence-kind laundering: invented verification.basis "proven" FAILS',
+    expect: 'fail', expectExit: 1,
+    ...single({ verification: { ...VERIFIED, basis: 'proven' } }),
+  },
+  {
+    name: 'evidence-kind laundering: malformed observation reference on a finding FAILS',
+    expect: 'fail', expectExit: 1,
+    ...single({ verification: { ...VERIFIED, observations: 'ran it locally' } }),
+  },
+  {
+    name: 'evidence-kind laundering: dropped entry cites an observation without any evidence run FAILS',
+    expect: 'fail', expectExit: 1,
+    ledger: [finding()],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 },
+      dropped: [{ id: 'SEC-001', reason: 'A probe showed the guard holds.', observations: ['OBS-001'] }] }),
+  },
+  {
+    name: 'evidence-kind laundering: dropped entry carries a prose observation claim FAILS',
+    expect: 'fail', expectExit: 1,
+    ledger: [finding()],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 },
+      dropped: [{ id: 'SEC-001', reason: 'A probe showed the guard holds.', observations: 'OBS-001 reproduced nothing' }] }),
+  },
+  {
+    name: 'evidence-kind laundering: coverage declares an observation chain head without assurance FAILS',
+    expect: 'fail', expectExit: 1,
+    ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['code-audit: all areas examined'], observation_head: '0'.repeat(64) } }),
+  },
+  {
+    name: 'website: interactive evidence names an observation that no evidence run recorded FAILS',
+    expect: 'fail', expectExit: 1,
+    ...websiteAudit((w) => { w.topics[0].evidence = [{ mode: 'interactive', ref: 'Checkout journey walked on the fixture.', observation: 'OBS-001' }]; }),
+  },
+  {
+    name: 'explicit source-quote basis on a verified legacy finding PASSES',
+    expect: 'pass',
+    ...single({ verification: { ...VERIFIED, basis: 'source-quote' } }),
+  },
+);
+
 // ---- run --------------------------------------------------------------------
 let passed = 0, failed = 0;
 for (const c of cases) {

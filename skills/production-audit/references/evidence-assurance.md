@@ -57,6 +57,10 @@ Use `findingHash(finding)` and `hash(canonical(manifest))` exported by `scripts/
 
 `verified` findings require `supported`. Dropped findings require `refuted` and bind to their raw ledger finding. Optional reviews for other reported statuses use `inconclusive`; retain the existing severity caps. Reviewer and auditor identities must differ. The gate checks record integrity and disposition consistency; it does not decide whether a written argument is sound. Never promote a finding because its quote merely matches.
 
+## Record observations where a quotation cannot settle the claim
+
+`observe.mjs` records a replayable search or an executed probe against the captured snapshot. Declare `assurance_version: 2` and `coverage.observation_head`, name each verified finding's `verification.basis`, and cite every observation on the disposition of its subject. `observation-contract.md` specifies the records, the gate rules and the limits. Version 1 reports remain valid when no observation was recorded.
+
 ## Validate and render together
 
 ```bash
@@ -78,5 +82,31 @@ node .claude/skills/production-audit/scripts/benchmark.mjs score results.json
 ```
 
 Scoring matches case, CWE and defect line, counting each defect once. Duplicate and unmatched findings count as false positives; undetected defects count as false negatives. False-positive rate is the fraction of negative cases with any reported finding. Precision is null when no findings were emitted. Missing, failed or duplicated cases reject the run rather than disappearing from the denominator.
+
+### Corpus v2: split packets, two tasks, two arms
+
+Corpus v1 shows a worker both members of each pair in a fixed order, and current models score 4/4 on it. `corpus-v2.json` holds twelve pairs of 12–45 line modules; each pair shares one contract and one executable oracle, and `test-benchmark.mjs` asserts every label against that oracle.
+
+```bash
+node .claude/skills/production-audit/scripts/benchmark.mjs prepare-v2 <packet> --key <file outside the packet> --seed <text> --split A|B [--task detect|verify] [--arm read-only|observe --tools <directory>]
+node .claude/skills/production-audit/scripts/benchmark.mjs score-v2 <results.json> --key <file> [--evidence <directory>] [--adjudications benchmark/adjudications-v2.json]
+node .claude/skills/production-audit/scripts/benchmark.mjs compare-v2 <scored.json> <scored.json> [...]
+```
+
+A packet holds one member of each pair under an opaque id, so a worker cannot diff a pair or read a label from an id. Splits A and B together cover the corpus. `detect` asks which modules violate their contract; `verify` gives one concrete claim per case (`claims-v2.json`), true of the defective member only. The `observe` arm adds the observation tool; the `read-only` arm forbids execution. Results add `arm` and optional `effort` (`tokens`, `tool_calls`, `duration_ms`) to the v1 metadata. `compare-v2` reports each arm's rates, agreement between repeats and a paired count per case.
+
+Adjudicate before trusting a false-positive figure. A separate adjudicator, told neither arm nor model, executes each finding that disagrees with a label and rules against the contract text. Rulings go in `adjudications-v2.json` with an executable check and are applied only with `--adjudications`; a scored run states whether they were. Never edit the corpus to match a run.
+
+`benchmark/v2-2026-11-10/` holds the first twenty runs with their keys and observation logs (`summary.json` has the scored comparison). What they showed, for two model tiers on this corpus:
+
+- **Detection, read-only against observe: no difference.** Recall and false-positive rate were identical per model in both arms; the observe arm cost 6% (larger model) to 20% (smaller model) more tokens. Workers probed what they already believed and seldom probed code they judged sound.
+- **Verification of a concrete claim: 24/24 in every arm**, with or without execution.
+- **The labels were wrong before the workers were.** All ten adjudicated disputes went the workers' way: four members labelled sound hold a real contract violation the oracle never tested, and three were location disputes over the same defect. After adjudication no finding in 86 was false.
+- **Independent runs disagree usefully.** Single-run recall on the sixteen adjudicated defects was 13/16 and 14.5/16 by model; the union of all runs reached 16/16. This is a post hoc count on small numbers.
+- **Every finding in the observe arm cited an observation that the log confirms** (43 of 43), and a third of the recorded observations were never cited by the worker that recorded them. The gate's accounting rule exists for that omission.
+
+These runs do not show that observations improve detection. They show that on short single-module code a current model's reading matches execution, and that executed records make a disputed finding cheap to settle. Multi-file, stateful or browser-dependent defects are untested. Isolation was by instruction only, and model versions were unavailable.
+
+### Corpus v1
 
 The initial corpus has four vulnerable/fixed pairs: object ownership, lexical path traversal, external redirect and SQL parameter separation. Executable probes confirm each labelled behaviour and legitimate boundary. It is a small synthetic security calibration, not a real-world accuracy estimate, and does not measure the other audit lenses. Add independently adjudicated real-repository cases, multiple seeds and repeated blinded model runs before making general detection claims. Test-suite pass counts are never detection results.

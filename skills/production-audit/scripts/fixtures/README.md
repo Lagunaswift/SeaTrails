@@ -33,3 +33,7 @@ The classic dressed-up-but-hollow report. The harness rejects it with four failu
 Fix all four (verify-or-cap, acknowledge or finish, add the matrix, add the order) and it gates clean — a useful exercise.
 
 Both apps are invented. Never put real audit output in this directory: `.gitignore` blocks `report.json`/`report.md` everywhere except these two fixture files, deliberately.
+
+## observation/web-journey
+
+A worked `web` observation: a one-page site that accepts a double submission, the probe that drives a browser through the journey, and the control page. `test-observation.mjs` runs it when a browser library resolves in the controller's environment and skips it otherwise. See its own README and `references/observation-contract.md`.

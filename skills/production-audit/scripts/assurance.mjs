@@ -17,11 +17,13 @@ export function source(root, file) {
   if (isAbsolute(rel) || rel === '..' || rel.startsWith('../') || !statSync(path).isFile()) throw Error('source outside repository or not a file');
   return readFileSync(path);
 }
+// The audited repository's own configuration must not run code inside these tools.
+const GIT = ['-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false'];
 export function inventory(root) {
-  const top = execFileSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+  const top = execFileSync('git', [...GIT, '-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
   if (realpathSync(top) !== realpathSync(root)) throw Error('--repo must be the repository root');
   // Tracked files are an independent, reproducible denominator. No extension heuristics.
-  const files = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }).split('\0').filter(Boolean);
+  const files = execFileSync('git', [...GIT, '-C', root, 'ls-files', '-z'], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }).split('\0').filter(Boolean);
   return [...new Set(files)].sort().map(file => ({ file, sha256: hash(source(root, file)) }));
 }
 const nonempty = value => typeof value === 'string' && value.trim().length > 0;
@@ -29,7 +31,7 @@ const equalSet = (a, b) => Array.isArray(a) && a.length === new Set(a).size && a
 
 export function checkAssurance(report, ledger, repo, directory) {
   if (!repo || !directory) throw Error('--repo and --assurance are required');
-  if (report.assurance_version !== 1) throw Error('report.assurance_version must be 1');
+  if (![1, 2].includes(report.assurance_version)) throw Error('report.assurance_version must be 1 or 2');
   const readJSON = name => JSON.parse(readFileSync(resolve(directory, name), 'utf8'));
   const manifest = readJSON('manifest.json');
   const reads = readFileSync(resolve(directory, 'reads.jsonl'), 'utf8').split('\n').filter(Boolean).map(JSON.parse);
@@ -102,5 +104,5 @@ export function checkAssurance(report, ledger, repo, directory) {
   }
   if (canonical(inventory(repo)) !== canonical(actual)) throw Error('source changed during validation');
   return { files_total: files.size - excluded.size, files_delivered: examined.size,
-    exclusions: manifest.exclusions, reviews: reviews.length, run_id: manifest.run_id };
+    exclusions: manifest.exclusions, reviews: reviews.length, run_id: manifest.run_id, manifest_sha256: manifestHash };
 }

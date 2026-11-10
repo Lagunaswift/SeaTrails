@@ -1,0 +1,167 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "observe",
+  "split": "B",
+  "seed": "s1",
+  "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-08",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 130507,
+    "tool_calls": 13,
+    "duration_ms": 213452
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task.",
+    "The worker acted as its own controller when recording observations.",
+    "The worker's first reply had one case entry without its id/status wrapper; it was asked once to resend the same verdicts in the required shape, and that resent object is recorded here."
+  ],
+  "cases": [
+    {
+      "id": "c-5d30df9f61",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-185",
+          "line": 2,
+          "explanation": "escapeDomain replaces only the first '.' (String.replace with a string pattern), so for ['eu.pay.example'] the pattern keeps the second dot unescaped and matches any character. Origin 'https://eu.pay-example' (not a host under eu.pay.example) is allowed. Probe: isAllowed returned true for it, where the contract requires false.",
+          "observations": [
+            "OBS-013"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-6e38a33039",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-1321",
+          "line": 8,
+          "explanation": "Segment traversal uses ??= on the inherited properties of whatever value sits at the previous segment. After the line 'a=x', the key 'a.__proto__.__proto__.polluted=1' walks from the string 'x' to String.prototype and then to Object.prototype and sets Object.prototype.polluted = '1'. The contract forbids modifying Object.prototype. Probe: ({}).polluted became '1' after the call.",
+          "observations": [
+            "OBS-014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-7c21c6acdc",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-89",
+          "line": 1,
+          "explanation": "The regex carries the m flag, so ^ and $ match at line boundaries. The sort value 'name\\nname; DELETE FROM orders' passes the test because its first line is valid. The whole string is then placed into the ORDER BY text, and the function returns it instead of throwing. Probe: the call returned SQL text containing the injected statement.",
+          "observations": [
+            "OBS-015"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-a8f7762361",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 10,
+          "explanation": "hasMore uses end < items.length - 1 where it should use end < items.length. For [1,2,3,4,5] with pageSize 2, page 2 reports hasMore false, so collectAll stops and drops element 5. Probe: collectAll([1,2,3,4,5], 2) returned without the final element and getPage reported hasMore false where true was required.",
+          "observations": [
+            "OBS-016"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-baceb8d80f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-190",
+          "line": 24,
+          "explanation": "deposit adds amount to balance with no check that the sum stays a safe integer. For balance MAX_SAFE_INTEGER - 5 and amount 10, the call returns normally and leaves balance at 2^53 + 4, an unsafe integer. The contract requires a safe integer after any call that returns. Probe: Number.isSafeInteger(balance) was false after the call.",
+          "observations": [
+            "OBS-017"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-da7b495546",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-697",
+          "line": 9,
+          "explanation": "For a user with a single string role, rolesOf returns the string and includes performs a substring match. The role 'superowner' therefore satisfies hasRole(user, 'owner') and canManageBilling. The contract requires an exact name match. Probe: hasRole({role:'superowner'},'owner') and canManageBilling({role:'superowner'}) both returned true.",
+          "observations": [
+            "OBS-018"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-eb696f9b2b",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-682",
+          "line": 5,
+          "explanation": "toPence computes Math.trunc(amount * 100) in binary floating point. For 19.99, 19.99 * 100 is 1998.9999999999998, which truncates to 1998 instead of the contract value 1999. Probe: toPence(19.99) returned 1998.",
+          "observations": [
+            "OBS-019"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-a302926525",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-f25d3a7e9e",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-601",
+          "line": 7,
+          "explanation": "The check accepts any string starting with '/' that does not start with '//'. The input '/\\evil.example' passes, and WHATWG URL parsing treats a backslash as a slash for special schemes, so it resolves to host evil.example. The contract requires the origin to remain https://app.example. Probe: new URL(safeRedirect('/\\\\evil.example'), 'https://app.example').origin was not https://app.example.",
+          "observations": [
+            "OBS-020"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-f6c62de162",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-799",
+          "line": 9,
+          "explanation": "Each key keeps a single window record, and any call whose timestamp falls in a different window replaces it. If the caller's clock moves backwards, the earlier window is reset and allowed again. With limit 1 and windowMs 100, allow('a',50), allow('a',150) and then allow('a',60) all return true, so window [0,100) admits two calls. The contract requires at most limit calls per window. Probe: the returned sequence was [true,true,true] where [true,true,false] was required.",
+          "observations": [
+            "OBS-021"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c-f8ff9caaa6",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-fbe6bf7024",
+      "status": "complete",
+      "findings": []
+    }
+  ]
+}

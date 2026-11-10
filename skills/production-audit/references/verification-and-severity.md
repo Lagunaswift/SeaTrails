@@ -102,6 +102,14 @@ Treat every serious finding as a claim to disprove, not confirm: go back to the 
 ## Connection to other stages
 Operates on Stage 3's merged findings (whose combined consequences may have already moved severity). Produces the verified, ranked set that Stage 5 formats. The "dropped N false positives" and the inline calibrated ratings both surface in the report (report-format.md) as signals of rigour, and the verification's limits feed the "what could not be assessed" section.
 
+## Observations: when reading is not enough
+
+Two kinds of claim cannot be settled by quoting a line. An absence claim ("no ownership check", "no rate limit") is about every other file; record a search across the inventory for the guard that would refute it. A behaviour claim ("this input escapes the origin", "two submissions create two orders") is about what the code does when run; where the target can execute safely, record a probe, with a control replacement of the cited file when one is cheap to write. `observation-contract.md` defines both records.
+
+Use them to try to refute the finding, as the rest of this stage does. A probe that conforms is evidence against the claim and stays on the record: the gate fails a report that leaves out any recorded observation, a verified finding whose only real probe conformed, or a dropped finding that was reproduced. Set `verification.basis` to what the records support and no higher. Where the environment cannot run the check, record it as unavailable and name the gap.
+
+An observation does not replace the source citation or the independent review. It adds evidence whose errors are not the reviewer's reading errors.
+
 ## Captured evidence for new audits
 
 Follow `evidence-assurance.md` for source delivery receipts, exact quotation checks, finding-bound independent review records and the combined delivery gate. Coverage counts come from captured deliveries. Semantic support remains a review judgement and must include counterevidence.

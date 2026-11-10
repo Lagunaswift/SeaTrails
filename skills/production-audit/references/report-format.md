@@ -65,6 +65,10 @@ The optional `limitations` array contains non-empty strings naming unassessed ro
 
 Website-profile partial/blocked topics and any feature assessment limitations also appear in that rendered section. They require `scope.partial=true` even if all source files were delivered. Missing browser/provider access is an evidence limit, not a pass or a reason to declare an applicable topic inapplicable. Pending optional product recommendations do not imply missing audit evidence.
 
+## Observations
+
+Under `assurance_version: 2` each verified finding prints its evidence basis, and each cited observation prints beneath it: the search and its match count, or the probe's result, deviating steps, fidelity and control status. An "Observations" section lists every record, including those that supported nothing. Unavailable and errored observations also appear under "What could not be assessed". The renderer takes these lines from the gate's result, never from report prose.
+
 ## Evidence assurance
 
 New delivery requires the capture and semantic-review contract in `evidence-assurance.md`. The renderer invokes the gate itself on a private ledger/report snapshot. Historical `--legacy` delivery explicitly labels self-reported coverage and review. Gate warnings and manifest exclusions are printed; integrity success never implies measured detection accuracy.

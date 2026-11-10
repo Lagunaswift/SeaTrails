@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "note": "One concrete claim per pair, identical for both members. holds is true exactly on the defective member. Held out from worker packets except the claim text.",
+  "claims": {
+    "v2-01": {
+      "claim": "safeRedirect('/\\\\evil.example') (a slash followed by one backslash, then evil.example) returns a value that resolves against https://app.example to a different origin.",
+      "check": "export async function holds(mod) { return new URL(mod.safeRedirect('/\\\\evil.example'), 'https://app.example').origin !== 'https://app.example'; }"
+    },
+    "v2-02": {
+      "claim": "resolveUpload('/srv/uploads', '../uploads-archive/a.pdf') returns a path instead of throwing.",
+      "check": "export async function holds(mod) { try { mod.resolveUpload('/srv/uploads', '../uploads-archive/a.pdf'); return true; } catch { return false; } }"
+    },
+    "v2-03": {
+      "claim": "listOrdersQuery(7, { sort: 'name\\n; DELETE FROM orders --' }), where \\n is a line feed, returns query text instead of throwing.",
+      "check": "export async function holds(mod) { try { mod.listOrdersQuery(7, { sort: 'name\\n; DELETE FROM orders --' }); return true; } catch { return false; } }"
+    },
+    "v2-04": {
+      "claim": "withdraw({ balance: 1000, history: [] }, NaN) returns instead of throwing.",
+      "check": "export async function holds(mod) { try { mod.withdraw({ balance: 1000, history: [] }, NaN); return true; } catch { return false; } }"
+    },
+    "v2-05": {
+      "claim": "With createLimiter({ limit: 2, windowMs: 1000 }), the calls allow('k', 0), allow('k', 1), allow('k', 2) all return true.",
+      "check": "export async function holds(mod) { const allow = mod.createLimiter({ limit: 2, windowMs: 1000 }); return [allow('k', 0), allow('k', 1), allow('k', 2)].every(Boolean); }"
+    },
+    "v2-06": {
+      "claim": "Two charge('o-1', 500) calls started in the same tick, before either settles, cause gateway.charge to be called twice.",
+      "check": "export async function holds(mod) { let calls = 0; const tick = () => new Promise((r) => setImmediate(r)); const gateway = { async quote(a) { await tick(); return a; }, async charge(id, total) { calls += 1; await tick(); return { id, total, ref: calls }; } }; const { charge } = mod.createPayments(gateway); await Promise.all([charge('o-1', 500), charge('o-1', 500)]); return calls === 2; }"
+    },
+    "v2-07": {
+      "claim": "collectAll([1, 2, 3], 2) returns fewer than three elements.",
+      "check": "export async function holds(mod) { return mod.collectAll([1, 2, 3], 2).length < 3; }"
+    },
+    "v2-08": {
+      "claim": "toPence(19.99) returns 1998.",
+      "check": "export async function holds(mod) { return mod.toPence(19.99) === 1998; }"
+    },
+    "v2-09": {
+      "claim": "With a store holding d1 (ownerId 'alice') and d2 (ownerId 'bob'), renameDocument(store, 'alice', { id: 'd1' }, { id: 'd2', title: 'Taken' }) changes the title of d2.",
+      "check": "export async function holds(mod) { const store = new Map([['d1', { id: 'd1', ownerId: 'alice', title: 'A' }], ['d2', { id: 'd2', ownerId: 'bob', title: 'B' }]]); try { mod.renameDocument(store, 'alice', { id: 'd1' }, { id: 'd2', title: 'Taken' }); } catch {} return store.get('d2').title !== 'B'; }"
+    },
+    "v2-10": {
+      "claim": "loadOverrides(['a.constructor.prototype.polluted=yes']) adds the property polluted to Object.prototype.",
+      "check": "export async function holds(mod) { try { mod.loadOverrides(['a.constructor.prototype.polluted=yes']); } catch {} const hit = Object.prototype.polluted !== undefined; delete Object.prototype.polluted; return hit; }"
+    },
+    "v2-11": {
+      "claim": "hasRole({ role: 'billing-admin-readonly' }, 'billing-admin') returns true.",
+      "check": "export async function holds(mod) { return mod.hasRole({ role: 'billing-admin-readonly' }, 'billing-admin') === true; }"
+    },
+    "v2-12": {
+      "claim": "createOriginCheck(['eu.pay.example'])('https://eu.pay-example') returns true.",
+      "check": "export async function holds(mod) { return mod.createOriginCheck(['eu.pay.example'])('https://eu.pay-example') === true; }"
+    }
+  }
+}

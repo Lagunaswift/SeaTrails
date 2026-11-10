@@ -1,0 +1,342 @@
+{
+  "version": 2,
+  "name": "seatrial-behaviour-pairs-v2",
+  "cases": [
+    {
+      "id": "v2-01-a",
+      "pair": "v2-01",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-601",
+      "lines": [
+        9,
+        9
+      ],
+      "contract": "safeRedirect(next) returns where to send a user after sign-in. The application is served from https://app.example. Resolving the returned value against https://app.example with the WHATWG URL parser (as a browser does) must always give a URL whose origin is https://app.example; when next would lead anywhere else, or is not a usable string, the function returns '/'. An in-app path such as '/account?tab=billing' must resolve to https://app.example/account?tab=billing.",
+      "source": "const HOME = '/';\nconst ORIGIN = 'https://app.example';\nconst MAX_LENGTH = 2048;\n\nexport function safeRedirect(next) {\n  if (typeof next !== 'string' || next.length === 0 || next.length > MAX_LENGTH) return HOME;\n  if (!URL.canParse(next.trim(), ORIGIN)) return HOME;\n  const candidate = new URL(next.trim(), ORIGIN);\n  if (candidate.origin !== ORIGIN) return HOME;\n  return candidate.href;\n}\n\nexport function signInLocation(next) {\n  return '/sign-in?next=' + encodeURIComponent(safeRedirect(next));\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const ORIGIN = 'https://app.example';\n    const land = (v) => new URL(mod.safeRedirect(v), ORIGIN);\n    const legitimate = land('/account?tab=billing').href === ORIGIN + '/account?tab=billing';\n    const attempts = ['//evil.example/', 'https://evil.example/', '/\\\\evil.example/', '/\\\\/evil.example/', '\\\\\\\\evil.example/', ' /\\\\evil.example'];\n    const breached = attempts.some((v) => { try { return land(v).origin !== ORIGIN; } catch { return true; } });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-01-b",
+      "pair": "v2-01",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-601",
+      "lines": [
+        7,
+        7
+      ],
+      "contract": "safeRedirect(next) returns where to send a user after sign-in. The application is served from https://app.example. Resolving the returned value against https://app.example with the WHATWG URL parser (as a browser does) must always give a URL whose origin is https://app.example; when next would lead anywhere else, or is not a usable string, the function returns '/'. An in-app path such as '/account?tab=billing' must resolve to https://app.example/account?tab=billing.",
+      "source": "const HOME = '/';\nconst MAX_LENGTH = 2048;\n\nexport function safeRedirect(next) {\n  if (typeof next !== 'string' || next.length === 0 || next.length > MAX_LENGTH) return HOME;\n  const candidate = next.trim();\n  if (!candidate.startsWith('/') || candidate.startsWith('//')) return HOME;\n  return candidate;\n}\n\nexport function signInLocation(next) {\n  return '/sign-in?next=' + encodeURIComponent(safeRedirect(next));\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const ORIGIN = 'https://app.example';\n    const land = (v) => new URL(mod.safeRedirect(v), ORIGIN);\n    const legitimate = land('/account?tab=billing').href === ORIGIN + '/account?tab=billing';\n    const attempts = ['//evil.example/', 'https://evil.example/', '/\\\\evil.example/', '/\\\\/evil.example/', '\\\\\\\\evil.example/', ' /\\\\evil.example'];\n    const breached = attempts.some((v) => { try { return land(v).origin !== ORIGIN; } catch { return true; } });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-02-a",
+      "pair": "v2-02",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-22",
+      "lines": [
+        11,
+        11
+      ],
+      "contract": "resolveUpload(root, name) returns the absolute POSIX path at which an upload called name is stored. root is an absolute directory path other than '/'. The returned path must lie strictly inside root: any name that resolves to root itself or to anywhere outside it (including a sibling directory whose name begins with the same characters as root) must cause a throw. Nested names such as 'invoices/2024/a.pdf' are valid. The function does not touch the filesystem.",
+      "source": "import { posix } from 'node:path';\n\nconst MAX_NAME = 255;\n\nexport function resolveUpload(root, name) {\n  if (typeof name !== 'string' || name.length === 0) throw new Error('name required');\n  if (name.includes('\\0')) throw new Error('invalid name');\n  if (name.length > MAX_NAME) throw new Error('name too long');\n  const base = posix.resolve(root);\n  const full = posix.resolve(base, name);\n  if (full === base || !full.startsWith(base)) throw new Error('outside upload root');\n  return full;\n}\n\nexport function uploadKey(root, name) {\n  return posix.relative(posix.resolve(root), resolveUpload(root, name));\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const root = '/srv/uploads';\n    const legitimate = mod.resolveUpload(root, 'invoices/2024/a.pdf') === '/srv/uploads/invoices/2024/a.pdf';\n    const attempts = ['../uploads-archive/ledger.csv', '../uploadsX', '../../etc/passwd', '..', '.', '/etc/passwd', 'a/../../uploads2/x'];\n    const breached = attempts.some((n) => {\n      let out;\n      try { out = mod.resolveUpload(root, n); } catch { return false; }\n      return !out.startsWith(root + '/') || out === root;\n    });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-02-b",
+      "pair": "v2-02",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-22",
+      "lines": [
+        11,
+        11
+      ],
+      "contract": "resolveUpload(root, name) returns the absolute POSIX path at which an upload called name is stored. root is an absolute directory path other than '/'. The returned path must lie strictly inside root: any name that resolves to root itself or to anywhere outside it (including a sibling directory whose name begins with the same characters as root) must cause a throw. Nested names such as 'invoices/2024/a.pdf' are valid. The function does not touch the filesystem.",
+      "source": "import { posix } from 'node:path';\n\nconst MAX_NAME = 255;\n\nexport function resolveUpload(root, name) {\n  if (typeof name !== 'string' || name.length === 0) throw new Error('name required');\n  if (name.includes('\\0')) throw new Error('invalid name');\n  if (name.length > MAX_NAME) throw new Error('name too long');\n  const base = posix.resolve(root);\n  const full = posix.resolve(base, name);\n  if (full === base || !full.startsWith(base + posix.sep)) throw new Error('outside upload root');\n  return full;\n}\n\nexport function uploadKey(root, name) {\n  return posix.relative(posix.resolve(root), resolveUpload(root, name));\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const root = '/srv/uploads';\n    const legitimate = mod.resolveUpload(root, 'invoices/2024/a.pdf') === '/srv/uploads/invoices/2024/a.pdf';\n    const attempts = ['../uploads-archive/ledger.csv', '../uploadsX', '../../etc/passwd', '..', '.', '/etc/passwd', 'a/../../uploads2/x'];\n    const breached = attempts.some((n) => {\n      let out;\n      try { out = mod.resolveUpload(root, n); } catch { return false; }\n      return !out.startsWith(root + '/') || out === root;\n    });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-03-a",
+      "pair": "v2-03",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-89",
+      "lines": [
+        1,
+        1
+      ],
+      "contract": "listOrdersQuery(accountId, options) builds a parameterised SQL query for a driver that binds ? placeholders to the values array. options.sort and options.status are attacker-controlled. Every value must travel in values, never in text. options.sort is a comma-separated list of the columns name, created_at and total, each optionally prefixed with '-' for descending order (column names are case-insensitive). The function must throw rather than return text whose ORDER BY clause contains anything other than those columns followed by ASC or DESC, separated by ', '. listOrdersQuery(7, { sort: '-total,name', status: 'paid' }) must return text ending 'ORDER BY total DESC, name ASC' with values [7, 'paid'].",
+      "source": "const SORT_PATTERN = /^-?(name|created_at|total)(,-?(name|created_at|total))*$/im;\nconst STATUSES = new Set(['open', 'paid', 'void']);\n\nexport function listOrdersQuery(accountId, { sort = 'created_at', status } = {}) {\n  const values = [accountId];\n  let text = 'SELECT id, name, total, status FROM orders WHERE account_id = ?';\n  if (status !== undefined) {\n    if (!STATUSES.has(status)) throw new Error('unsupported status');\n    text += ' AND status = ?';\n    values.push(status);\n  }\n  if (typeof sort !== 'string' || !SORT_PATTERN.test(sort)) throw new Error('unsupported sort');\n  const orderBy = sort.split(',').map((field) =>\n    field.startsWith('-') ? field.slice(1) + ' DESC' : field + ' ASC');\n  text += ' ORDER BY ' + orderBy.join(', ');\n  return { text, values };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const ok = mod.listOrdersQuery(7, { sort: '-total,name', status: 'paid' });\n    const legitimate = ok.text.endsWith('ORDER BY total DESC, name ASC') && JSON.stringify(ok.values) === JSON.stringify([7, 'paid']);\n    const clause = /ORDER BY (name|created_at|total) (ASC|DESC)(, (name|created_at|total) (ASC|DESC))*$/i;\n    const attempts = ['name; DROP TABLE orders --', 'name\\n; DELETE FROM orders --', 'total,(SELECT 1)', 'name\\r\\nUNION SELECT 1', 'created_at x'];\n    const breached = attempts.some((sort) => {\n      let q;\n      try { q = mod.listOrdersQuery(7, { sort }); } catch { return false; }\n      const tail = q.text.slice(q.text.indexOf('ORDER BY'));\n      return !clause.test(tail) || /[;\\n\\r()]/.test(tail);\n    });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-03-b",
+      "pair": "v2-03",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-89",
+      "lines": [
+        1,
+        1
+      ],
+      "contract": "listOrdersQuery(accountId, options) builds a parameterised SQL query for a driver that binds ? placeholders to the values array. options.sort and options.status are attacker-controlled. Every value must travel in values, never in text. options.sort is a comma-separated list of the columns name, created_at and total, each optionally prefixed with '-' for descending order (column names are case-insensitive). The function must throw rather than return text whose ORDER BY clause contains anything other than those columns followed by ASC or DESC, separated by ', '. listOrdersQuery(7, { sort: '-total,name', status: 'paid' }) must return text ending 'ORDER BY total DESC, name ASC' with values [7, 'paid'].",
+      "source": "const SORT_PATTERN = /^-?(name|created_at|total)(,-?(name|created_at|total))*$/i;\nconst STATUSES = new Set(['open', 'paid', 'void']);\n\nexport function listOrdersQuery(accountId, { sort = 'created_at', status } = {}) {\n  const values = [accountId];\n  let text = 'SELECT id, name, total, status FROM orders WHERE account_id = ?';\n  if (status !== undefined) {\n    if (!STATUSES.has(status)) throw new Error('unsupported status');\n    text += ' AND status = ?';\n    values.push(status);\n  }\n  if (typeof sort !== 'string' || !SORT_PATTERN.test(sort)) throw new Error('unsupported sort');\n  const orderBy = sort.split(',').map((field) =>\n    field.startsWith('-') ? field.slice(1) + ' DESC' : field + ' ASC');\n  text += ' ORDER BY ' + orderBy.join(', ');\n  return { text, values };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const ok = mod.listOrdersQuery(7, { sort: '-total,name', status: 'paid' });\n    const legitimate = ok.text.endsWith('ORDER BY total DESC, name ASC') && JSON.stringify(ok.values) === JSON.stringify([7, 'paid']);\n    const clause = /ORDER BY (name|created_at|total) (ASC|DESC)(, (name|created_at|total) (ASC|DESC))*$/i;\n    const attempts = ['name; DROP TABLE orders --', 'name\\n; DELETE FROM orders --', 'total,(SELECT 1)', 'name\\r\\nUNION SELECT 1', 'created_at x'];\n    const breached = attempts.some((sort) => {\n      let q;\n      try { q = mod.listOrdersQuery(7, { sort }); } catch { return false; }\n      const tail = q.text.slice(q.text.indexOf('ORDER BY'));\n      return !clause.test(tail) || /[;\\n\\r()]/.test(tail);\n    });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-04-a",
+      "pair": "v2-04",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-20",
+      "lines": [
+        3,
+        3
+      ],
+      "contract": "withdraw(account, amount) and deposit(account, amount) move amount, a number of whole pence, out of or into account.balance (a non-negative safe integer) and record it in account.history. amount is attacker-controlled. Each must throw, leaving balance and history unchanged, unless amount is a positive safe integer and, for withdraw, no greater than the balance. After any call that returns, balance must be a non-negative safe integer. withdraw({ balance: 1000, history: [] }, 250) returns 750.",
+      "source": "function assertAmount(amount) {\n  if (typeof amount !== 'number') throw new TypeError('amount must be a number');\n  if (!Number.isSafeInteger(amount) || amount <= 0) throw new RangeError('amount must be a positive whole number of pence');\n}\n\nfunction assertAccount(account) {\n  if (!account || !Number.isSafeInteger(account.balance) || !Array.isArray(account.history)) {\n    throw new TypeError('invalid account');\n  }\n}\n\nexport function withdraw(account, amount) {\n  assertAccount(account);\n  assertAmount(amount);\n  if (amount > account.balance) throw new RangeError('insufficient funds');\n  account.balance -= amount;\n  account.history.push({ type: 'withdrawal', amount });\n  return account.balance;\n}\n\nexport function deposit(account, amount) {\n  assertAccount(account);\n  assertAmount(amount);\n  account.balance += amount;\n  account.history.push({ type: 'deposit', amount });\n  return account.balance;\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const acc = { balance: 1000, history: [] };\n    const legitimate = mod.withdraw(acc, 250) === 750 && acc.balance === 750 && acc.history.length === 1;\n    const attempts = [NaN, 0.5, -1, 0, Infinity, -Infinity, 2 ** 60, 1e300];\n    let breached = false;\n    for (const fn of ['withdraw', 'deposit']) {\n      for (const amount of attempts) {\n        const a = { balance: 1000, history: [] };\n        let returned = true;\n        try { mod[fn](a, amount); } catch { returned = false; }\n        const valid = Number.isSafeInteger(a.balance) && a.balance >= 0;\n        if (returned || !valid || a.history.length !== 0 || a.balance !== 1000) breached = true;\n      }\n    }\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-04-b",
+      "pair": "v2-04",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-20",
+      "lines": [
+        3,
+        3
+      ],
+      "contract": "withdraw(account, amount) and deposit(account, amount) move amount, a number of whole pence, out of or into account.balance (a non-negative safe integer) and record it in account.history. amount is attacker-controlled. Each must throw, leaving balance and history unchanged, unless amount is a positive safe integer and, for withdraw, no greater than the balance. After any call that returns, balance must be a non-negative safe integer. withdraw({ balance: 1000, history: [] }, 250) returns 750.",
+      "source": "function assertAmount(amount) {\n  if (typeof amount !== 'number') throw new TypeError('amount must be a number');\n  if (amount <= 0 || Math.trunc(amount) < amount) throw new RangeError('amount must be a positive whole number of pence');\n}\n\nfunction assertAccount(account) {\n  if (!account || !Number.isSafeInteger(account.balance) || !Array.isArray(account.history)) {\n    throw new TypeError('invalid account');\n  }\n}\n\nexport function withdraw(account, amount) {\n  assertAccount(account);\n  assertAmount(amount);\n  if (amount > account.balance) throw new RangeError('insufficient funds');\n  account.balance -= amount;\n  account.history.push({ type: 'withdrawal', amount });\n  return account.balance;\n}\n\nexport function deposit(account, amount) {\n  assertAccount(account);\n  assertAmount(amount);\n  account.balance += amount;\n  account.history.push({ type: 'deposit', amount });\n  return account.balance;\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const acc = { balance: 1000, history: [] };\n    const legitimate = mod.withdraw(acc, 250) === 750 && acc.balance === 750 && acc.history.length === 1;\n    const attempts = [NaN, 0.5, -1, 0, Infinity, -Infinity, 2 ** 60, 1e300];\n    let breached = false;\n    for (const fn of ['withdraw', 'deposit']) {\n      for (const amount of attempts) {\n        const a = { balance: 1000, history: [] };\n        let returned = true;\n        try { mod[fn](a, amount); } catch { returned = false; }\n        const valid = Number.isSafeInteger(a.balance) && a.balance >= 0;\n        if (returned || !valid || a.history.length !== 0 || a.balance !== 1000) breached = true;\n      }\n    }\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-05-a",
+      "pair": "v2-05",
+      "pair_kind": "plain",
+      "defective": true,
+      "weakness": "CWE-770",
+      "lines": [
+        13,
+        13
+      ],
+      "contract": "createLimiter({ limit, windowMs }) returns allow(key, now), where now is a millisecond timestamp supplied by the caller. Time is divided into fixed windows [k*windowMs, (k+1)*windowMs). Within one window, the first limit calls for a given key return true and every further call for that key returns false. Keys are counted independently and a new window starts each key afresh.",
+      "source": "export function createLimiter({ limit, windowMs }) {\n  if (!Number.isInteger(limit) || limit < 1) throw new RangeError('limit must be a positive integer');\n  if (!(windowMs > 0)) throw new RangeError('windowMs must be positive');\n  const windows = new Map();\n\n  return function allow(key, now) {\n    const windowStart = Math.floor(now / windowMs) * windowMs;\n    let entry = windows.get(key);\n    if (!entry || entry.windowStart !== windowStart) {\n      entry = { windowStart, count: 0 };\n      windows.set(key, entry);\n    }\n    if (entry.count > limit) return false;\n    entry.count += 1;\n    return true;\n  };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const allow = mod.createLimiter({ limit: 3, windowMs: 1000 });\n    const first = [allow('k', 5000), allow('k', 5100), allow('k', 5200)];\n    const legitimate = first.every(Boolean) && allow('other', 5300) === true && allow('k', 6000) === true;\n    const allow2 = mod.createLimiter({ limit: 3, windowMs: 1000 });\n    let admitted = 0;\n    for (let i = 0; i < 10; i++) if (allow2('k', 9000 + i)) admitted++;\n    return { legitimate, breached: admitted !== 3 };\n  }"
+    },
+    {
+      "id": "v2-05-b",
+      "pair": "v2-05",
+      "pair_kind": "plain",
+      "defective": false,
+      "weakness": "CWE-770",
+      "lines": [
+        13,
+        13
+      ],
+      "contract": "createLimiter({ limit, windowMs }) returns allow(key, now), where now is a millisecond timestamp supplied by the caller. Time is divided into fixed windows [k*windowMs, (k+1)*windowMs). Within one window, the first limit calls for a given key return true and every further call for that key returns false. Keys are counted independently and a new window starts each key afresh.",
+      "source": "export function createLimiter({ limit, windowMs }) {\n  if (!Number.isInteger(limit) || limit < 1) throw new RangeError('limit must be a positive integer');\n  if (!(windowMs > 0)) throw new RangeError('windowMs must be positive');\n  const windows = new Map();\n\n  return function allow(key, now) {\n    const windowStart = Math.floor(now / windowMs) * windowMs;\n    let entry = windows.get(key);\n    if (!entry || entry.windowStart !== windowStart) {\n      entry = { windowStart, count: 0 };\n      windows.set(key, entry);\n    }\n    if (entry.count >= limit) return false;\n    entry.count += 1;\n    return true;\n  };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const allow = mod.createLimiter({ limit: 3, windowMs: 1000 });\n    const first = [allow('k', 5000), allow('k', 5100), allow('k', 5200)];\n    const legitimate = first.every(Boolean) && allow('other', 5300) === true && allow('k', 6000) === true;\n    const allow2 = mod.createLimiter({ limit: 3, windowMs: 1000 });\n    let admitted = 0;\n    for (let i = 0; i < 10; i++) if (allow2('k', 9000 + i)) admitted++;\n    return { legitimate, breached: admitted !== 3 };\n  }"
+    },
+    {
+      "id": "v2-06-a",
+      "pair": "v2-06",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-362",
+      "lines": [
+        7,
+        8
+      ],
+      "contract": "createPayments(gateway) returns charge(orderId, amount). gateway.quote(amount) and gateway.charge(orderId, total) are asynchronous. For any orderId, gateway.charge must be called at most once while a charge for it has succeeded or is still in progress, including when charge is called several times concurrently for the same orderId; every such call resolves to the receipt from that single gateway.charge. A call for an orderId whose earlier charge failed may try again.",
+      "source": "export function createPayments(gateway) {\n  const inflight = new Map();\n\n  async function charge(orderId, amount) {\n    if (typeof orderId !== 'string' || orderId === '') throw new TypeError('orderId required');\n    if (inflight.has(orderId)) return inflight.get(orderId);\n    const pending = gateway.quote(amount).then((total) => gateway.charge(orderId, total));\n    inflight.set(orderId, pending);\n    pending.catch(() => inflight.delete(orderId));\n    return pending;\n  }\n\n  function isKnown(orderId) {\n    return inflight.has(orderId);\n  }\n\n  return { charge, isKnown };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    let calls = 0;\n    const tick = () => new Promise((r) => setImmediate(r));\n    const gateway = {\n      async quote(amount) { await tick(); return amount + 20; },\n      async charge(orderId, total) { calls += 1; const ref = 'r' + calls; await tick(); return { orderId, total, ref }; },\n    };\n    const { charge } = mod.createPayments(gateway);\n    const one = await charge('o-1', 1000);\n    const again = await charge('o-1', 1000);\n    const legitimate = one.total === 1020 && again.ref === one.ref && calls === 1;\n    const before = calls;\n    const [x, y] = await Promise.all([charge('o-2', 500), charge('o-2', 500)]);\n    return { legitimate, breached: calls - before !== 1 || x.ref !== y.ref };\n  }"
+    },
+    {
+      "id": "v2-06-b",
+      "pair": "v2-06",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-362",
+      "lines": [
+        7,
+        9
+      ],
+      "contract": "createPayments(gateway) returns charge(orderId, amount). gateway.quote(amount) and gateway.charge(orderId, total) are asynchronous. For any orderId, gateway.charge must be called at most once while a charge for it has succeeded or is still in progress, including when charge is called several times concurrently for the same orderId; every such call resolves to the receipt from that single gateway.charge. A call for an orderId whose earlier charge failed may try again.",
+      "source": "export function createPayments(gateway) {\n  const inflight = new Map();\n\n  async function charge(orderId, amount) {\n    if (typeof orderId !== 'string' || orderId === '') throw new TypeError('orderId required');\n    if (inflight.has(orderId)) return inflight.get(orderId);\n    const total = await gateway.quote(amount);\n    const pending = gateway.charge(orderId, total);\n    inflight.set(orderId, pending);\n    pending.catch(() => inflight.delete(orderId));\n    return pending;\n  }\n\n  function isKnown(orderId) {\n    return inflight.has(orderId);\n  }\n\n  return { charge, isKnown };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    let calls = 0;\n    const tick = () => new Promise((r) => setImmediate(r));\n    const gateway = {\n      async quote(amount) { await tick(); return amount + 20; },\n      async charge(orderId, total) { calls += 1; const ref = 'r' + calls; await tick(); return { orderId, total, ref }; },\n    };\n    const { charge } = mod.createPayments(gateway);\n    const one = await charge('o-1', 1000);\n    const again = await charge('o-1', 1000);\n    const legitimate = one.total === 1020 && again.ref === one.ref && calls === 1;\n    const before = calls;\n    const [x, y] = await Promise.all([charge('o-2', 500), charge('o-2', 500)]);\n    return { legitimate, breached: calls - before !== 1 || x.ref !== y.ref };\n  }"
+    },
+    {
+      "id": "v2-07-a",
+      "pair": "v2-07",
+      "pair_kind": "plain",
+      "defective": false,
+      "weakness": "CWE-193",
+      "lines": [
+        10,
+        10
+      ],
+      "contract": "getPage(items, page, pageSize) returns the page-th (1-based) run of pageSize consecutive elements of items (shorter only on the final page) together with hasMore, which is true exactly when items has at least one element after this page. collectAll(items, pageSize) must return every element of items exactly once, in the original order, for any array and any positive integer pageSize.",
+      "source": "export function getPage(items, page, pageSize) {\n  if (!Array.isArray(items)) throw new TypeError('items must be an array');\n  if (!Number.isInteger(page) || page < 1) throw new RangeError('page must be a positive integer');\n  if (!Number.isInteger(pageSize) || pageSize < 1) throw new RangeError('pageSize must be a positive integer');\n  const start = (page - 1) * pageSize;\n  const end = start + pageSize;\n  return {\n    items: items.slice(start, end),\n    page,\n    hasMore: end < items.length,\n  };\n}\n\nexport function collectAll(items, pageSize) {\n  const out = [];\n  for (let page = 1; ; page += 1) {\n    const result = getPage(items, page, pageSize);\n    out.push(...result.items);\n    if (!result.hasMore) return out;\n  }\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const range = (n) => Array.from({ length: n }, (_, i) => i);\n    const p1 = mod.getPage(range(12), 1, 5);\n    const legitimate = JSON.stringify(p1.items) === '[0,1,2,3,4]' && p1.hasMore === true\n      && JSON.stringify(mod.collectAll(range(12), 5)) === JSON.stringify(range(12));\n    let breached = false;\n    for (let n = 0; n <= 20; n++) {\n      for (let size = 1; size <= 6; size++) {\n        if (JSON.stringify(mod.collectAll(range(n), size)) !== JSON.stringify(range(n))) breached = true;\n      }\n    }\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-07-b",
+      "pair": "v2-07",
+      "pair_kind": "plain",
+      "defective": true,
+      "weakness": "CWE-193",
+      "lines": [
+        10,
+        10
+      ],
+      "contract": "getPage(items, page, pageSize) returns the page-th (1-based) run of pageSize consecutive elements of items (shorter only on the final page) together with hasMore, which is true exactly when items has at least one element after this page. collectAll(items, pageSize) must return every element of items exactly once, in the original order, for any array and any positive integer pageSize.",
+      "source": "export function getPage(items, page, pageSize) {\n  if (!Array.isArray(items)) throw new TypeError('items must be an array');\n  if (!Number.isInteger(page) || page < 1) throw new RangeError('page must be a positive integer');\n  if (!Number.isInteger(pageSize) || pageSize < 1) throw new RangeError('pageSize must be a positive integer');\n  const start = (page - 1) * pageSize;\n  const end = start + pageSize;\n  return {\n    items: items.slice(start, end),\n    page,\n    hasMore: end < items.length - 1,\n  };\n}\n\nexport function collectAll(items, pageSize) {\n  const out = [];\n  for (let page = 1; ; page += 1) {\n    const result = getPage(items, page, pageSize);\n    out.push(...result.items);\n    if (!result.hasMore) return out;\n  }\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const range = (n) => Array.from({ length: n }, (_, i) => i);\n    const p1 = mod.getPage(range(12), 1, 5);\n    const legitimate = JSON.stringify(p1.items) === '[0,1,2,3,4]' && p1.hasMore === true\n      && JSON.stringify(mod.collectAll(range(12), 5)) === JSON.stringify(range(12));\n    let breached = false;\n    for (let n = 0; n <= 20; n++) {\n      for (let size = 1; size <= 6; size++) {\n        if (JSON.stringify(mod.collectAll(range(n), size)) !== JSON.stringify(range(n))) breached = true;\n      }\n    }\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-08-a",
+      "pair": "v2-08",
+      "pair_kind": "plain",
+      "defective": true,
+      "weakness": "CWE-682",
+      "lines": [
+        5,
+        5
+      ],
+      "contract": "amount is a non-negative number of pounds written with at most two decimal places (for example 19.99). toPence(amount) returns that amount as an integer number of pence (19.99 gives 1999). splitAmount(amount, parts) returns parts integers of pence that differ from one another by at most 1 and sum exactly to toPence(amount). splitAmount(10, 3) returns [334, 333, 333].",
+      "source": "export function toPence(amount) {\n  if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {\n    throw new RangeError('amount must be a non-negative number of pounds');\n  }\n  return Math.trunc(amount * 100);\n}\n\nexport function splitAmount(amount, parts) {\n  if (!Number.isInteger(parts) || parts < 1) throw new RangeError('parts must be a positive integer');\n  const total = toPence(amount);\n  const share = Math.floor(total / parts);\n  const remainder = total - share * parts;\n  return Array.from({ length: parts }, (_, i) => share + (i < remainder ? 1 : 0));\n}\n\nexport function formatPence(pence) {\n  return 'GBP ' + (pence / 100).toFixed(2);\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const legitimate = JSON.stringify(mod.splitAmount(10, 3)) === '[334,333,333]';\n    const amounts = [0.29, 0.57, 1.15, 4.35, 19.99, 64.1, 1005.01];\n    const breached = amounts.some((a) => {\n      const expected = Number(a.toFixed(2).replace('.', ''));\n      const shares = mod.splitAmount(a, 3);\n      const sum = shares.reduce((s, v) => s + v, 0);\n      return mod.toPence(a) !== expected || sum !== expected || Math.max(...shares) - Math.min(...shares) > 1;\n    });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-08-b",
+      "pair": "v2-08",
+      "pair_kind": "plain",
+      "defective": false,
+      "weakness": "CWE-682",
+      "lines": [
+        5,
+        5
+      ],
+      "contract": "amount is a non-negative number of pounds written with at most two decimal places (for example 19.99). toPence(amount) returns that amount as an integer number of pence (19.99 gives 1999). splitAmount(amount, parts) returns parts integers of pence that differ from one another by at most 1 and sum exactly to toPence(amount). splitAmount(10, 3) returns [334, 333, 333].",
+      "source": "export function toPence(amount) {\n  if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {\n    throw new RangeError('amount must be a non-negative number of pounds');\n  }\n  return Math.round(amount * 100);\n}\n\nexport function splitAmount(amount, parts) {\n  if (!Number.isInteger(parts) || parts < 1) throw new RangeError('parts must be a positive integer');\n  const total = toPence(amount);\n  const share = Math.floor(total / parts);\n  const remainder = total - share * parts;\n  return Array.from({ length: parts }, (_, i) => share + (i < remainder ? 1 : 0));\n}\n\nexport function formatPence(pence) {\n  return 'GBP ' + (pence / 100).toFixed(2);\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const legitimate = JSON.stringify(mod.splitAmount(10, 3)) === '[334,333,333]';\n    const amounts = [0.29, 0.57, 1.15, 4.35, 19.99, 64.1, 1005.01];\n    const breached = amounts.some((a) => {\n      const expected = Number(a.toFixed(2).replace('.', ''));\n      const shares = mod.splitAmount(a, 3);\n      const sum = shares.reduce((s, v) => s + v, 0);\n      return mod.toPence(a) !== expected || sum !== expected || Math.max(...shares) - Math.min(...shares) > 1;\n    });\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-09-a",
+      "pair": "v2-09",
+      "pair_kind": "plain",
+      "defective": false,
+      "weakness": "CWE-639",
+      "lines": [
+        13,
+        13
+      ],
+      "contract": "renameDocument(store, actorId, params, body) handles a rename request for the document identified by params.id; store is a Map of id to document ({ id, ownerId, title }). params and body come from the request and are attacker-controlled. It must throw unless the document exists and its ownerId equals actorId, and it must never change any document other than the one whose ownership it checked. renameDocument(store, 'alice', { id: 'd1' }, { title: 'Q3 plan' }) renames alice's document d1.",
+      "source": "const MAX_TITLE = 200;\n\nfunction normaliseTitle(title) {\n  const value = String(title ?? '').trim();\n  if (value === '' || value.length > MAX_TITLE) throw new RangeError('invalid title');\n  return value;\n}\n\nexport function renameDocument(store, actorId, params, body) {\n  const doc = store.get(params.id);\n  if (!doc) throw new Error('not found');\n  if (doc.ownerId !== actorId) throw new Error('forbidden');\n  const id = params.id;\n  const title = normaliseTitle(body.title);\n  store.set(id, { ...store.get(id), title, updatedBy: actorId });\n  return store.get(id);\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const store = new Map([\n      ['d1', { id: 'd1', ownerId: 'alice', title: 'Draft' }],\n      ['d2', { id: 'd2', ownerId: 'bob', title: 'Payroll' }],\n    ]);\n    mod.renameDocument(store, 'alice', { id: 'd1' }, { title: 'Q3 plan' });\n    const legitimate = store.get('d1').title === 'Q3 plan' && store.get('d2').title === 'Payroll';\n    try { mod.renameDocument(store, 'alice', { id: 'd1' }, { id: 'd2', title: 'Taken' }); } catch {}\n    try { mod.renameDocument(store, 'alice', { id: 'd2' }, { title: 'Taken' }); } catch {}\n    return { legitimate, breached: store.get('d2').title !== 'Payroll' };\n  }"
+    },
+    {
+      "id": "v2-09-b",
+      "pair": "v2-09",
+      "pair_kind": "plain",
+      "defective": true,
+      "weakness": "CWE-639",
+      "lines": [
+        13,
+        13
+      ],
+      "contract": "renameDocument(store, actorId, params, body) handles a rename request for the document identified by params.id; store is a Map of id to document ({ id, ownerId, title }). params and body come from the request and are attacker-controlled. It must throw unless the document exists and its ownerId equals actorId, and it must never change any document other than the one whose ownership it checked. renameDocument(store, 'alice', { id: 'd1' }, { title: 'Q3 plan' }) renames alice's document d1.",
+      "source": "const MAX_TITLE = 200;\n\nfunction normaliseTitle(title) {\n  const value = String(title ?? '').trim();\n  if (value === '' || value.length > MAX_TITLE) throw new RangeError('invalid title');\n  return value;\n}\n\nexport function renameDocument(store, actorId, params, body) {\n  const doc = store.get(params.id);\n  if (!doc) throw new Error('not found');\n  if (doc.ownerId !== actorId) throw new Error('forbidden');\n  const id = body.id ?? params.id;\n  const title = normaliseTitle(body.title);\n  store.set(id, { ...store.get(id), title, updatedBy: actorId });\n  return store.get(id);\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const store = new Map([\n      ['d1', { id: 'd1', ownerId: 'alice', title: 'Draft' }],\n      ['d2', { id: 'd2', ownerId: 'bob', title: 'Payroll' }],\n    ]);\n    mod.renameDocument(store, 'alice', { id: 'd1' }, { title: 'Q3 plan' });\n    const legitimate = store.get('d1').title === 'Q3 plan' && store.get('d2').title === 'Payroll';\n    try { mod.renameDocument(store, 'alice', { id: 'd1' }, { id: 'd2', title: 'Taken' }); } catch {}\n    try { mod.renameDocument(store, 'alice', { id: 'd2' }, { title: 'Taken' }); } catch {}\n    return { legitimate, breached: store.get('d2').title !== 'Payroll' };\n  }"
+    },
+    {
+      "id": "v2-10-a",
+      "pair": "v2-10",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-1321",
+      "lines": [
+        8,
+        8
+      ],
+      "contract": "loadOverrides(lines) parses attacker-controlled 'dotted.key=value' lines into a nested configuration object and returns it. Blank lines and lines starting with '#' are ignored; any other line may be rejected by throwing. Processing any input must never add or change a property on any object other than the returned configuration and objects created for it; in particular Object.prototype and Function.prototype must stay unmodified. loadOverrides(['db.host=localhost', 'db.port=5432']) must return a configuration in which db.host is 'localhost' and db.port is '5432'.",
+      "source": "const KEY_FORMAT = /^[A-Za-z_][\\w-]*(\\.[A-Za-z_][\\w-]*)*$/;\n\nexport function applyOverride(config, key, value) {\n  if (!KEY_FORMAT.test(key) || key.split('.').includes('__proto__')) throw new Error('invalid key: ' + key);\n  const segments = key.split('.');\n  const last = segments.pop();\n  let node = config;\n  for (const segment of segments) node = node[segment] ??= {};\n  node[last] = value;\n  return config;\n}\n\nexport function loadOverrides(lines) {\n  const config = Object.create(null);\n  for (const raw of lines) {\n    const line = raw.trim();\n    if (line === '' || line.startsWith('#')) continue;\n    const eq = line.indexOf('=');\n    if (eq < 1) throw new Error('malformed line: ' + line);\n    applyOverride(config, line.slice(0, eq).trim(), line.slice(eq + 1).trim());\n  }\n  return config;\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const cfg = mod.loadOverrides(['db.host=localhost', 'db.port=5432']);\n    const legitimate = cfg.db.host === 'localhost' && cfg.db.port === '5432';\n    const attempts = ['__proto__.polluted=yes', 'a.__proto__.polluted=yes', 'constructor.prototype.polluted=yes', 'a.constructor.prototype.polluted=yes', 'a.constructor.polluted=yes', 'a.toString.polluted=yes'];\n    let breached = false;\n    for (const line of attempts) {\n      try { mod.loadOverrides([line]); } catch {}\n      if (Object.prototype.polluted !== undefined || Function.prototype.polluted !== undefined || Object.polluted !== undefined) breached = true;\n      delete Object.prototype.polluted; delete Function.prototype.polluted; delete Object.polluted;\n    }\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-10-b",
+      "pair": "v2-10",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-1321",
+      "lines": [
+        8,
+        8
+      ],
+      "contract": "loadOverrides(lines) parses attacker-controlled 'dotted.key=value' lines into a nested configuration object and returns it. Blank lines and lines starting with '#' are ignored; any other line may be rejected by throwing. Processing any input must never add or change a property on any object other than the returned configuration and objects created for it; in particular Object.prototype and Function.prototype must stay unmodified. loadOverrides(['db.host=localhost', 'db.port=5432']) must return a configuration in which db.host is 'localhost' and db.port is '5432'.",
+      "source": "const KEY_FORMAT = /^[A-Za-z_][\\w-]*(\\.[A-Za-z_][\\w-]*)*$/;\n\nexport function applyOverride(config, key, value) {\n  if (!KEY_FORMAT.test(key)) throw new Error('invalid key: ' + key);\n  const segments = key.split('.');\n  const last = segments.pop();\n  let node = config;\n  for (const segment of segments) node = node[segment] ??= Object.create(null);\n  node[last] = value;\n  return config;\n}\n\nexport function loadOverrides(lines) {\n  const config = Object.create(null);\n  for (const raw of lines) {\n    const line = raw.trim();\n    if (line === '' || line.startsWith('#')) continue;\n    const eq = line.indexOf('=');\n    if (eq < 1) throw new Error('malformed line: ' + line);\n    applyOverride(config, line.slice(0, eq).trim(), line.slice(eq + 1).trim());\n  }\n  return config;\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const cfg = mod.loadOverrides(['db.host=localhost', 'db.port=5432']);\n    const legitimate = cfg.db.host === 'localhost' && cfg.db.port === '5432';\n    const attempts = ['__proto__.polluted=yes', 'a.__proto__.polluted=yes', 'constructor.prototype.polluted=yes', 'a.constructor.prototype.polluted=yes', 'a.constructor.polluted=yes', 'a.toString.polluted=yes'];\n    let breached = false;\n    for (const line of attempts) {\n      try { mod.loadOverrides([line]); } catch {}\n      if (Object.prototype.polluted !== undefined || Function.prototype.polluted !== undefined || Object.polluted !== undefined) breached = true;\n      delete Object.prototype.polluted; delete Function.prototype.polluted; delete Object.polluted;\n    }\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-11-a",
+      "pair": "v2-11",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-863",
+      "lines": [
+        4,
+        4
+      ],
+      "contract": "Users come from two identity providers: one supplies roles as an array of role names, the other supplies a single role name as the string role. hasRole(user, role) must return true only when one of the user's role names is exactly equal to role. canManageBilling(user) is true only for users holding the role 'owner' or 'billing-admin'. hasRole({ roles: ['owner'] }, 'owner') and hasRole({ role: 'owner' }, 'owner') are both true.",
+      "source": "const BILLING_ROLES = ['owner', 'billing-admin'];\n\nfunction rolesOf(user) {\n  return user.roles ?? user.role ?? [];\n}\n\nexport function hasRole(user, role) {\n  if (!user || typeof role !== 'string' || role === '') return false;\n  return rolesOf(user).includes(role);\n}\n\nexport function canManageBilling(user) {\n  return BILLING_ROLES.some((role) => hasRole(user, role));\n}\n\nexport function canViewReports(user) {\n  return hasRole(user, 'analyst') || canManageBilling(user);\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const legitimate = mod.hasRole({ roles: ['owner'] }, 'owner') && mod.hasRole({ role: 'owner' }, 'owner')\n      && mod.canManageBilling({ role: 'billing-admin' }) && !mod.canManageBilling({ roles: ['viewer'] });\n    const breached = mod.canManageBilling({ role: 'billing-admin-readonly' })\n      || mod.canManageBilling({ role: 'co-owner-pending' })\n      || mod.hasRole({ role: 'analyst-trainee' }, 'analyst')\n      || mod.hasRole({ roles: ['billing-admin-readonly'] }, 'billing-admin');\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-11-b",
+      "pair": "v2-11",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-863",
+      "lines": [
+        4,
+        4
+      ],
+      "contract": "Users come from two identity providers: one supplies roles as an array of role names, the other supplies a single role name as the string role. hasRole(user, role) must return true only when one of the user's role names is exactly equal to role. canManageBilling(user) is true only for users holding the role 'owner' or 'billing-admin'. hasRole({ roles: ['owner'] }, 'owner') and hasRole({ role: 'owner' }, 'owner') are both true.",
+      "source": "const BILLING_ROLES = ['owner', 'billing-admin'];\n\nfunction rolesOf(user) {\n  return [].concat(user.roles ?? user.role ?? []);\n}\n\nexport function hasRole(user, role) {\n  if (!user || typeof role !== 'string' || role === '') return false;\n  return rolesOf(user).includes(role);\n}\n\nexport function canManageBilling(user) {\n  return BILLING_ROLES.some((role) => hasRole(user, role));\n}\n\nexport function canViewReports(user) {\n  return hasRole(user, 'analyst') || canManageBilling(user);\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const legitimate = mod.hasRole({ roles: ['owner'] }, 'owner') && mod.hasRole({ role: 'owner' }, 'owner')\n      && mod.canManageBilling({ role: 'billing-admin' }) && !mod.canManageBilling({ roles: ['viewer'] });\n    const breached = mod.canManageBilling({ role: 'billing-admin-readonly' })\n      || mod.canManageBilling({ role: 'co-owner-pending' })\n      || mod.hasRole({ role: 'analyst-trainee' }, 'analyst')\n      || mod.hasRole({ roles: ['billing-admin-readonly'] }, 'billing-admin');\n    return { legitimate, breached };\n  }"
+    },
+    {
+      "id": "v2-12-a",
+      "pair": "v2-12",
+      "pair_kind": "trap",
+      "defective": false,
+      "weakness": "CWE-185",
+      "lines": [
+        2,
+        2
+      ],
+      "contract": "createOriginCheck(domains) takes a list of lower-case DNS names and returns isAllowed(origin). isAllowed must return true only when origin is exactly 'https://' followed by one of the configured domains, or by a hostname ending in '.' plus one of them, with no port, path or other suffix (letter case ignored). With domains ['shop.example', 'eu.pay.example'], 'https://shop.example' and 'https://cdn.eu.pay.example' are allowed and 'https://shop.example.invalid' is not.",
+      "source": "function escapeDomain(domain) {\n  return domain.trim().toLowerCase().replaceAll('.', '\\\\.');\n}\n\nexport function createOriginCheck(domains) {\n  const patterns = domains.map((domain) =>\n    new RegExp('^https://([a-z0-9-]+\\\\.)*' + escapeDomain(domain) + '$'));\n  return function isAllowed(origin) {\n    if (typeof origin !== 'string' || origin.length > 253) return false;\n    return patterns.some((pattern) => pattern.test(origin.toLowerCase()));\n  };\n}\n\nexport function corsHeaders(isAllowed, origin) {\n  if (!isAllowed(origin)) return {};\n  return { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const isAllowed = mod.createOriginCheck(['shop.example', 'eu.pay.example']);\n    const legitimate = isAllowed('https://shop.example') && isAllowed('https://cdn.eu.pay.example')\n      && isAllowed('https://eu.pay.example') && !isAllowed('https://shop.example.invalid');\n    const attempts = ['https://eu.pay-example', 'https://eu.payxexample', 'https://cdn.eu.pay_example', 'https://shopxexample', 'https://evil.invalid', 'http://shop.example', 'https://shop.example:8443'];\n    return { legitimate, breached: attempts.some((o) => isAllowed(o)) };\n  }"
+    },
+    {
+      "id": "v2-12-b",
+      "pair": "v2-12",
+      "pair_kind": "trap",
+      "defective": true,
+      "weakness": "CWE-185",
+      "lines": [
+        2,
+        2
+      ],
+      "contract": "createOriginCheck(domains) takes a list of lower-case DNS names and returns isAllowed(origin). isAllowed must return true only when origin is exactly 'https://' followed by one of the configured domains, or by a hostname ending in '.' plus one of them, with no port, path or other suffix (letter case ignored). With domains ['shop.example', 'eu.pay.example'], 'https://shop.example' and 'https://cdn.eu.pay.example' are allowed and 'https://shop.example.invalid' is not.",
+      "source": "function escapeDomain(domain) {\n  return domain.trim().toLowerCase().replace('.', '\\\\.');\n}\n\nexport function createOriginCheck(domains) {\n  const patterns = domains.map((domain) =>\n    new RegExp('^https://([a-z0-9-]+\\\\.)*' + escapeDomain(domain) + '$'));\n  return function isAllowed(origin) {\n    if (typeof origin !== 'string' || origin.length > 253) return false;\n    return patterns.some((pattern) => pattern.test(origin.toLowerCase()));\n  };\n}\n\nexport function corsHeaders(isAllowed, origin) {\n  if (!isAllowed(origin)) return {};\n  return { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' };\n}\n",
+      "oracle": "export async function oracle(mod) {\n    const isAllowed = mod.createOriginCheck(['shop.example', 'eu.pay.example']);\n    const legitimate = isAllowed('https://shop.example') && isAllowed('https://cdn.eu.pay.example')\n      && isAllowed('https://eu.pay.example') && !isAllowed('https://shop.example.invalid');\n    const attempts = ['https://eu.pay-example', 'https://eu.payxexample', 'https://cdn.eu.pay_example', 'https://shopxexample', 'https://evil.invalid', 'http://shop.example', 'https://shop.example:8443'];\n    return { legitimate, breached: attempts.some((o) => isAllowed(o)) };\n  }"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ docs/                           maintainer docs (tracked selectively — see .gi
 ```bash
 node skills/production-audit/scripts/run-tests.mjs            # harness regression suite; must end "0 failed"
 node skills/production-audit/scripts/test-assurance.mjs       # evidence capture and delivery
+node skills/production-audit/scripts/test-observation.mjs     # observation records, gate rules, findings export
 node skills/production-audit/scripts/test-benchmark.mjs       # corpus/scorer checks, not detector accuracy
 node .claude/skills/release-check/scripts/check-consistency.mjs   # cross-file drift check (counts, enums, registry)
 node skills/production-audit/scripts/audit-check.mjs <audit-dir> [--repo <path>]   # gate an audit's artifacts

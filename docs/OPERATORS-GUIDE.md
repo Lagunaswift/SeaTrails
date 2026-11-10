@@ -110,3 +110,13 @@ After reconciliation, update each profile finding reference to its surviving ID.
 ## New audit evidence and detection calibration
 
 Before starting an audit, follow `skills/production-audit/references/evidence-assurance.md`. The controller must capture source deliveries and retain separate reviewer responses. New rendering requires those records. Use `--legacy` only for historical artifacts and retain the printed limitation. The same reference documents blinded benchmark preparation and scoring; regression counts are not detection accuracy.
+
+## Recording observations
+
+Record an observation when a quotation cannot settle a claim: a search for the guard an absence finding says is missing, or a probe for behaviour at run time. The controller runs `observe.mjs <repo> <evidence-dir> <spec.json>`; workers write the specification and probe files and never the evidence directory. Keep specifications outside the audited repository. A file written inside it changes the inventory and the tool refuses to record.
+
+Decide before the audit whether the target may be executed in this environment. Probes run target code in a temporary copy with a scrubbed environment and no network block. If the answer is no, record `unavailable` with the reason and keep the finding on `source-quote`.
+
+Cite every observation, including the ones that conformed or errored. The gate fails a report that leaves one out. `skills/production-audit/references/observation-contract.md` has the formats, the gate rules and the web journey convention; `fixtures/observation/web-journey/` is a working browser example.
+
+To pass findings to another tool, run `export-findings.mjs` with the same arguments as the renderer and give the consumer `references/findings-interchange.md`.

@@ -6,7 +6,62 @@ Written 2026-07-01 on branch `claude/opus-4.8-documentation-gy6nfh`, after a ful
 
 ## What this repo is
 
-seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The core suite now contains 147 tests, with 20 evidence integration checks and 17 corpus/scorer checks.
+seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The core suite contains 155 cases, with 20 evidence integration checks, 88 observation checks (89 when a browser library resolves) and 103 corpus/scorer checks.
+
+## Observation records update (2026-11-10)
+
+**What exists.** Verified findings name their evidence basis. `observe.mjs` records a replayable search or an executed probe against the captured snapshot, with an optional control replacement of the cited file. `observation.mjs` holds the recording logic and the gate rules; `audit-check.mjs` calls it after `checkAssurance`. `export-findings.mjs` writes a sealed bundle for another tool. Contracts: `references/observation-contract.md`, `references/findings-interchange.md`. Decision and rejected alternatives: ADR 0018. Reports opt in with `assurance_version: 2`; version 1 and legacy behaviour are unchanged except that a legacy report can no longer cite observation-backed evidence.
+
+**How it was built.** Attack-first: eight evidence-kind cases were added to `run-tests.mjs` and seven were observed passing the gate before INVARIANT 13 and the shape checks closed them. No existing case was removed or relaxed. A separate adversarial review of the new code was commissioned; see "Independent review" below.
+
+**What was measured.** `scripts/benchmark/v2-2026-11-10/` holds twenty blinded runs on corpus v2 across two model tiers (`summary.json` is the scored comparison; `references/evidence-assurance.md` has the protocol).
+
+| Question | Result |
+|---|---|
+| Does a probe-enabled protocol detect more than reading? | No. Recall and false-positive rate were identical per model: 13/16 and 13/16 on the larger model, 29/32 and 29/32 on the smaller (adjudicated). Token cost rose 6% and 20%. |
+| Does it verify a concrete claim more accurately? | No. Every arm scored 24/24. |
+| Were the unexpected findings false? | No. All ten disputes were adjudicated for the workers by execution. Four members labelled sound hold real contract violations; 0 of 86 findings were false after adjudication. |
+| Do repeated runs agree? | 92–96% of cases read-only and 88% observe on the smaller model (24 cases, 2 repeats). |
+| Do independent passes add recall? | Post hoc: the union of all runs located 16/16 defects against 13–14.5 per single run. |
+| Is observe-arm evidence checkable? | 43 of 43 findings cited an observation the log confirms as a deviation on that case. 21 of 64 recorded observations were never cited by the worker. |
+
+Read this as: the mechanism's measured value is evidence a gate can check and disputes execution can settle. A detection benefit is unsupported on short single-module code and untested on multi-file, stateful or browser-dependent code. Limits: prompt-level isolation only, model versions unavailable, small counts, one seed per task, workers acted as their own controller.
+
+**Not run.** No audit of a real repository used the new records. The web adapter ran only against the fixture page. No game adapter exists. The benchmark did not exercise controls, searches or the gate's accounting rules; those are covered by `test-observation.mjs` only.
+
+**Open pull requests.** #5's head (`2f942bf`) is an ancestor of main: nothing is left to merge. #4's single commit (`38092ba`) has 500 of its 509 substantive added lines verbatim in main, which integrated that work through #7; the other nine are superseded counts and phrasing. Neither was merged or closed in this pass. Closing both without merging loses nothing.
+
+### Independent review
+
+A reviewer with no part in the design was given the code and the contract and asked for runnable proofs of any report the gate wrongly accepts. It proved nine weaknesses in the first implementation (commit `00fc514`). All nine are closed in the following commit, each with a test in `test-observation.mjs` or `run-tests.mjs`, and each proof script was re-run and now ends in a rejection.
+
+| Weakness proved | Closed by |
+|---|---|
+| A search that never read the cited file backed `static-search` | Scope check on replay: the finding's file must have been scanned; a `present` result needs a match in the finding's files |
+| A control changed the cited file cosmetically and fixed another file | Every control file must be one the finding names, its primary location included |
+| A probe kept state between runs and conformed under the control without loading the target | Fresh probe copy per run; the subject is repeated beside the control in a hidden order; new status `unstable` |
+| A record relabelled `exploratory` escaped the conflict and drop rules | Both rules read the probe's targets, whatever its subject and wherever it is cited |
+| Any deviation, even simulated, cancelled a conforming probe | Only a controlled reproduction outweighs a conforming run |
+| A linked `.git` let a probe plant a hook that ran inside the gate | `.git` cannot be linked; the tools run git with `core.fsmonitor` off |
+| The last record could be cut from the log | Store directories must match the chain; the remaining limit is stated in the contract |
+| Record text injected a section into the report | Record text is one bounded line; the renderer prints search flags and files read |
+| A malformed dropped entry passed the gate and crashed the renderer | Shape check in the gate, legacy path included |
+
+The reviewer also listed some twenty attacks the gate already rejected. Limits that remain open are in `observation-contract.md`: a probe that keeps state outside its working directory and counts runs, a probe that pattern-matches source text, writes to linked directories, and forgery by a party who controls the whole evidence directory.
+
+### Follow-up work, sized for a single worker each
+
+Each task names its files and its acceptance. None overlaps another. Harness tasks follow `.claude/skills/harness-dev/`.
+
+1. **Corpus v3: repair the mislabelled pairs.** Never edit `corpus-v2.json`; its runs are bound to its hash. Create `benchmark/corpus-v3.json` and `claims-v3.json`, and let `benchmark.mjs` select a corpus by name. Fix both members of pairs 04, 05, 07 and 10 so each differs only by its intended defect, and extend each oracle to cover the adjudicated inputs. Accept when: every `check` in `adjudications-v2.json` returns false on the corresponding v3 sound member; `test-benchmark.mjs` asserts all v3 labels; a separate adjudicator has tried to break every sound member by execution and its rulings file has no `unlabelled_defect`.
+2. **Cases where reading should fail.** New corpus of small multi-file repositories (3–6 files): a guard in another module, state built over a call sequence, a framework default. `prepare-v2` learns directory cases. Write the hypothesis and the stopping rule into the results directory before any run. Accept when: both tasks and both arms are run on two model tiers with two repeats, and the write-up states the result whichever way it falls. If the read-only arm is again at ceiling, say so and stop.
+3. **Union of passes, pre-registered.** Add `benchmark.mjs union-v2 <scored...>` reporting located defects and flagged sound cases for the union of k runs, k = 1 to n. Tests in `test-benchmark.mjs`. Then run three read-only repeats per split per model on corpus v3 and record cost per added defect. Accept when: the command is tested and the runs are stored like `v2-2026-11-10/`.
+4. **Replay observations on a later snapshot.** `observe.mjs replay <repo> <old-evidence> <new-evidence>` re-runs each stored specification against a new capture and appends records to the new directory with a `replays` field naming the original record. The old directory is never written. A specification whose targets are gone records `unavailable`. Output: a table of result transitions per observation. `checkObservations` validates `replays` when present. Accept when: `test-observation.mjs` covers deviation→conforms after a fix, an unchanged deviation, a missing target, and an untouched old directory.
+5. **Entry-point inventory with a checkable denominator.** `coverage.surface_inventory` lists routes, handlers and forms with a disposition each (`examined`, `finding`, `not_applicable`). Each class cites a search observation with `expect: present`; every match of that search must map to an inventory entry. Files: `audit-check.mjs`, `observation.mjs`, `references/coverage-matrix.md`, `run-tests.mjs`, `test-observation.mjs`. Accept when: an inventory that omits a matched line is shown passing today and failing after, with its boundary case.
+6. **Game adapter example.** `fixtures/observation/game-loop/`: a deterministic headless loop module, a probe that writes one step per checkpoint, a control. No dependency. Accept when: `test-observation.mjs` runs it everywhere and `observation-contract.md` replaces "No example ships yet".
+7. **Tell the lenses when to ask for an observation.** Add one "evidence to request" line to `references/running-the-lenses.md` and to the lenses whose claims are behavioural or about absence: `frontend-robustness`, `code-audit` (correctness and access passes), `accessibility` (keyboard journeys), `scaling-audit` (concurrency), `ai-saas-security` (rate and cost limits). Output contracts do not change. Accept when: the consistency checker is clean and each line names the claim type and the observation kind.
+8. **Keep benchmark material out of installs.** The operator guide's install step copies `scripts/benchmark/`, labels and keys included, into target repositories. Document an install that omits it, or move it under a maintainer path, and update the paths in `benchmark.mjs`, the tests and the references. Accept when: all four suites and the consistency checker pass and the operator guide states what is copied.
+9. **Diagnostic codes** (existing backlog item 2) now also covers the observation failures in `checkObservations`: stable codes per rule, no change to exit semantics.
 
 ## Website readiness update
 
@@ -37,7 +92,7 @@ node skills/production-audit/scripts/test-benchmark.mjs
 node .claude/skills/release-check/scripts/check-consistency.mjs
 ```
 
-Expected: 147 core cases, 20 assurance checks and 17 corpus/scorer checks pass; 0 consistency failures and warnings. ADRs 0015 and 0016 record the preceding design/evidence additions. Earlier pass descriptions below are historical, not the current inventory.
+Expected at that date: 147 core cases, 20 assurance checks and 17 corpus/scorer checks; the current counts are in "What this repo is" above, and `test-observation.mjs` is the fourth suite. 0 consistency failures and warnings. ADRs 0015 and 0016 record the preceding design/evidence additions. Earlier pass descriptions below are historical, not the current inventory.
 
 ## History
 
@@ -51,6 +106,7 @@ Expected: 147 core cases, 20 assurance checks and 17 corpus/scorer checks pass; 
 | 2026-07-02 | this branch | next three backlog items executed: the accessibility category grant, both name mismatches, ui-ux-pro-max intake debt (below) |
 | 2026-07-03 | this branch | anti-slop-writing gains a discourse-level "Shape of the Piece" layer from the StoryScope research (below) |
 | 2026-11-07 | `anti-slop-writing-v2` | anti-slop-writing moves to version 2.0: the Root Problem tests (provenance, asymmetry, friction), the stop rule, the anti-forgery guard and late-2026 current-model tells replace the shape layer; frontmatter and the lens contract unchanged |
+| 2026-11-10 | `claude/new-session-qljzjh` | observation records, named evidence kinds, findings export, corpus v2 with split packets, two tasks, two arms and adjudication; twenty blinded runs recorded (ADR 0018) |
 
 ## What this branch changed
 

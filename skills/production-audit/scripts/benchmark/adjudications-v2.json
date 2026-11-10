@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "adjudicated_at": "2026-11-10",
+  "method": "Triggered by findings from blinded workers that disagreed with the labels. A separate adjudicator, told neither the arm nor the model behind any claim, executed each claim against the case source and ruled against the contract text. Each unlabelled_defect ruling carries a check that the corpus tests execute. Pair members not named in a worker claim were checked with the same input and are listed when it holds.",
+  "limits": "Only claims that some worker raised were adjudicated. Other members labelled sound may hold defects that nobody reported.",
+  "rulings": [
+    {
+      "case": "v2-04-a",
+      "kind": "unlabelled_defect",
+      "lines": [
+        24,
+        24
+      ],
+      "reason": "deposit near Number.MAX_SAFE_INTEGER returns with an unsafe balance; the contract requires a safe-integer balance after any call that returns.",
+      "check": "export async function holds(mod) { const a = { balance: Number.MAX_SAFE_INTEGER - 5, history: [] }; try { mod.deposit(a, 10); } catch { return false; } return !Number.isSafeInteger(a.balance); }"
+    },
+    {
+      "case": "v2-04-b",
+      "kind": "unlabelled_defect",
+      "lines": [
+        24,
+        24
+      ],
+      "reason": "Same overflow as its pair member, separate from the labelled amount validation defect.",
+      "check": "export async function holds(mod) { const a = { balance: Number.MAX_SAFE_INTEGER - 5, history: [] }; try { mod.deposit(a, 10); } catch { return false; } return !Number.isSafeInteger(a.balance); }"
+    },
+    {
+      "case": "v2-05-a",
+      "kind": "unlabelled_defect",
+      "lines": [
+        9,
+        9
+      ],
+      "reason": "A call whose timestamp falls in an earlier window is admitted again; the contract does not require timestamps to be non-decreasing.",
+      "check": "export async function holds(mod) { const allow = mod.createLimiter({ limit: 1, windowMs: 100 }); return [allow('k', 50), allow('k', 150), allow('k', 60)].every(Boolean); }"
+    },
+    {
+      "case": "v2-05-b",
+      "kind": "unlabelled_defect",
+      "lines": [
+        9,
+        9
+      ],
+      "reason": "A call whose timestamp falls in an earlier window is admitted again; the contract does not require timestamps to be non-decreasing.",
+      "check": "export async function holds(mod) { const allow = mod.createLimiter({ limit: 1, windowMs: 100 }); return [allow('k', 50), allow('k', 150), allow('k', 60)].every(Boolean); }"
+    },
+    {
+      "case": "v2-07-a",
+      "kind": "unlabelled_defect",
+      "lines": [
+        18,
+        18
+      ],
+      "reason": "Spreading one very large page into push throws RangeError; the contract covers any array and any positive integer pageSize.",
+      "check": "export async function holds(mod) { try { return mod.collectAll(Array.from({ length: 1000000 }, (_, i) => i), 1000000).length !== 1000000; } catch { return true; } }"
+    },
+    {
+      "case": "v2-07-b",
+      "kind": "unlabelled_defect",
+      "lines": [
+        18,
+        18
+      ],
+      "reason": "Same spread failure as its pair member, separate from the labelled hasMore defect.",
+      "check": "export async function holds(mod) { try { return mod.collectAll(Array.from({ length: 1000000 }, (_, i) => i), 1000000).length !== 1000000; } catch { return true; } }"
+    },
+    {
+      "case": "v2-10-b",
+      "kind": "unlabelled_defect",
+      "lines": [
+        8,
+        8
+      ],
+      "reason": "Traversal through an existing string value reaches String.prototype and then Object.prototype.",
+      "check": "export async function holds(mod) { try { mod.loadOverrides(['a=x', 'a.__proto__.__proto__.polluted=yes']); } catch {} const hit = Object.prototype.polluted !== undefined; delete Object.prototype.polluted; return hit; }"
+    },
+    {
+      "case": "v2-11-a",
+      "kind": "accept_location",
+      "lines": [
+        9,
+        9
+      ],
+      "reason": "Line 4 returns the raw string role and line 9 applies includes to it; either line names the same substring-match defect."
+    },
+    {
+      "case": "v2-09-b",
+      "kind": "accept_location",
+      "lines": [
+        15,
+        15
+      ],
+      "reason": "Line 13 chooses the attacker-supplied id and line 15 writes to it; the sink is a reasonable citation of the same defect."
+    },
+    {
+      "case": "v2-06-b",
+      "kind": "accept_location",
+      "lines": [
+        6,
+        6
+      ],
+      "reason": "The has() check on line 6 is the check half of the check-then-await race labelled on lines 7-9."
+    }
+  ]
+}

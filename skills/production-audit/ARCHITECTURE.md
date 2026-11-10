@@ -113,6 +113,14 @@ code-audit  ──┬── Pass 1 Security      ── lens: saas-production-se
 
  scripts/run-tests.mjs   → regression suite locking every closed bypass. Must stay green.
 
+ scripts/observe.mjs     → records an observation against the captured snapshot: a replayable search,
+ scripts/observation.mjs   or a probe run in a temporary copy with an optional control change. The gate
+                           replays searches, re-derives probe results and checks each finding's
+                           verification.basis against the records (references/observation-contract.md).
+
+ scripts/export-findings.mjs → gated, sealed findings bundle for another tool
+                             (references/findings-interchange.md).
+
  scripts/render-report.mjs → generates report.md FROM the gated report.json, so the method-line counts
                              a reader trusts are computed from data and cannot diverge. Leads with the
                              GATING SET (verified crit/high) not the raw total; collapses re-narrated
@@ -173,12 +181,20 @@ Every skill participates in an audit run or in the fix phase that follows it.
 │   ├── verification-and-severity.md Stage 4 (structured verdicts, severity rules)
 │   ├── coverage-matrix.md           coverage measurement
 │   ├── ledger-and-reconciliation.md the ledger + report.json shape + reconciliation identity
-│   └── report-format.md             Stage 5
+│   ├── report-format.md             Stage 5
+│   ├── evidence-assurance.md        source capture, review records, detection benchmark
+│   ├── observation-contract.md      observation records: searches, probes, evidence kinds, adapters
+│   └── findings-interchange.md      the exported findings bundle and consumer rules
 └── scripts/
     ├── audit-check.mjs              the integrity gate (zero-dependency Node)
     ├── render-report.mjs            report.json → report.md
+    ├── assurance.mjs, capture-source.mjs   source delivery receipts and review records
+    ├── observation.mjs, observe.mjs observation records and their gate rules
+    ├── export-findings.mjs          gated findings bundle
+    ├── benchmark.mjs, benchmark/    detection corpora, scorer, run records
+    ├── test-assurance.mjs, test-observation.mjs, test-benchmark.mjs   integration suites
     ├── run-tests.mjs               regression suite (every closed bypass, incl. chain root-cause + data-class duty)
-    └── fixtures/{pass,fail}/        worked examples (a valid audit, and a broken one)
+    └── fixtures/{pass,fail,observation}/   worked examples (a valid audit, a broken one, a web journey probe)
 ```
 
 

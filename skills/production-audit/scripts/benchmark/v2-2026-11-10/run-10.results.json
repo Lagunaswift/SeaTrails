@@ -1,0 +1,126 @@
+{
+  "corpus_sha256": "6bffe3f7fbb5f6b7a26ea0b5a0574be376f640335d77d1cd46fc4224c52edd52",
+  "arm": "read-only",
+  "split": "B",
+  "seed": "s1",
+  "model": "claude-haiku (Claude Code subagent alias \"haiku\")",
+  "model_version": "unavailable in runtime metadata",
+  "skills_commit": "f263822 plus the uncommitted observation work",
+  "prompt_sha256": "4731189327e8e774269fd7f794f962e443ca349893607a997eb8c0b8fce09bed",
+  "run_id": "2026-11-10-v2-run-10",
+  "started_at": "2026-11-10",
+  "blind": true,
+  "effort": {
+    "tokens": 105055,
+    "tool_calls": 27,
+    "duration_ms": 73564
+  },
+  "limitations": [
+    "Prompt-level isolation only: the worker shared a filesystem with the corpus and key and was instructed not to read them; no sandbox boundary was provisioned.",
+    "Token, tool-call and duration figures are the harness totals for the subagent, including reading the task."
+  ],
+  "cases": [
+    {
+      "id": "c-5d30df9f61",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-185",
+          "line": 2,
+          "explanation": "escapeDomain uses String.replace with a string pattern, which escapes only the first '.'. For a configured domain with two or more dots, such as 'eu.pay.example', the regex becomes '...eu\\.pay.example$', where the second dot matches any character. An origin such as 'https://eu.pay-example' then passes isAllowed although it is not the configured domain or a subdomain of it, which breaks the exact-match contract."
+        }
+      ]
+    },
+    {
+      "id": "c-eb696f9b2b",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-682",
+          "line": 5,
+          "explanation": "toPence multiplies by 100 in binary floating point and then truncates. For amount 19.99, 19.99 * 100 is 1998.9999999999998, so Math.trunc returns 1998 pence instead of the 1999 the contract requires. Splitting such amounts then sums to the wrong total."
+        }
+      ]
+    },
+    {
+      "id": "c-a8f7762361",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-193",
+          "line": 10,
+          "explanation": "hasMore uses end < items.length - 1 where it should use end < items.length. For items [1,2,3] with pageSize 2, page 1 reports hasMore false although element 3 remains. collectAll then returns [1,2] and drops the final element. The same off-by-one drops the last element of any array whose length is a multiple of pageSize, such as [1,2] with pageSize 1."
+        }
+      ]
+    },
+    {
+      "id": "c-da7b495546",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-697",
+          "line": 9,
+          "explanation": "hasRole calls includes on the value of user.role when that value is a string, which performs a substring match rather than an exact role comparison. A user with role 'co-owner' satisfies hasRole(user, 'owner') and therefore canManageBilling, and a role such as 'not-analyst' satisfies hasRole(user, 'analyst'). The contract requires exact equality."
+        }
+      ]
+    },
+    {
+      "id": "c-f6c62de162",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-6e38a33039",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-baceb8d80f",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-190",
+          "line": 24,
+          "explanation": "deposit adds amount to balance without checking the result. A balance of 9007199254740990 with a deposit of 5 gives 9007199254740995, which is not a safe integer. The call returns normally and records the history entry, but the contract requires it to throw and leave balance unchanged in this case."
+        }
+      ]
+    },
+    {
+      "id": "c-a302926525",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-7c21c6acdc",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-89",
+          "line": 1,
+          "explanation": "The SORT_PATTERN regex uses the m flag, so ^ and $ match at line boundaries. A sort value such as 'name\\n1; DROP TABLE orders' passes the test because its first line is exactly 'name'. The whole string is then appended to ORDER BY, which lets attacker-controlled text reach the SQL text. The contract requires a throw for any ORDER BY content beyond the allowed columns and ASC/DESC."
+        }
+      ]
+    },
+    {
+      "id": "c-f25d3a7e9e",
+      "status": "complete",
+      "findings": [
+        {
+          "weakness": "CWE-601",
+          "line": 7,
+          "explanation": "The check rejects only values starting with '//'. A value such as '/\\evil.example' passes, because the WHATWG parser treats a backslash as a slash for special schemes and resolves it against https://app.example to https://evil.example/. A value such as '/\\t/evil.example' also passes, because the parser strips the tab and the result is protocol-relative. Either input sends the user to an external origin, which the contract forbids."
+        }
+      ]
+    },
+    {
+      "id": "c-f8ff9caaa6",
+      "status": "complete",
+      "findings": []
+    },
+    {
+      "id": "c-fbe6bf7024",
+      "status": "complete",
+      "findings": []
+    }
+  ]
+}
