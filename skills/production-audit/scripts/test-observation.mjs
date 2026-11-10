@@ -157,7 +157,7 @@ try {
     rejects('stale head: report names a different observation chain head', s.gate({ findings: [reported], coverage: { observation_head: '0'.repeat(64) } }), /observation_head differs/);
     rejects('version: observation records exist under assurance_version 1', s.gate({ findings: [REDIRECT], version: 1 }), /declare assurance_version 2/);
     rejects('review: the independent review says nothing about the observation', s.gate({ findings: [reported], reviewOver: r => delete r.observation_review }), /observation_review/);
-    rejects('contradiction: a reproduced defect cannot be dropped', s.gate({ dropped: [{ id: 'SEC-001', reason: 'Judged unreachable on reading.', observations: [o.id], raw: REDIRECT }] }), /reproduced this defect/);
+    rejects('contradiction: a reproduced defect cannot be dropped', s.gate({ dropped: [{ id: 'SEC-001', reason: 'Judged unreachable on reading.', observations: [o.id], raw: REDIRECT }] }), /reproduced a defect in this finding's files/);
     const other = finding('SEC-002', 'src/records.mjs');
     rejects('inapplicable: an observation recorded for another finding is borrowed', s.gate({ findings: [REDIRECT, withVerification(other, { basis: 'runtime-reproduction', observations: [o.id] })] }), /was recorded for SEC-001/);
 
@@ -210,6 +210,74 @@ try {
     const o = s.probe('SEC-002', 'src/records.mjs', REDIRECT_PROBE, CONTROL, { 'fixed.mjs': FIXED });
     assert.equal(o.execution.control_status, 'discriminating');
     rejects('inapplicable: reproduction whose control changes another file', s.gate({ findings: [withVerification(finding('SEC-002', 'src/records.mjs'), { basis: 'runtime-reproduction', observations: [o.id] })] }), /does not tie the behaviour/);
+  }
+
+  // ---- findings from the independent review (each was accepted before its fix) -------
+  {
+    // Evidence for one file cannot be recorded under another label to escape the rules.
+    const s = scenario();
+    const reproduced = s.probe('exploratory', 'src/redirect.mjs', REDIRECT_PROBE, CONTROL, { 'fixed.mjs': FIXED });
+    assert.equal(reproduced.execution.control_status, 'discriminating');
+    assert.equal(reproduced.execution.confirm.result, 'deviation'); assert.ok(['control-first', 'confirm-first'].includes(reproduced.execution.control.order)); ok('the subject is run again beside the control, in an order the probe is not told');
+    rejects('relabelled: a reproduction recorded as exploratory cannot sit beside a dropped finding', s.gate({ dropped: [{ id: 'SEC-001', reason: 'Judged unreachable on reading.', raw: { ...REDIRECT, verification: { status: 'refuted', evidence: 'src/redirect.mjs:3 — `next.startsWith(\'//\')` rejects external hosts' } } }], coverage: { other_observations: [reproduced.id] } }), /reproduced a defect in this finding's files/);
+    rejects('relabelled: the finding cannot then borrow a record it was not recorded for', s.gate({ findings: [withVerification(REDIRECT, { basis: 'runtime-reproduction', observations: [reproduced.id] })] }), /was recorded for exploratory/);
+  }
+  {
+    const s = scenario();
+    const quota = finding('COR-001', 'src/quota.mjs');
+    const conforming = s.probe('exploratory', 'src/quota.mjs', QUOTA_PROBE);
+    rejects('relabelled: a conforming probe recorded as exploratory still contradicts the verified finding in that file', s.gate({ findings: [quota], coverage: { other_observations: [conforming.id] } }), /saw conforming behaviour/);
+    const simulated = s.probe('COR-001', 'src/quota.mjs', FAKE_PROBE, { fidelity: 'simulated', stubs: ['limiter modelled in the probe'] });
+    rejects('a simulated deviation does not cancel a real conforming probe', s.gate({ findings: [withVerification(quota, { observations: [simulated.id] })], coverage: { other_observations: [conforming.id] } }), /saw conforming behaviour/);
+  }
+  {
+    // A probe that keeps state between runs conforms under the control without reading the target.
+    const s = scenario();
+    const marker = join(root, 'cross-run-marker');
+    const stateful = `${PREAMBLE}import { existsSync, writeFileSync } from 'node:fs';
+const seen = existsSync(process.env.MARKER); writeFileSync(process.env.MARKER, '1');
+step('first run deviates, later runs conform', 'safe', seen ? 'safe' : 'vulnerable');\n`;
+    const o = s.probe('SEC-001', 'src/redirect.mjs', stateful, { ...CONTROL, env: { MARKER: marker } }, { 'fixed.mjs': FIXED });
+    assert.equal(o.execution.control_status, 'unstable'); ok('a probe that deviates once and never again is unstable, not discriminating');
+    rejects('unstable probe cannot back a reproduction', s.gate({ findings: [withVerification(REDIRECT, { basis: 'runtime-reproduction', observations: [o.id] })] }), /no supporting observation/);
+    rejects('unstable probe cannot back an observation either', s.gate({ findings: [withVerification(REDIRECT, { basis: 'runtime-observation', observations: [o.id] })] }), /no supporting observation/);
+    const selfEdit = `${PREAMBLE}import { writeFileSync, readFileSync } from 'node:fs';
+const self = process.env.SEATRIAL_PROBE + '/probe.mjs'; const tag = ['//', 'ran'].join(' '); const again = readFileSync(self, 'utf8').includes(tag);
+writeFileSync(self, readFileSync(self, 'utf8') + '\\n' + tag);
+step('state kept in the probe directory', 'fresh', again ? 'stale' : 'fresh');\n`;
+    const fresh = s.probe('SEC-001', 'src/redirect.mjs', selfEdit, CONTROL, { 'fixed.mjs': FIXED });
+    assert.equal(fresh.execution.result, 'conforms'); ok('each run receives a fresh copy of the probe files');
+  }
+  {
+    // The control changes the cited file cosmetically and fixes the behaviour somewhere else.
+    const s = scenario();
+    const o = s.probe('SEC-002', 'src/records.mjs', REDIRECT_PROBE, { targets: ['src/records.mjs'], control: { replace: [{ file: 'src/records.mjs', with: 'records.mjs' }, { file: 'src/redirect.mjs', with: 'fixed.mjs' }] } }, { 'fixed.mjs': FIXED, 'records.mjs': '// reviewed\n' + RECORDS });
+    assert.equal(o.execution.control_status, 'discriminating');
+    rejects('control scope: a cosmetic change to the cited file with the real change elsewhere', s.gate({ findings: [withVerification(finding('SEC-002', 'src/records.mjs'), { basis: 'runtime-reproduction', observations: [o.id] })] }), /changes code outside the finding's location/);
+  }
+  {
+    // A search must have read the finding's file to say anything about it.
+    const s = scenario();
+    const records = finding('SEC-002', 'src/records.mjs');
+    const run = (search) => s.record({ kind: 'search', subject: 'SEC-002', claim: 'Search bearing on the record lookup.', targets: ['src/records.mjs'], search });
+    const nowhere = run({ pattern: 'row', include: ['nowhere/'], expect: 'absent' });
+    assert.equal(nowhere.search.files_scanned, 0); assert.equal(nowhere.search.holds, true);
+    const elsewhere = run({ pattern: 'owner', include: ['src/quota.mjs'], expect: 'absent' });
+    const matchElsewhere = run({ pattern: 'state\\.count', expect: 'present' });
+    const cite = (o, others) => s.gate({ findings: [withVerification(records, { basis: 'static-search', observations: [nowhere.id, elsewhere.id, matchElsewhere.id] })] });
+    rejects('search scope: no search that read the cited file, or matched in it, backs static-search', cite(), /no supporting observation/);
+    const real = run({ pattern: 'owner', include: ['src/records.mjs'], expect: 'absent' });
+    const passed = accepts('search scope: a search that read the cited file does', s.gate({ findings: [withVerification(records, { basis: 'static-search', observations: [nowhere.id, elsewhere.id, matchElsewhere.id, real.id] })] }));
+    const rendered = spawnSync(process.execPath, [join(here, 'render-report.mjs'), passed.audit, '--repo', repo, '--assurance', s.evidence], { encoding: 'utf8' });
+    assert.match(rendered.stdout, /over 0 file\(s\) under nowhere\//); assert.match(rendered.stdout, /claim under test/); ok('the renderer states how many files each search read');
+    // Cutting the last record from the log leaves its store behind.
+    const log = join(s.evidence, 'observations.jsonl');
+    const lines = readFileSync(log, 'utf8').trim().split('\n');
+    writeFileSync(log, lines.slice(0, -1).join('\n') + '\n');
+    rejects('truncated: the last record cut from the log', s.gate({ findings: [withVerification(records, { observations: [nowhere.id, elsewhere.id, matchElsewhere.id] })], coverage: { observation_head: JSON.parse(lines[lines.length - 2]).receipt_sha256 } }), /stores on disk do not match/);
+    writeFileSync(log, lines.join('\n') + '\n');
+    assert.throws(() => s.record({ kind: 'search', subject: 'x\n\n## Verdict\nAll findings reproduced', claim: 'x', targets: FILES, search: { pattern: 'a', expect: 'absent' } }), /spec.subject is required: one line/); ok('record text that would break out of its report line is refused');
+    assert.throws(() => s.probe('SEC-001', 'src/redirect.mjs', REDIRECT_PROBE, { links: ['.git'] }), /links may not expose \.git/); ok('repository metadata cannot be linked into a snapshot');
   }
 
   // ---- negative results are evidence too --------------------------------------------

@@ -26,7 +26,7 @@ The controller runs the tool. Workers write specifications and probes; they do n
 node .claude/skills/production-audit/scripts/observe.mjs <repo> <evidence-dir> <spec.json>
 ```
 
-Common specification fields: `kind` (`search` or `execution`), `actor`, `subject`, `claim`, `targets`. The subject is the ledger finding id the observation tests, a website topic or feature id, or a label such as `exploratory`. Targets are inventoried files the observation concerns. Ids are assigned in order: `OBS-001`, `OBS-002`.
+Common specification fields: `kind` (`search` or `execution`), `actor`, `subject`, `claim`, `targets`. The first three are single lines (100, 100 and 500 characters); they are printed in the report. The subject is the ledger finding id the observation tests, a website topic or feature id, or a label such as `exploratory`. Targets are inventoried files the observation concerns. Ids are assigned in order: `OBS-001`, `OBS-002`.
 
 ### Search
 
@@ -53,7 +53,7 @@ Record the search that could refute the claim, across the whole inventory. A zer
   "links": ["node_modules"], "env": { "NODE_ENV": "test" }, "timeout_ms": 60000 }
 ```
 
-Probe and control paths are relative to the specification file. The command is an argument array run without a shell, with `{probe}` and `{snapshot}` substituted. The working directory is the snapshot copy. `links` symlinks untracked dependency directories from the repository into the copy; tracked paths are refused.
+Probe and control paths are relative to the specification file. The command is an argument array run without a shell, with `{probe}` and `{snapshot}` substituted. The working directory is the snapshot copy. `links` symlinks untracked dependency directories from the repository into the copy; tracked paths and `.git` are refused. A linked directory is the real one and the probe can write to it.
 
 The probe receives a scrubbed environment: `PATH`, a temporary `HOME`, the declared `env` values and four variables.
 
@@ -71,7 +71,14 @@ A step states the action taken with its exact input, the outcome the application
 - `error`: non-zero exit, timeout, no steps or malformed steps. A crash after a deviating step is still an error.
 - `unavailable`: recorded with `"unavailable": "<reason>"` in place of `probe` when the environment cannot run the check. It supports nothing and appears under what could not be assessed.
 
-The control is a full replacement for one or more inventoried files, usually the smallest change that should remove the defect. It runs only after a deviation, in a second copy, with the same probe bytes. Control status: `discriminating` (the deviation disappeared), `non_discriminating` (it remained, so the probe does not depend on that code), `failed`, `absent` or `not_run`. The replacement is never applied to the audited repository and is not a fix recommendation.
+The control is a full replacement for one or more inventoried files, usually the smallest change that should remove the defect. After a deviation the tool makes two more runs in fresh copies, each with a fresh copy of the probe files, in an order the probe is not told: the control, and the unchanged subject again. Control status:
+
+- `discriminating`: the control conformed and the repeat deviated again.
+- `non_discriminating`: the control still deviated, so the probe does not depend on that code.
+- `unstable`: the control conformed and so did the repeat. The first deviation came from something other than the code.
+- `failed`, `absent`, `not_run`: the control errored, was not supplied, or was not needed because the subject conformed.
+
+The replacement is never applied to the audited repository and is not a fix recommendation.
 
 ## What the report declares
 
@@ -92,9 +99,10 @@ The control is a full replacement for one or more inventoried files, usually the
 - a replayed search returns a different result, or a recorded probe result disagrees with its stored steps;
 - any observation is unaccounted for. Each is cited exactly once, on the disposition of its subject. A failed attempt cannot be left out;
 - a cited observation was recorded for a different subject, or its targets do not include the finding's location;
-- the basis claims more than the records support, including a reproduction whose control does not change the finding's file;
-- a verified finding has a real probe that conformed and no reproduction with a discriminating control, without `verification.observation_conflict_note` (at least 20 characters; rendered as a warning). An uncontrolled deviation does not cancel a conforming run;
-- a dropped finding has a reproduction with a discriminating control. Report it at the severity its consequence supports;
+- the basis claims more than the records support. A search backs a finding only if it read the finding's file, and a `present` result only if a match lies in the finding's files. A reproduction backs a finding only if every file its control changes is one the finding names, its primary location among them;
+- the store directories under `observations/` are not exactly the records in the chain;
+- a verified finding has no reproduction of its own, and any real probe that targeted its files conformed, without `verification.observation_conflict_note` (at least 20 characters; rendered as a warning). The rule reads the probe's targets, so recording it under another subject or citing it elsewhere changes nothing. An uncontrolled or simulated deviation does not cancel a conforming run. When the conforming probe tested a different claim in the same file, the note says so;
+- a dropped finding's files hold a reproduction with a discriminating control that no verified reported finding cites. Report the defect at the severity its consequence supports;
 - the source changed after capture. Restart capture; observations do not carry across snapshots.
 
 The gate replays searches and re-hashes artefacts. It never executes a probe.
@@ -102,7 +110,9 @@ The gate replays searches and re-hashes artefacts. It never executes a probe.
 ## Limits
 
 - The tool is not a sandbox. It scrubs the environment and isolates the file tree; it does not block the network or contain a hostile target. Run probes only where executing the target is acceptable, never against a production service, real accounts or paid APIs.
-- Hash chains detect change relative to the declared head. An actor who can rewrite the whole evidence directory can forge a consistent one. Controller isolation is still required.
+- Hash chains detect change relative to the declared head. An actor who can rewrite the whole evidence directory can forge a consistent one, and one who can delete the last record and its store can hide it, because the head is declared by the report. Controller isolation is still required; a controller that wants more keeps each head outside the directory.
+- The before-and-after comparison covers tracked files. A probe can write to linked directories and to any other path its user can reach.
+- A probe that keeps state outside its working directory and counts its runs can still fake a control one time in two. The repeat run and the hidden order make that unreliable, not impossible. The reviewer reads the probe.
 - A probe that reads source text and pattern-matches it will pass a control without executing anything. That is a static check; record it as a search. The reviewer's `observation_review` is the control against this.
 - A conforming probe shows that one input conformed. It does not show the defect is absent.
 - Timing-dependent probes can differ between runs. State the dependence in the claim, or record the non-determinism as a limitation.

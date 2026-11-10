@@ -6,13 +6,13 @@ Written 2026-07-01 on branch `claude/opus-4.8-documentation-gy6nfh`, after a ful
 
 ## What this repo is
 
-seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The core suite contains 154 cases, with 20 evidence integration checks, 72 observation checks (73 when a browser library resolves) and 103 corpus/scorer checks.
+seatrial (repo name SeaTrails): 34 Claude skills, comprising 21 audit lenses, the production-audit orchestrator and 12 craft skills. The zero-dependency gate, renderer and regression suite remain the execution checks. The core suite contains 155 cases, with 20 evidence integration checks, 88 observation checks (89 when a browser library resolves) and 103 corpus/scorer checks.
 
 ## Observation records update (2026-11-10)
 
 **What exists.** Verified findings name their evidence basis. `observe.mjs` records a replayable search or an executed probe against the captured snapshot, with an optional control replacement of the cited file. `observation.mjs` holds the recording logic and the gate rules; `audit-check.mjs` calls it after `checkAssurance`. `export-findings.mjs` writes a sealed bundle for another tool. Contracts: `references/observation-contract.md`, `references/findings-interchange.md`. Decision and rejected alternatives: ADR 0018. Reports opt in with `assurance_version: 2`; version 1 and legacy behaviour are unchanged except that a legacy report can no longer cite observation-backed evidence.
 
-**How it was built.** Attack-first: seven evidence-kind cases were added to `run-tests.mjs` and six were observed passing the unchanged gate before INVARIANT 13 and the `checkSchema` basis checks closed them. No existing case was removed or relaxed. A separate adversarial review of the new code was commissioned; see "Independent review" below.
+**How it was built.** Attack-first: eight evidence-kind cases were added to `run-tests.mjs` and seven were observed passing the gate before INVARIANT 13 and the shape checks closed them. No existing case was removed or relaxed. A separate adversarial review of the new code was commissioned; see "Independent review" below.
 
 **What was measured.** `scripts/benchmark/v2-2026-11-10/` holds twenty blinded runs on corpus v2 across two model tiers (`summary.json` is the scored comparison; `references/evidence-assurance.md` has the protocol).
 
@@ -33,7 +33,21 @@ Read this as: the mechanism's measured value is evidence a gate can check and di
 
 ### Independent review
 
-Pending at this commit. A reviewer with no part in the design was given the code and the contract and asked for runnable proofs of any report the gate wrongly accepts. Its outcome replaces this paragraph.
+A reviewer with no part in the design was given the code and the contract and asked for runnable proofs of any report the gate wrongly accepts. It proved nine weaknesses in the first implementation (commit `00fc514`). All nine are closed in the following commit, each with a test in `test-observation.mjs` or `run-tests.mjs`, and each proof script was re-run and now ends in a rejection.
+
+| Weakness proved | Closed by |
+|---|---|
+| A search that never read the cited file backed `static-search` | Scope check on replay: the finding's file must have been scanned; a `present` result needs a match in the finding's files |
+| A control changed the cited file cosmetically and fixed another file | Every control file must be one the finding names, its primary location included |
+| A probe kept state between runs and conformed under the control without loading the target | Fresh probe copy per run; the subject is repeated beside the control in a hidden order; new status `unstable` |
+| A record relabelled `exploratory` escaped the conflict and drop rules | Both rules read the probe's targets, whatever its subject and wherever it is cited |
+| Any deviation, even simulated, cancelled a conforming probe | Only a controlled reproduction outweighs a conforming run |
+| A linked `.git` let a probe plant a hook that ran inside the gate | `.git` cannot be linked; the tools run git with `core.fsmonitor` off |
+| The last record could be cut from the log | Store directories must match the chain; the remaining limit is stated in the contract |
+| Record text injected a section into the report | Record text is one bounded line; the renderer prints search flags and files read |
+| A malformed dropped entry passed the gate and crashed the renderer | Shape check in the gate, legacy path included |
+
+The reviewer also listed some twenty attacks the gate already rejected. Limits that remain open are in `observation-contract.md`: a probe that keeps state outside its working directory and counts runs, a probe that pattern-matches source text, writes to linked directories, and forgery by a party who controls the whole evidence directory.
 
 ### Follow-up work, sized for a single worker each
 

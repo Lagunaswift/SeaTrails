@@ -122,9 +122,10 @@ const w = (s = '') => out.push(s);
 const observations = gate.assurance?.observations || [];
 const observationById = new Map(observations.map((o) => [o.id, o]));
 const BASIS_LABEL = { 'source-quote': 'source quotation', 'static-search': 'replayed static search', 'runtime-observation': 'runtime observation (no control; behaviour seen, not tied to the cited code)',
-  'runtime-reproduction': 'runtime reproduction (deviation on the snapshot, gone under a control change to the cited code)', 'simulated-test': 'simulated test (the snapshot code was not executed)' };
+  'runtime-reproduction': 'runtime reproduction (deviation on the snapshot, repeated, and gone under a control change confined to the cited files)', 'simulated-test': 'simulated test (the snapshot code was not executed)' };
 const describeObservation = (o) => o.kind === 'search'
-  ? `${o.id} search /${o.pattern}/ expected ${o.expect}: ${o.match_count} match(es), expectation ${o.holds ? 'held' : 'FAILED'}`
+  ? `${o.id} search /${o.pattern}/${o.flags || ''} over ${o.files_scanned} file(s)${o.include?.length ? ` under ${o.include.join(', ')}` : ''}, expected ${o.expect}: ${o.match_count} match(es), expectation ${o.holds ? 'held' : 'FAILED'}` +
+    (o.binary_skipped || o.long_lines_truncated ? ` (${o.binary_skipped} binary file(s) skipped, ${o.long_lines_truncated} long line(s) truncated)` : '')
   : `${o.id} ${o.surface} probe (${o.fidelity}${o.stubs?.length ? `; stubs: ${o.stubs.join(', ')}` : ''}): ${o.result}` +
     (o.result === 'deviation' || o.result === 'conforms' ? `, ${o.deviations} of ${o.steps} step(s) deviated` : '') +
     (o.reason ? ` — ${o.reason}` : '') + `; control ${o.control_status.replace('_', ' ')}` + (o.control_changes?.length ? ` (${o.control_changes.join(', ')})` : '');
@@ -336,6 +337,7 @@ if (observations.length) {
   w('Recorded by the controller against the captured snapshot. The gate replayed each search and re-derived each probe result from its stored steps; it did not execute any probe. A probe shows behaviour for the inputs it used, not for all inputs. Whether a probe exercises the cited code is the reviewer\'s judgement, except where a control change to that code removed the deviation.');
   w();
   for (const o of observations) w(`- ${describeObservation(o)} · subject ${o.subject} · by ${o.actor} · targets ${o.targets.join(', ')}`);
+  for (const o of observations) w(`  - ${o.id} claim under test: ${o.claim}`);
   w();
 }
 

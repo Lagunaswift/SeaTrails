@@ -25,7 +25,7 @@ The detection benchmark could not measure a change either. Its eight one-line ca
 
 A verified finding names its evidence basis: `source-quote`, `static-search`, `runtime-observation`, `runtime-reproduction` or `simulated-test`. Any basis but the first needs observation records under `assurance_version: 2`.
 
-An observation is recorded by the controller with `observe.mjs`, chained from the manifest hash, and stored with its specification, probe, outputs, steps and artefacts. A probe runs in a temporary copy of the tracked files with a scrubbed environment and reports steps; the tool, not the probe, decides whether expected and observed differ. A control replaces the cited file in a second copy and reruns the same probe. A deviation that disappears under the control ties the behaviour to that file.
+An observation is recorded by the controller with `observe.mjs`, chained from the manifest hash, and stored with its specification, probe, outputs, steps and artefacts. A probe runs in a temporary copy of the tracked files with a scrubbed environment and reports steps; the tool, not the probe, decides whether expected and observed differ. A control replaces the cited file in a fresh copy. The tool runs the control and the unchanged subject again, in an order the probe is not told. A deviation that disappears under the control and reappears in the repeat ties the behaviour to that file.
 
 The gate replays searches, re-derives probe results from stored bytes and never executes a probe. Every recorded observation must be accounted for on the disposition of its subject. A verified finding whose only real probe conformed fails without a stated reason; a dropped finding that was reproduced fails. Under version 2, `rendered` and `interactive` website evidence must name a completed web observation. Version 1 stays valid for audits that record none.
 
@@ -35,7 +35,11 @@ The benchmark gains a second corpus with a shared executable oracle per pair, sp
 
 ## What would falsify the benefit
 
-If, on labelled cases, a protocol with observations detected or verified no better than reading, the detection benefit would be unsupported. **It was not supported.** In twenty blinded runs over two model tiers, the read-only and observe arms had identical recall and false-positive rates, and every arm verified 24 of 24 concrete claims. The measured benefit is narrower: evidence claims the gate can check (six bypasses closed, seventy-two integration checks), and disputes that execution settles. The corpus is short single-module code; multi-file, stateful and browser-dependent defects are untested.
+If, on labelled cases, a protocol with observations detected or verified no better than reading, the detection benefit would be unsupported. **It was not supported.** In twenty blinded runs over two model tiers, the read-only and observe arms had identical recall and false-positive rates, and every arm verified 24 of 24 concrete claims. The measured benefit is narrower: evidence claims the gate can check (seven legacy-path bypasses closed, eighty-eight integration checks), and disputes that execution settles. The corpus is short single-module code; multi-file, stateful and browser-dependent defects are untested.
+
+## Independent review
+
+A reviewer with no part in the design attacked the first implementation and proved nine weaknesses with runnable scripts. Five were reports the gate accepted while they claimed more than the records held or hid a result: a search that never read the cited file; a control that changed the cited file cosmetically and fixed another; a probe that kept state between runs; a record relabelled `exploratory` to escape the conflict and drop rules; any deviation cancelling a conforming probe. The others: a probe writing through a linked `.git` and so running code inside the gate; a record cut from the end of the log; report text injected through record fields; a malformed dropped entry. Each is closed and locked by a test, and every proof script now ends in a rejection. The limits that remain are in the contract's Limits section.
 
 ## Consequences
 
@@ -47,4 +51,4 @@ If, on labelled cases, a protocol with observations detected or verified no bett
 
 ## Enforced by
 
-`observation.mjs` (`observe`, `checkObservations`, `claimsObservations`, `armResult`, `controlStatus`, `BASES`, `SURFACES`); `audit-check.mjs` (`checkSchema` basis and id checks, INVARIANT 13); `render-report.mjs` (`describeObservation`, `BASIS_LABEL`); `export-findings.mjs` (`verifyBundle`); `benchmark.mjs` (`prepareV2`, `scoreV2`, `compareV2`); `run-tests.mjs` (seven evidence-kind cases); `test-observation.mjs`; `test-benchmark.mjs`.
+`observation.mjs` (`observe`, `checkObservations`, `claimsObservations`, `armResult`, `controlStatus`, `BASES`, `SURFACES`); `audit-check.mjs` (`checkSchema` basis and id checks, INVARIANT 13); `render-report.mjs` (`describeObservation`, `BASIS_LABEL`); `export-findings.mjs` (`verifyBundle`); `benchmark.mjs` (`prepareV2`, `scoreV2`, `compareV2`); `run-tests.mjs` (eight evidence-kind cases); `test-observation.mjs`; `test-benchmark.mjs`.

@@ -1379,6 +1379,13 @@ cases.push(
       dropped: [{ id: 'SEC-001', reason: 'A probe showed the guard holds.', observations: ['OBS-001'] }] }),
   },
   {
+    name: 'evidence-kind laundering: dropped entry carries a prose observation claim FAILS',
+    expect: 'fail', expectExit: 1,
+    ledger: [finding()],
+    report: report({ reconciliation: { raw: 1, reported: 0, merged: 0, dropped: 1 },
+      dropped: [{ id: 'SEC-001', reason: 'A probe showed the guard holds.', observations: 'OBS-001 reproduced nothing' }] }),
+  },
+  {
     name: 'evidence-kind laundering: coverage declares an observation chain head without assurance FAILS',
     expect: 'fail', expectExit: 1,
     ...single({}, { coverage: { files_total: 1, files_examined: 1, areas_total: 1, matrix: ['code-audit: all areas examined'], observation_head: '0'.repeat(64) } }),

@@ -17,11 +17,13 @@ export function source(root, file) {
   if (isAbsolute(rel) || rel === '..' || rel.startsWith('../') || !statSync(path).isFile()) throw Error('source outside repository or not a file');
   return readFileSync(path);
 }
+// The audited repository's own configuration must not run code inside these tools.
+const GIT = ['-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false'];
 export function inventory(root) {
-  const top = execFileSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+  const top = execFileSync('git', [...GIT, '-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
   if (realpathSync(top) !== realpathSync(root)) throw Error('--repo must be the repository root');
   // Tracked files are an independent, reproducible denominator. No extension heuristics.
-  const files = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }).split('\0').filter(Boolean);
+  const files = execFileSync('git', [...GIT, '-C', root, 'ls-files', '-z'], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }).split('\0').filter(Boolean);
   return [...new Set(files)].sort().map(file => ({ file, sha256: hash(source(root, file)) }));
 }
 const nonempty = value => typeof value === 'string' && value.trim().length > 0;

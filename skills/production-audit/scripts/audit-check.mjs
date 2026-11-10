@@ -298,6 +298,9 @@ function checkReconciliation(ledger, report, ledgerById) {
   }
   for (const d of report.dropped || []) {
     if (!ledgerById[d.id]) fail(`reconciliation: dropped id ${d.id} is absent from the ledger`);
+    if (d.observations != null && !(Array.isArray(d.observations) && d.observations.every((o) => typeof o === 'string' && OBSERVATION_ID.test(o)))) {
+      fail(`reconciliation: dropped ${d.id} observations must be an array of observation ids (OBS-001)`);
+    }
   }
   const reported = new Set((report.findings || []).map((f) => f.id));
   const mergedAway = new Set();
