@@ -17,6 +17,8 @@ Before coding, establish the context and an appropriate visual direction:
 
 Use the existing design system where available. If the brief is missing, record assumptions and solve the immediate task without inventing a replacement identity. Read production-audit/references/design-review-context.md when implementing an audit recommendation.
 
+Use `ux-ui-patterns/design-execution-review.md` to verify relevant typography, layout, input and motion details in the implemented interface. Retain working techniques; choose OKLCH, custom controls or transitions only when they serve the brief. Check real content, failure/recovery states and supported accessibility preferences before considering the change complete.
+
 Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
 - Production-grade and functional
 - Legible and appropriate to the task

@@ -75,10 +75,13 @@ Every page, every API endpoint, every asset, every WebSocket connection. No exce
 
 If you support "Sign in with Google/GitHub/etc.":
 - Validate the `state` parameter on callback to prevent CSRF
-- Verify the `id_token` signature using the provider's public keys (fetched from their JWKS endpoint)
-- Check `iss` (issuer) and `aud` (audience) claims match your application
-- Do not trust email addresses from OAuth providers without checking the `email_verified` claim
-- Link social accounts to existing accounts by verified email, not by display name
+- For OpenID Connect, verify the `id_token` signature using trusted provider keys and validate the required claims and flow binding. Check `iss` (issuer) and `aud` (audience) against the expected provider/application.
+- For an OAuth-only provider, use its documented authenticated identity lookup; do not assume every social provider issues an `id_token`.
+- Bind the authenticated identity to the provider's stable, issuer-scoped subject contract. For Entra, apply the tenant/object or subject rules documented for the token and application.
+- Treat email, username and display claims according to the provider's trust guarantees; an `email_verified` flag alone does not establish ownership of an existing application account.
+- Link identities only after authenticated proof of control of the existing account and the new identity. Matching email/display claims must not silently merge accounts or grant their data. Test this boundary with distinct synthetic subjects and matching display claims.
+
+Read [protocol-and-auth-checks.md](protocol-and-auth-checks.md), S16.04, for the nOAuth case and current provider references.
 
 ### Password Reset Flow
 

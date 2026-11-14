@@ -158,23 +158,15 @@ Use connection signals and actual request outcomes to describe availability. A b
 
 ### When to Use
 
-Update the UI immediately as if the action succeeded, then reconcile with the server response. Use for:
-- Toggling states (like, bookmark, follow)
-- Reordering items (drag and drop)
-- Simple edits (renaming, updating a field)
-- Sending messages
+Consider a reversible local preview when it improves a frequent task and failure can be handled without misleading the user. Likes, bookmarks, ordering and simple edits may qualify. A message may appear locally as pending; delivered status requires the authoritative outcome. The product can use ordinary pending feedback where optimism adds little value.
 
 ### When Not to Use
 
-Do not use optimistic updates for:
-- Financial transactions (payment, transfer)
-- Destructive actions (delete, remove access)
-- Actions with complex validation (form submission with server-side rules)
-- Actions where the server might reject (rate limited, quota exceeded)
+Wait for authoritative confirmation before presenting a payment, access change or other consequential commitment as successful. A preview never bypasses validation, quotas or permissions. Decide whether a reversible deletion or complex edit supports a truthful pending state and recovery; the presence of a possible rejection alone does not decide the design.
 
 ### Rollback
 
-If the server rejects the action, roll back the UI to its pre-action state. Show an error toast explaining what happened. Do not silently revert — the user needs to know their action did not persist.
+On confirmed rejection, restore or reconcile the affected change while preserving newer edits and unrelated work. Explain the failed action with persistent recovery where needed. On a lost response, reconcile the outcome before retrying; the server may have committed the write. Test delayed and out-of-order replies, duplicate actions, account changes and conflicts. Use mutation identity or the existing state model to prevent an older response from overwriting current intent.
 
 ---
 
@@ -316,9 +308,9 @@ For navigation actions (clicking a link that loads a new page or section):
 
 For toggle switches, like/unlike buttons, and other binary actions:
 
-- Accept the first click immediately (optimistic update).
-- Ignore subsequent clicks within a debounce window (300ms).
-- If the user toggles rapidly (on-off-on-off), batch the final state and send one request for the settled value, not four requests.
+- Acknowledge input immediately; use optimism only under the conditions above.
+- Preserve the latest intended value if requests are coalesced. Choose timing from the actual interaction rather than discarding every second input inside a fixed window.
+- Coalesce only operations whose semantics allow it, such as setting a final preference. Independently meaningful events need their own handling. Reconcile delayed responses without overwriting the latest state.
 
 ```
 Rapid toggle pattern:
@@ -334,8 +326,8 @@ During drag operations:
 - Show a drag preview (ghost of the dragged element) immediately on drag start.
 - Highlight valid drop targets as the user drags over them.
 - Show an insertion indicator (line, gap, highlight) at the exact drop position.
-- On drop: animate the element to its new position. Do not teleport.
-- If the drop is rejected (invalid target), animate the element back to its original position.
+- On drop, make the final position clear. A short transition may explain the move; an immediate state change is valid when clearer or preferred.
+- If the drop is rejected, retain or restore the correct position and explain the rejection. Return motion is optional and must not delay recovery or obscure the latest state.
 - Disable other interactions during drag (no tooltips, no hover menus, no scrolling unless near the edge).
 
 ### Keyboard Interaction Feedback
@@ -344,7 +336,7 @@ Keyboard actions need the same feedback as mouse actions:
 
 - Enter/Space on a button: same loading state as click.
 - Tab focus: visible focus ring (covered in accessibility.md).
-- Escape: closes the most recent overlay (modal, dropdown, popover) with visible transition.
+- Escape: closes the dismissible active overlay and restores focus appropriately. Closing must work immediately; any visual transition is optional and cannot gate dismissal.
 - Keyboard shortcuts (Cmd+S, Cmd+Enter): show the same feedback as clicking the corresponding button. The user pressed a shortcut but expects to see the "Saving..." state.
 
 ### Scroll-Triggered Actions
@@ -357,19 +349,19 @@ For actions triggered by scroll position (infinite scroll load-more, sticky head
 
 ### Animation as Feedback
 
-Use animation to confirm that an action registered:
+Use clear feedback to confirm that an action registered. Motion can help explain a change, but immediate state updates and static feedback are valid. These are optional treatments, selected for the task and motion preference:
 
 ```
 Add to list:     New item slides in from the side or fades in with height animation
-Remove from list: Item slides out or fades with height collapse (do not just vanish)
+Remove from list: Item leaves with a transition, or immediately with clear resulting state
 Reorder:         Item animates to new position
 Toggle:          Switch slides with brief ease transition
 Save:            Brief checkmark or green flash on the saved element
-Error:           Brief shake animation on the errored element (subtle, not violent)
+Error:           Persistent explanation and recovery, optionally a visual highlight
 Copy to clipboard: Brief "Copied!" tooltip or icon swap (clipboard → checkmark)
 ```
 
-These animations should be 150-300ms. Fast enough to feel responsive, slow enough to be perceived. Respect `prefers-reduced-motion` (see accessibility.md).
+For a small transition, 150–300ms can be an illustrative starting range, not an acceptance requirement. Check the actual distance, sequence, interruption and total wait. Respect `prefers-reduced-motion` (see accessibility.md), and preserve the action, focus and feedback when motion is reduced or absent. No successful state change depends solely on an animation finishing.
 
 ### What "Responsive" Actually Means
 

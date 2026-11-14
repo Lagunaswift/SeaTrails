@@ -11,6 +11,8 @@ Individual components can work while the interface loses consistency across rout
 
 Read `production-audit/references/design-review-context.md` first. Establish the product's users, main tasks, existing design rules, reviewed routes and available evidence. Inspect the source before drawing conclusions from screenshots. Preserve deliberate brand choices and working conventions.
 
+Apply the relevant S17 probes in `ux-ui-patterns/design-execution-review.md` during the passes below. Record typography and layout observations at actual sizes, viewports and themes. Share functional, accessibility and measured performance defects with their native owners; a colour-space or animation preference alone creates no finding.
+
 ## The passes
 
 ### Pass 1: Design-system drift

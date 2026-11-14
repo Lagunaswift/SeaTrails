@@ -18,6 +18,18 @@ Record an observation, applicability reason or precise untested scope for each H
 
 Keep the twelve topic IDs, 119-control mapping and existing finding schema. HEUR labels add traceability within evidence, without a separate score or finding prefix. An expert walkthrough cannot establish a conversion improvement or representative user preference. Optional shortcuts, help interfaces and sparse styling need the same contextual judgement as other feature/design choices.
 
+## Security and design source probes
+
+At Stage 0/1, identify the HTTP termination/proxy path, authentication providers, token types, GraphQL/WebSocket endpoints, database views and parser/import paths that actually exist. Record provider-managed boundaries separately from application code. This establishes applicability for S16.01 through S16.20 in [protocol-and-auth-checks.md](../../saas-production-security/references/protocol-and-auth-checks.md) and [runtime-and-data-checks.md](../../saas-production-security/references/runtime-and-data-checks.md). Code-audit runs them in its security pass and coordinates with infrastructure-config, dependency-audit and scaling-audit where those lenses own the evidence.
+
+Run S17.01 through S17.20 in [design-execution-review.md](../../ux-ui-patterns/design-execution-review.md) through the UI/UX pass and relevant specialist lenses. Prioritise demonstrated interaction, accessibility and state failures before optional visual refinement; implement changes only in an authorised fix phase. Existing behaviour, real content and supported devices determine the needed tests. A named technique is not a requirement to add it.
+
+Keep one compact disposition for each of the forty source probes: assessed with its result, not applicable with a product reason, or partial/blocked with the missing scope. For applicable topics, retain these notes in the existing topic evidence. If the whole topic is not applicable, record the probe dispositions in its reason or an existing review note referenced there; keep its evidence, finding_ids and limitations arrays empty. Do not make a topic applicable merely to hold inapplicability notes.
+
+Map security observations to access-security and relevant reliability-cost/performance topics; map design observations to interaction-states, mobile-accessibility, performance or layout-features. A reused control or existing reference does not establish that the new probe was performed. Required unassessed work keeps the affected topic partial/blocked and scope.partial=true. Under assurance version 2, follow the observation contract for rendered and interactive evidence.
+
+S16/S17 labels are source traceability within the existing 119 controls, not finding prefixes or additional topic IDs. Preserve the ordinary ledger and severity rules. Historical advisory names do not prove current exposure. Read-only audit authority covers source/configuration inspection and authorised bounded fixtures; live load, shared-cache or protocol-desynchronisation exercises need their own explicit scope. A managed-service check may use current provider mitigation/configuration evidence with its limits stated.
+
 ## Topic ownership
 
 Record all twelve topics. The owner is the existing lead lens used for this run; supporting lenses keep their established findings and consequence rules. A topic can be inapplicable for a stated product reason. Missing access or time is partial/blocked work, not inapplicability.

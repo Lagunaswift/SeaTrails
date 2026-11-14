@@ -32,6 +32,8 @@ Security issues are first because they're the highest-cost failures and the ones
 
 For website/API surfaces, read `references/website-boundaries.md` for direct ownership, private-cache, remote-fetch and payment probes. Record unavailable runtime/provider checks through the existing evidence and coverage rules.
 
+Apply the conditional probes in `../saas-production-security/references/protocol-and-auth-checks.md` and `../saas-production-security/references/runtime-and-data-checks.md` to the actual protocols, identity providers, parsers and data paths present. Record a disposition and evidence or limit for each S16 source item. Use provider/version evidence and isolated fixtures where appropriate; this review grants no authority for live denial-of-service, shared-cache poisoning or desynchronisation tests. Keep findings under their native owners and deduplicate by root cause.
+
 Security findings are almost always report-first even in fix mode, because a wrong security fix is worse than the hole. Flag, explain the risk, propose the fix, and apply it only with care and verification.
 
 ### Pass 2: Correctness
@@ -79,6 +81,8 @@ The code's shape, where bad structure makes it hard to understand, change, or sa
 For code with a user interface, apply the following references, including static brochure sites. Skip entirely for non-UI code. Read `../ux-ui-patterns/website-completeness.md` for route/navigation, identity/contact and commercial/content checks. Keep these in this pass even when `frontend-robustness` is inapplicable to a static site.
 
 Read `../ux-ui-patterns/nielsen-usability-review.md` and apply its ten perspectives across selected complete tasks, including relevant correction and failure paths. Record the surfaces, observations and limits in the ordinary coverage notes. Use existing consequence ownership and deduplicate the root cause; HEUR labels are review provenance only. A source-only review leaves any required interactive assessment explicitly outstanding.
+
+Read `../ux-ui-patterns/design-execution-review.md` for the S17 typography, layout, input and motion probes. Coordinate relevant checks with accessibility, mobile-and-responsive, frontend-robustness, performance and the selected design lenses. Assess techniques only where used or justified, with rendered/interactive evidence for visual or behavioural claims. Preserve useful brand choices and record untested scope.
 
 - **`ux-ui-patterns`** for usability and interaction patterns: form design, navigation structure, accessibility, responsive behaviour, data display, error states, empty states, loading states, and microcopy. This lens asks "can the user accomplish their task correctly and efficiently?"
 - **`frontend-design`** for typography, colour, composition, motion and brand fit. Judge the rendered page against its purpose and established design rules. A familiar layout, eyebrow label, font or gradient is not a finding by itself. Identify the actual mismatch, repetition or hierarchy problem and its consequence; preserve conventions that help the task.

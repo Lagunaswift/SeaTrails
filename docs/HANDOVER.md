@@ -65,6 +65,8 @@ Each task names its files and its acceptance. None overlaps another. Harness tas
 
 ## Website readiness update
 
+On 14 November 2026, added S16 security probes and S17 design execution checks from two further screenshots. The forty source items extend existing ownership and evidence records, with current primary references and conditional applicability. Code-audit invokes the security and UI references; the design craft/lens paths share the new execution checks. The standalone brief is version 1.2 with 241 source entries and the same 119 controls. Audit authority and the report contracts remain unchanged.
+
 On 9 November 2026, added an active Nielsen usability review under ux-ui-patterns, called by code-audit's UI/UX pass and the website profile. Its ten review labels map to the existing controls and coverage evidence. The review covers complete tasks, including memory between screens, useful help and truthful cancellation/recovery. Existing undo, cancellation, offline and routed-overlay guidance now distinguishes the product's actual commitments. The 119 controls, twelve profile topics, skill/lens counts and report schema remain unchanged.
 
 The website-readiness profile routes twelve review topics and twenty-four optional-feature decisions through existing lenses. All 119 controls in the supplied website brief map to native ownership in `website-readiness-coverage.md`. New coverage records stay inside report.json; findings, ledger and severity contracts remain unchanged. The gate rejects missing/contradictory profile records, hidden gaps and dangling finding references. The renderer exposes all decisions and limitations. It validates declared integrity, not visual truth or detection completeness.

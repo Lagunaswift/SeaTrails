@@ -129,6 +129,8 @@ The profile covers real journeys, navigation and contact actions, truthful comme
 
 The [Nielsen usability review](skills/ux-ui-patterns/nielsen-usability-review.md) applies ten perspectives across complete tasks, including memory between screens, meaningful exits and help at the point of need. Its observations and limitations feed the existing coverage records. The review preserves useful detail and brand choices; it adds no lens, score or mandatory component list.
 
+The profile also routes twenty conditional [protocol/authentication](skills/saas-production-security/references/protocol-and-auth-checks.md) and [runtime/data](skills/saas-production-security/references/runtime-and-data-checks.md) probes, plus twenty [design execution checks](skills/ux-ui-patterns/design-execution-review.md). They cover the supplied security and design screenshots through existing controls. Historical vulnerabilities retain their prerequisites; design techniques remain conditional. Each source item receives an applicability decision and assessment evidence or a named gap.
+
 Ask Claude or Codex:
 
 > Read `.claude/skills/production-audit/SKILL.md` and run a production audit with the website-readiness profile. Check existing coverage before proposing additions. Preserve useful design conventions and approved brand choices. Record evidence, optional-feature decisions and gaps, then deliver the gated report with fixes ordered by risk and dependency. Keep this run in report mode.
