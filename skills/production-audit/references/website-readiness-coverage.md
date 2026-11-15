@@ -1,12 +1,14 @@
 # Website brief coverage and native ownership
 
-This is the integration map for Website Audit and Remediation Brief version 1.2, reviewed 14 November 2026. Its 119 controls comprise 95 core/conditional checks and 24 optional-feature decisions. The seventeen screenshots contain thirteen distinct relevant sources and 241 source points, with three duplicates and one unrelated RAM-email image. Twelve layout examples supply vocabulary, not twelve more controls.
+This is the integration map for Website Audit and Remediation Brief version 1.3, reviewed 15 November 2026. Its 119 controls comprise 95 core/conditional checks and 24 optional-feature decisions. The nineteen screenshots contain fifteen distinct relevant sources and 276 source points, with three duplicates and one unrelated RAM-email image. Twelve layout examples supply vocabulary, not twelve more controls.
 
 The brief's IDs below are provenance labels only. They are not SeaTrails finding IDs and must never enter raw-findings.jsonl as findings. SeaTrails keeps its existing lenses, severity rules, evidence assurance, report-by-default mode and canonical output. Read website-readiness-profile.md for runtime selection, topic coverage and optional decisions.
 
 Brief version 1.1 added a journey review informed by [Jakob Nielsen's ten usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/). Read [nielsen-usability-review.md](../../ux-ui-patterns/nielsen-usability-review.md) for the ten perspectives, original task probes and existing-control crosswalk. HEUR-01 through HEUR-10 are review labels, not additional controls. Version 1.2 retains the original 201 screenshot entries and adds twenty security probes (S16) and twenty design probes (S17).
 
 The complete new source-to-control mappings sit beside their checks in [protocol-and-auth-checks.md](../../saas-production-security/references/protocol-and-auth-checks.md), [runtime-and-data-checks.md](../../saas-production-security/references/runtime-and-data-checks.md) and [design-execution-review.md](../../ux-ui-patterns/design-execution-review.md). They extend the existing owners below. Each probe needs its own recorded applicability and assessment; a link or mapped control is not a pass.
+
+Version 1.3 adds S18's fifteen [application abuse checks](../../saas-production-security/references/application-abuse-checks.md) and S19's twenty [App Store readiness checks](../../release-and-ops/references/app-store-readiness.md), preserving all 241 preceding source rows. S18 reuses established security owners and adds explicit price, quantity and redemption invariants. S19 is conditional on the actual distribution channel, with release-and-ops coordinating privacy, functionality and metadata evidence. Missing platform access remains a limitation; a browser-only site does not fail an App Store rule. The complete per-probe mappings remain beside those checks.
 
 ## Reuse and additions
 

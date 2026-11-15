@@ -69,7 +69,7 @@ Every page, every API endpoint, every asset, every WebSocket connection. No exce
 - SMS-based 2FA is better than nothing but vulnerable to SIM swapping. Offer it as a fallback, not a primary MFA method.
 - Enforce MFA for admin accounts. Strongly encourage it for all users.
 - Store MFA recovery codes as hashed values, same as passwords.
-- Rate limit MFA code attempts (max 5 failures in 15 minutes, then lock for 30 minutes).
+- Enforce identity/challenge-aware attempt limits appropriate to the verifier and threat model. Record the policy and verify it with a small local test budget, including expiry, replay, recovery and legitimate success. Do not invent a universal lockout threshold or lock real users out during an audit. See S18.11 in [application-abuse-checks.md](application-abuse-checks.md).
 
 ### OAuth and Social Login
 
@@ -373,7 +373,7 @@ This ensures the CDN-served file matches what you expect. If the CDN is compromi
 
 ### Image-Specific
 
-- Re-encode uploaded images server-side (open with an image library and save as a new file). This strips embedded payloads, EXIF data with location information, and potential exploits in image metadata.
+- Where the image pipeline needs decoding/re-encoding, use a maintained processor with explicit resource bounds and isolation. Remove unnecessary metadata deliberately and verify the resulting output. Rewriting does not guarantee safety; retain type, publication and serving controls. See S18.12 in [application-abuse-checks.md](application-abuse-checks.md).
 - Limit image dimensions (e.g., max 4096x4096 pixels). Decompression bombs use small files that expand to enormous pixel dimensions.
 - Validate image integrity — corrupt images that parse partially can crash processing libraries.
 
@@ -460,14 +460,14 @@ Security events:
 ### Never commit secrets to version control.
 
 This includes:
-- API keys (yours and third-party)
+- Privilege-bearing API keys, including server/provider credentials
 - Database credentials
 - JWT signing keys
 - Encryption keys
 - OAuth client secrets
 - Webhook secrets
 
-Use `.gitignore` to exclude `.env` files. Use a pre-commit hook (e.g., git-secrets, trufflehog) to scan for accidental secret commits.
+Exclude secret-bearing environment files from version control and scan staged files for accidental secret commits. Classify deliberately public client configuration and placeholder examples by their actual permissions; a filename or API-key shape alone does not establish exposure. See S18.04 and S18.13 in [application-abuse-checks.md](application-abuse-checks.md).
 
 ### Environment Variable Security
 

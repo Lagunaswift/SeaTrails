@@ -34,6 +34,8 @@ For website/API surfaces, read `references/website-boundaries.md` for direct own
 
 Apply the conditional probes in `../saas-production-security/references/protocol-and-auth-checks.md` and `../saas-production-security/references/runtime-and-data-checks.md` to the actual protocols, identity providers, parsers and data paths present. Record a disposition and evidence or limit for each S16 source item. Use provider/version evidence and isolated fixtures where appropriate; this review grants no authority for live denial-of-service, shared-cache poisoning or desynchronisation tests. Keep findings under their native owners and deduplicate by root cause.
 
+Read `../saas-production-security/references/application-abuse-checks.md` for S18.01–S18.15. Apply the account, role, price, fulfilment, redemption, quantity, upload, AI-cost and database probes to the relevant routes. Reuse evidence only where it exercises the same boundary and revision; a previously mapped control is not an assessment. Record every probe's result, inapplicability or missing scope. Test policy invariants with small isolated fixtures, not the screenshot's suggested volume of attempts.
+
 Security findings are almost always report-first even in fix mode, because a wrong security fix is worse than the hole. Flag, explain the risk, propose the fix, and apply it only with care and verification.
 
 ### Pass 2: Correctness

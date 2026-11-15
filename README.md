@@ -131,6 +131,8 @@ The [Nielsen usability review](skills/ux-ui-patterns/nielsen-usability-review.md
 
 The profile also routes twenty conditional [protocol/authentication](skills/saas-production-security/references/protocol-and-auth-checks.md) and [runtime/data](skills/saas-production-security/references/runtime-and-data-checks.md) probes, plus twenty [design execution checks](skills/ux-ui-patterns/design-execution-review.md). They cover the supplied security and design screenshots through existing controls. Historical vulnerabilities retain their prerequisites; design techniques remain conditional. Each source item receives an applicability decision and assessment evidence or a named gap.
 
+Fifteen [application abuse checks](skills/saas-production-security/references/application-abuse-checks.md) make account, price, redemption, quantity, upload and AI boundaries explicit. Twenty [App Store checks](skills/release-and-ops/references/app-store-readiness.md) apply when an iOS/iPadOS App Store release is intended. Release-and-ops also invokes them for native-only products. Browser-only websites remain outside that module; missing device/provider evidence and unresolved review conditions stay visible. The source inventory now contains 276 entries mapped to the same 119 controls.
+
 Ask Claude or Codex:
 
 > Read `.claude/skills/production-audit/SKILL.md` and run a production audit with the website-readiness profile. Check existing coverage before proposing additions. Preserve useful design conventions and approved brand choices. Record evidence, optional-feature decisions and gaps, then deliver the gated report with fixes ordered by risk and dependency. Keep this run in report mode.

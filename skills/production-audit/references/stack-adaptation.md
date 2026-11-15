@@ -16,6 +16,7 @@ Before Stage 1's lens selection, build a **stack profile** by reading the repo's
 | `pom.xml`, `build.gradle` | Java/Kotlin; `spring` |
 | `Cargo.toml` | Rust; `axum`, `actix` |
 | `*.csproj` | .NET / C# |
+| `*.xcodeproj`, `*.xcworkspace`, `Info.plist`, entitlements, `ios/`, Capacitor/React Native/Flutter configuration, Fastlane metadata | Possible native or packaged mobile target; inspect the intended platform and distribution channel before selecting store requirements |
 | ORM / DB deps (`prisma`, `sqlalchemy`, `gorm`, `activerecord`, `mongoose`, `firebase-admin`, `pg`, `mysql2`) | datastore family: **SQL** vs **document/NoSQL** |
 | `Dockerfile`, `vercel.json`, `netlify.toml`, `serverless.yml`, `fly.toml`, `*.tf` | hosting / deploy model: container, serverless, PaaS, IaC |
 | presence of `index.html` + no server deps | **static site** |
@@ -27,6 +28,7 @@ The profile to record: **language(s), framework, datastore family (SQL / documen
 **Service-triggered deepeners.** Some detected services pull in a specialist checklist on top of the standard lenses:
 - **Stripe** (`stripe` / `@stripe/*` dependency, `STRIPE_*` env vars, `/webhooks/stripe` routes) → the code-audit Security and Correctness passes additionally apply `stripe-best-practices` as a payment-integration checklist (webhook signature verification, idempotency keys, restricted/secret key handling, subscription-state correctness, refunds/disputes). See `lens-registry.md` Lens 1. Findings stay under code-audit's `SEC`/`COR` prefixes, tagged `also_seen_by_lenses: ["stripe-best-practices"]`.
 - An **AI provider** dependency → the `ai-saas-security` lens is mandatory (not optional).
+- An intended **Apple App Store release**, established from build/release configuration and product scope, makes `release-and-ops/references/app-store-readiness.md` applicable. Record platform, build, storefront/OS conditions and review access in the existing scope notes. Release-and-ops coordinates the twenty S19 probes with privacy/security/interaction owners. A browser-only PWA or an unused mobile directory does not establish that intent; missing access to a required build/provider check remains a limitation.
 
 The stack profile drives two things: which lenses apply (a static site skips scaling/privacy-deletion/AI; a headless API skips accessibility/SEO/frontend-robustness) and how each lens's checks are phrased.
 

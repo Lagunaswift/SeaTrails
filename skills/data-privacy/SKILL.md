@@ -13,6 +13,8 @@ This is a read-only engineering/product assessment unless changes are requested.
 
 Flag genuinely unresolved legal scope, lawful-basis or interpretation questions as **[LEGAL]**, with the engineering facts needed for a decision. Continue the evidence work that can be completed. Do not claim legal compliance, invent approved policy text or treat an unavailable contract as a confirmed violation.
 
+For an intended Apple App Store release, also read the permission, third-party AI, deletion and tracking probes in `../release-and-ops/references/app-store-readiness.md` (S19.07, S19.09, S19.12 and S19.16). Platform distribution conditions are separate from statutory duties. A generally workable manual privacy process does not by itself satisfy a platform's in-app deletion requirement. Assess actual SDK/server data flows and the applicable OS/region; a web cookie banner cannot establish native permission or tracking behaviour.
+
 ## Areas, in dependency order
 
 ### 1. Inventory and minimise

@@ -63,6 +63,12 @@ Reducing the blast radius of a bad release.
 - Are database changes decoupled from code changes so neither blocks the other's rollback (expand-contract)?
 `references/release-safety.md` covers feature flags, gradual rollout, and decoupling schema from code.
 
+## App Store distribution, where present
+
+For an intended Apple App Store release, read `references/app-store-readiness.md` and assess S19.01–S19.20 against the actual platform, build, metadata and review access. Coordinate privacy, authentication, moderation and functional findings with their existing owners. Record each probe's applicability, evidence and unresolved scope in the ordinary review notes; these are source labels, not a new finding prefix or approval score.
+
+The reference applies to native or packaged products targeting that channel, including a web app with an App Store wrapper. A browser-only website or PWA does not acquire App Store obligations merely because it works on an iPhone. Store policies, regional exceptions and OS behaviour must be checked at execution time. Do not submit a build, publish metadata or perform live account deletion during an ordinary audit.
+
 ## How to report
 Order by risk: secrets exposure and no-rollback first (they cause the worst incidents), reproducibility and release-safety practices later (they reduce risk but are less acutely dangerous). For each: the current posture, what it risks, and the concrete fix. Distinguish "this will cause an incident" from "this is below best practice." Note what could not be assessed (some of this lives in platform settings, not the repo).
 

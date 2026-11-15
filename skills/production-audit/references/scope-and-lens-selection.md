@@ -23,7 +23,7 @@ Run a lens when its subject is present; skip it (and say so) when it is not:
 - **`code-audit`**: always. Security and correctness apply to every app.
 - **`ai-saas-security`**: when the app sends user input to an AI provider or returns AI output. Skip if there is no AI surface.
 - **`scaling-audit`**: when the app has (or expects) real users, persistent data, or load. A throwaway prototype can get a light version; skip the deep version only for genuinely disposable things.
-- **`release-and-ops`**: almost always; any app that deploys has secrets, config, and a release path. Lighter for a static site.
+- **`release-and-ops`**: almost always; any app that deploys has secrets, config, and a release path. Lighter for a static site. For an intended Apple App Store release, apply its app-store-readiness reference, including native-only products that do not select the website profile.
 - **`data-privacy`**: when the app collects any personal data (accounts, analytics, emails, user content). Skip only for a genuinely data-free static site.
 - **`performance`**: when there is a frontend users wait on. Skip for a pure backend API (its latency is a scaling concern instead).
 - **`accessibility`**: when there is a user-facing UI. Skip for a headless API.
