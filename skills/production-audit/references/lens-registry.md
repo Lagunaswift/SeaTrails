@@ -50,7 +50,7 @@ When running a lens (Stage 2), the orchestrator should:
 ## Lens 4: release-and-ops  (prefix OPS · priority 2)
 
 - **Skill:** `.claude/skills/release-and-ops/SKILL.md`
-- **References:** `release-and-ops/references/`: secrets-and-config, environments, ci-cd, release-safety, rollback-and-recovery, reproducibility.
+- **References:** `release-and-ops/references/`: secrets-and-config, environments, ci-cd, release-safety, rollback-and-recovery, reproducibility; app-store-readiness when that distribution channel is intended.
 - **Owns:** Secrets management/exposure, config & environment parity, CI/CD, build checks, deployment safety (migrations, index ordering), rollback readiness, service-worker versioning, cron-job safety, reproducibility.
 - **Passes:** Secrets & config → Environments → CI/CD → Release safety → Rollback & recovery → Reproducibility.
 - **Type:** Atomic. **Overlap:** secrets in client bundles are also code-audit's; this owns the operational lifecycle.

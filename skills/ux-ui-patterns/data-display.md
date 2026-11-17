@@ -6,7 +6,7 @@
 
 Use tables for data that needs to be compared, scanned, or acted upon in bulk. Tables work when: the data has consistent columns, users need to compare rows, sorting and filtering add value, and bulk actions are needed.
 
-Do not use tables for: heterogeneous content (use cards), small datasets under 5 items (use a simple list), or mobile-primary interfaces (tables do not work well on narrow screens).
+Choose a table when row/column comparison serves the task, including small datasets and mobile views. Heterogeneous content may suit cards or a list. Test the actual data and narrow-width reading order before changing a working comparison layout.
 
 ### Table Design
 
@@ -24,13 +24,13 @@ Do not use tables for: heterogeneous content (use cards), small datasets under 5
 
 ### Responsive Tables
 
-Tables on mobile are a problem. Options:
+Test the comparison task at supported mobile widths. Possible treatments include:
 
 **Horizontal scroll:** Keep the full table, add horizontal scroll. Pin the first column (name/identifier) so it stays visible while scrolling. Works for data-literate users.
 
 **Card conversion:** Below a breakpoint, convert each row into a card with key-value pairs stacked vertically. Works for tables with fewer columns.
 
-**Column prioritisation:** Show only the most important 2-3 columns on mobile. Provide a "View details" link to see the full row.
+**Column prioritisation:** Keep the fields needed for the current comparison visible, with a discoverable route to supporting detail. Do not hide decisive values merely to fit a fixed column count.
 
 ---
 
@@ -159,7 +159,7 @@ Structure: header with item identity and primary actions, tabbed or sectioned co
 
 **WebSocket/SSE push.** Content updates as events arrive. Highlight new or changed items briefly (a flash of colour or a "New" badge). Do not scroll the user's viewport — new items appear at the expected position (top or bottom depending on sort order), and the user scrolls when ready.
 
-**Optimistic local + server reconciliation.** The user sees their own changes immediately. Other users' changes arrive via push. Conflict resolution (last-write-wins or merge) happens transparently.
+**Optimistic local + server reconciliation.** Where appropriate, show a reversible local change with truthful pending feedback, then reconcile with the server. Preserve newer edits when responses arrive out of order. Conflicts follow the product's declared policy; meaningful user work must not be silently overwritten. An authoritative response establishes saved or delivered state.
 
 ### Handling Stale Data
 

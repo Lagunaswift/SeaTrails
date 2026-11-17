@@ -17,6 +17,8 @@ It overlaps `accessibility` (error and loading states must be perceivable to eve
 
 Default to assessing where the UI breaks under real conditions, missing states, unhandled failures, double-submit risks, lost input, in priority order with fixes. Give concrete build guidance (state patterns, validation approaches) when asked to build rather than assess.
 
+When the UI has real animation or transitions, apply the state/lifecycle checks in `../ux-ui-patterns/animation-engineering-review.md` (especially ANIM-02–08, ANIM-17–19). Ensure visual completion never becomes the source of truth for a save, payment or destructive operation. Share measured performance and accessibility evidence with their owning lenses. Review only by default.
+
 ## The areas, in priority order
 
 ### 1. The four states of async (loading, success, error, empty)

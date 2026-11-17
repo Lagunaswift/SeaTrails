@@ -7,8 +7,11 @@ description: "Use this skill whenever building, auditing, or hardening any SaaS 
 
 When used for an audit, inspect the existing design and report findings under the parent audit contract. Apply only checks relevant to the product; implementation examples and suggested limits are not universal launch requirements. Audit mode does not authorise changes or live incident drills.
 
-Before writing any code, read the relevant reference files:
+Before auditing or writing code, read the relevant reference files:
 
+- `references/protocol-and-auth-checks.md`: Conditional HTTP/proxy, federation, token-verification and resource-abuse probes; distinguishes historical advisories from current product exposure.
+- `references/runtime-and-data-checks.md`: Trusted client identity, database views, randomness, cryptographic failure paths, parsers, WebSockets and account canonicalisation.
+- `references/application-abuse-checks.md`: Direct account and resource access, privileged fields, authoritative prices/payments, atomic redemption, quantity validation, uploads and bounded AI usage.
 - `references/web-security.md` — Transport security, auth hardening, sessions, XSS, CSRF, injection, security headers, dependencies, file uploads, CORS, logging, secrets, database security, server hardening, payments, account security, email, compliance, security testing, deployment
 - `references/production-readiness.md` — Subscription states, billing, feature flags, data integrity, load balancing, multi-region, disaster recovery, queues, migrations, error handling, latency, observability, API versioning, user lifecycle, governance, documentation, testing, vendor lock-in, cloud costs, support ops
 
@@ -55,7 +58,7 @@ Subscription manipulation, payment fraud, coupon/referral abuse, rate limit circ
 - [ ] OAuth id_token signature and claims verified
 - [ ] Password reset tokens: cryptographically random, hashed, single-use, 15-30 min expiry
 - [ ] Account enumeration prevented (generic messages on login, reset, registration)
-- [ ] Account lockout after 5 failed attempts with progressive delays
+- [ ] Authentication/MFA attempt limits follow the documented identity/challenge policy, with expiry, replay, recovery and legitimate success verified; see `references/application-abuse-checks.md` S18.11
 - [ ] Login, logout, MFA, and password events logged with IP and user agent
 
 ### Sessions

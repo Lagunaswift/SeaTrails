@@ -69,16 +69,19 @@ Every page, every API endpoint, every asset, every WebSocket connection. No exce
 - SMS-based 2FA is better than nothing but vulnerable to SIM swapping. Offer it as a fallback, not a primary MFA method.
 - Enforce MFA for admin accounts. Strongly encourage it for all users.
 - Store MFA recovery codes as hashed values, same as passwords.
-- Rate limit MFA code attempts (max 5 failures in 15 minutes, then lock for 30 minutes).
+- Enforce identity/challenge-aware attempt limits appropriate to the verifier and threat model. Record the policy and verify it with a small local test budget, including expiry, replay, recovery and legitimate success. Do not invent a universal lockout threshold or lock real users out during an audit. See S18.11 in [application-abuse-checks.md](application-abuse-checks.md).
 
 ### OAuth and Social Login
 
 If you support "Sign in with Google/GitHub/etc.":
 - Validate the `state` parameter on callback to prevent CSRF
-- Verify the `id_token` signature using the provider's public keys (fetched from their JWKS endpoint)
-- Check `iss` (issuer) and `aud` (audience) claims match your application
-- Do not trust email addresses from OAuth providers without checking the `email_verified` claim
-- Link social accounts to existing accounts by verified email, not by display name
+- For OpenID Connect, verify the `id_token` signature using trusted provider keys and validate the required claims and flow binding. Check `iss` (issuer) and `aud` (audience) against the expected provider/application.
+- For an OAuth-only provider, use its documented authenticated identity lookup; do not assume every social provider issues an `id_token`.
+- Bind the authenticated identity to the provider's stable, issuer-scoped subject contract. For Entra, apply the tenant/object or subject rules documented for the token and application.
+- Treat email, username and display claims according to the provider's trust guarantees; an `email_verified` flag alone does not establish ownership of an existing application account.
+- Link identities only after authenticated proof of control of the existing account and the new identity. Matching email/display claims must not silently merge accounts or grant their data. Test this boundary with distinct synthetic subjects and matching display claims.
+
+Read [protocol-and-auth-checks.md](protocol-and-auth-checks.md), S16.04, for the nOAuth case and current provider references.
 
 ### Password Reset Flow
 
@@ -370,7 +373,7 @@ This ensures the CDN-served file matches what you expect. If the CDN is compromi
 
 ### Image-Specific
 
-- Re-encode uploaded images server-side (open with an image library and save as a new file). This strips embedded payloads, EXIF data with location information, and potential exploits in image metadata.
+- Where the image pipeline needs decoding/re-encoding, use a maintained processor with explicit resource bounds and isolation. Remove unnecessary metadata deliberately and verify the resulting output. Rewriting does not guarantee safety; retain type, publication and serving controls. See S18.12 in [application-abuse-checks.md](application-abuse-checks.md).
 - Limit image dimensions (e.g., max 4096x4096 pixels). Decompression bombs use small files that expand to enormous pixel dimensions.
 - Validate image integrity — corrupt images that parse partially can crash processing libraries.
 
@@ -457,14 +460,14 @@ Security events:
 ### Never commit secrets to version control.
 
 This includes:
-- API keys (yours and third-party)
+- Privilege-bearing API keys, including server/provider credentials
 - Database credentials
 - JWT signing keys
 - Encryption keys
 - OAuth client secrets
 - Webhook secrets
 
-Use `.gitignore` to exclude `.env` files. Use a pre-commit hook (e.g., git-secrets, trufflehog) to scan for accidental secret commits.
+Exclude secret-bearing environment files from version control and scan staged files for accidental secret commits. Classify deliberately public client configuration and placeholder examples by their actual permissions; a filename or API-key shape alone does not establish exposure. See S18.04 and S18.13 in [application-abuse-checks.md](application-abuse-checks.md).
 
 ### Environment Variable Security
 

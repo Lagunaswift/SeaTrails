@@ -1,10 +1,22 @@
 # Website brief coverage and native ownership
 
-This is the integration map for the supplied Website Audit and Remediation Brief, reviewed 9 November 2026. Its 119 controls comprise 95 core/conditional checks and 24 optional-feature decisions. The source material included duplicate screenshots; the unrelated RAM-email script supplies no website requirement. Twelve layout examples supply vocabulary, not twelve more controls.
+This is the integration map for Website Audit and Remediation Brief version 1.3, reviewed 15 November 2026. Its 119 controls comprise 95 core/conditional checks and 24 optional-feature decisions. The nineteen screenshots contain fifteen distinct relevant sources and 276 source points, with three duplicates and one unrelated RAM-email image. Twelve layout examples supply vocabulary, not twelve more controls.
 
 The brief's IDs below are provenance labels only. They are not SeaTrails finding IDs and must never enter raw-findings.jsonl as findings. SeaTrails keeps its existing lenses, severity rules, evidence assurance, report-by-default mode and canonical output. Read website-readiness-profile.md for runtime selection, topic coverage and optional decisions.
 
-Brief version 1.1 also adds a journey review informed by [Jakob Nielsen's ten usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/). Read [nielsen-usability-review.md](../../ux-ui-patterns/nielsen-usability-review.md) for the ten perspectives, original task probes and existing-control crosswalk. HEUR-01 through HEUR-10 are review labels, not additional controls. This source is separate from the screenshot material; the 119 controls and original 201 source entries remain unchanged.
+Brief version 1.1 added a journey review informed by [Jakob Nielsen's ten usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/). Read [nielsen-usability-review.md](../../ux-ui-patterns/nielsen-usability-review.md) for the ten perspectives, original task probes and existing-control crosswalk. HEUR-01 through HEUR-10 are review labels, not additional controls. Version 1.2 retains the original 201 screenshot entries and adds twenty security probes (S16) and twenty design probes (S17).
+
+The complete new source-to-control mappings sit beside their checks in [protocol-and-auth-checks.md](../../saas-production-security/references/protocol-and-auth-checks.md), [runtime-and-data-checks.md](../../saas-production-security/references/runtime-and-data-checks.md) and [design-execution-review.md](../../ux-ui-patterns/design-execution-review.md). They extend the existing owners below. Each probe needs its own recorded applicability and assessment; a link or mapped control is not a pass.
+
+Version 1.3 adds S18's fifteen [application abuse checks](../../saas-production-security/references/application-abuse-checks.md) and S19's twenty [App Store readiness checks](../../release-and-ops/references/app-store-readiness.md), preserving all 241 preceding source rows. S18 reuses established security owners and adds explicit price, quantity and redemption invariants. S19 is conditional on the actual distribution channel, with release-and-ops coordinating privacy, functionality and metadata evidence. Missing platform access remains a limitation; a browser-only site does not fail an App Store rule. The complete per-probe mappings remain beside those checks.
+
+## Animation engineering extension (17 November 2026)
+
+The standalone brief v1.4 adds **ANIM-01–ANIM-20** as a dedicated engineering review, not screenshot-derived items and not new scored controls. Read [animation-engineering-review.md](../../ux-ui-patterns/animation-engineering-review.md). Its lifecycle/cleanup, timing/orchestration, memory/GPU, responsive/accessibility and integration probes map to existing `UX-03/05/06/10`, `A11Y-03/04/05/06/10`, `PERF-01/03/04/06`, `REL-01/08`, `PAY-01`, `SEC-13`, `BRAND-05`, `OPS-01/04`, and `BASE-02`. The **276 screenshot-source points**, **119 control IDs**, twelve website topics and twenty-four optional features are unchanged. A justified absence of motion is recorded as inapplicable, not a release failure. A test of source code alone must not be marked as a browser/GPU pass.
+
+## Typography extension (17 November 2026)
+
+The source screenshot S20 adds ten typography techniques, making **286 distinct relevant source points** from **20 screenshots** (16 distinct relevant sources, three duplicates and one unrelated). [Typography Engineering Review](../../ux-ui-patterns/typography-engineering-review.md) maps each S20.01–S20.10 to the existing `BRAND-03/05/07`, `UX-03/06/09`, `A11Y-01/05/06/07`, `PERF-04`, `SEO-09`, and conditional `OPT-05/10` controls. No new scored controls, lenses, topics or report fields. Absent optional techniques are justified omissions; existing clipping, layout shifts, unreadable text and broken accessible values require evidence-based findings.
 
 ## Reuse and additions
 

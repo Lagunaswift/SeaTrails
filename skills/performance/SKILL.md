@@ -17,6 +17,8 @@ This does not cover backend throughput or concurrency (`scaling-audit`), or logi
 
 Default to identifying what is actually slow before recommending fixes: what does a load actually do, what is big, what blocks, what is the real bottleneck. Use the real signals (the metrics below, a profile, the network waterfall) rather than assuming. A recommendation without a measurement behind it is a guess.
 
+For animation-heavy routes, apply `../ux-ui-patterns/animation-engineering-review.md` ANIM-09–14 and ANIM-18–20. Inspect retained heap/DOM and GPU-side resources separately; record browser traces and the actual device/profile. Transform/opacity and `will-change` are optimisations to measure, not automatic guarantees or mandatory fixes. Keep correctness and accessibility findings with their owners.
+
 ## What to measure: the user-facing signals
 
 The metrics that reflect what a user actually experiences (Core Web Vitals and relatives):
