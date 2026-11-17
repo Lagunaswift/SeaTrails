@@ -11,6 +11,7 @@ Before building any interface, read the relevant reference files:
 
 - `nielsen-usability-review.md`: Apply the ten Nielsen perspectives to complete user journeys during usability review and code-audit's UI/UX pass. Check cross-step context, safe exits and usable help through the existing controls; record evidence and limits.
 - `design-execution-review.md`: Check the supplied typography, layout, input and motion terms against real content and state transitions. Preserve useful treatments; optional techniques require a task-based reason.
+- `animation-engineering-review.md`: Dedicated lifecycle, cleanup, leaks, rendering/GPU, orchestration, responsiveness, reduced-motion and library-specific review. Run when an interface, Canvas or browser game actually animates; preserve existing 119 controls.
 - `states-and-feedback.md` — Loading, empty, error, success, partial, offline states. Skeleton screens, progress indicators, toast/notification patterns, confirmation dialogs, optimistic updates, double-click prevention, button loading states, form submission guards, debouncing, drag-and-drop feedback, animation as feedback, perceived responsiveness thresholds
 - `forms-and-input.md` — Form layout, validation, multi-step forms, inline editing, search, filtering, sorting, autocomplete, date/time pickers, file uploads
 - `navigation-and-structure.md` — Information architecture, nav patterns, tabs, sidebars, command palettes, breadcrumbs, pagination, infinite scroll, deep linking, back button behaviour

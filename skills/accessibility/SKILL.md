@@ -13,6 +13,8 @@ Run a read-only assessment unless changes are requested. Use **WCAG 2.2 Level AA
 
 The checks below are a practical entry point, not the full standard. For a conformance assessment, review all applicable criteria and complete processes. Do not infer compliance from a clean automated scan or a sample of pages.
 
+For animated interfaces, consult `../ux-ui-patterns/animation-engineering-review.md` ANIM-15–17 for reduced-motion fallback, focus/hit-testing during transitions and responsive state changes. Apply actual WCAG criteria to the tested scope; the mere use of animation is not a conformance failure.
+
 ## Areas to assess
 
 ### 1. Semantics and structure

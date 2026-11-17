@@ -13,6 +13,8 @@ Read `production-audit/references/design-review-context.md` first. Establish the
 
 Apply the relevant S17 probes in `ux-ui-patterns/design-execution-review.md` during the passes below. Record typography and layout observations at actual sizes, viewports and themes. Share functional, accessibility and measured performance defects with their native owners; a colour-space or animation preference alone creates no finding.
 
+Where motion is present, use `ux-ui-patterns/animation-engineering-review.md` for the engineering checks and reserve this lens for supported design-system/purpose findings. Report lifecycle leaks, state races, accessibility barriers and frame-time problems through their native lenses rather than capping them as aesthetic issues. Keep useful approved motion when it is functional and measured.
+
 ## The passes
 
 ### Pass 1: Design-system drift

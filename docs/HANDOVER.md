@@ -65,6 +65,9 @@ Each task names its files and its acceptance. None overlaps another. Harness tas
 
 ## Website readiness update
 
+On 17 November 2026, added `skills/ux-ui-patterns/animation-engineering-review.md` (ANIM-01–ANIM-20) and wired it into code-audit, website readiness, UX, performance, robustness, accessibility and Impeccable. Covers setup/teardown, timers/rAF, interrupted timelines and promises, retained DOM/heap, compositor/GPU/Three.js resources, viewport/visibility/motion changes and installed-version library integrations. This extends standalone brief v1.4 while retaining all 276 screenshot source entries and 119 control IDs. No new lens, report schema, gate or feature requirement. Source-only audits cannot claim browser performance or leak verification.
+
+
 On 15 November 2026, added S18's fifteen application abuse probes and S19's twenty conditional App Store probes. The standalone brief is version 1.3 with 276 source entries and the same 119 controls. Code-audit invokes S18; stack/lens selection and release-and-ops invoke S19 for the intended channel, including native-only audits. The privacy lens shares permission, AI-transfer, deletion and tracking checks. Browser-only websites remain outside App Store scope, and native evidence is not relabelled as a web observation. Corrected image-rewriting assurances, blanket API-key classification and an arbitrary MFA lockout rule. No report schema, gate, lens or skill count changed.
 
 On 14 November 2026, added S16 security probes and S17 design execution checks from two further screenshots. The forty source items extend existing ownership and evidence records, with current primary references and conditional applicability. Code-audit invokes the security and UI references; the design craft/lens paths share the new execution checks. The standalone brief is version 1.2 with 241 source entries and the same 119 controls. Audit authority and the report contracts remain unchanged.
