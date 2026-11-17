@@ -11,7 +11,7 @@ Individual components can work while the interface loses consistency across rout
 
 Read `production-audit/references/design-review-context.md` first. Establish the product's users, main tasks, existing design rules, reviewed routes and available evidence. Inspect the source before drawing conclusions from screenshots. Preserve deliberate brand choices and working conventions.
 
-Apply the relevant S17 probes in `ux-ui-patterns/design-execution-review.md` during the passes below. Record typography and layout observations at actual sizes, viewports and themes. Share functional, accessibility and measured performance defects with their native owners; a colour-space or animation preference alone creates no finding.
+Apply the relevant S17 probes in `ux-ui-patterns/design-execution-review.md` and S20 probes in `ux-ui-patterns/typography-engineering-review.md` during the passes below. For S20, test real text and font loading; do not prescribe small caps, hyphenation or trimming merely for their own sake. Accessibility/content loss belongs to its native owner. Record typography and layout observations at actual sizes, viewports and themes. Share functional, accessibility and measured performance defects with their native owners; a colour-space or animation preference alone creates no finding.
 
 Where motion is present, use `ux-ui-patterns/animation-engineering-review.md` for the engineering checks and reserve this lens for supported design-system/purpose findings. Report lifecycle leaks, state races, accessibility barriers and frame-time problems through their native lenses rather than capping them as aesthetic issues. Keep useful approved motion when it is functional and measured.
 

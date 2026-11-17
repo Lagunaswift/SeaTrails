@@ -14,6 +14,10 @@ Version 1.3 adds S18's fifteen [application abuse checks](../../saas-production-
 
 The standalone brief v1.4 adds **ANIM-01–ANIM-20** as a dedicated engineering review, not screenshot-derived items and not new scored controls. Read [animation-engineering-review.md](../../ux-ui-patterns/animation-engineering-review.md). Its lifecycle/cleanup, timing/orchestration, memory/GPU, responsive/accessibility and integration probes map to existing `UX-03/05/06/10`, `A11Y-03/04/05/06/10`, `PERF-01/03/04/06`, `REL-01/08`, `PAY-01`, `SEC-13`, `BRAND-05`, `OPS-01/04`, and `BASE-02`. The **276 screenshot-source points**, **119 control IDs**, twelve website topics and twenty-four optional features are unchanged. A justified absence of motion is recorded as inapplicable, not a release failure. A test of source code alone must not be marked as a browser/GPU pass.
 
+## Typography extension (17 November 2026)
+
+The source screenshot S20 adds ten typography techniques, making **286 distinct relevant source points** from **20 screenshots** (16 distinct relevant sources, three duplicates and one unrelated). [Typography Engineering Review](../../ux-ui-patterns/typography-engineering-review.md) maps each S20.01–S20.10 to the existing `BRAND-03/05/07`, `UX-03/06/09`, `A11Y-01/05/06/07`, `PERF-04`, `SEO-09`, and conditional `OPT-05/10` controls. No new scored controls, lenses, topics or report fields. Absent optional techniques are justified omissions; existing clipping, layout shifts, unreadable text and broken accessible values require evidence-based findings.
+
 ## Reuse and additions
 
 Most security, operations, state handling, performance and accessibility checks already had owners. The integration adds the website profile and commercial completeness reference, makes boundary tests more explicit, updates requirements that could produce incorrect findings and aligns design guidance with purpose. Existing design/evidence work is retained. An entry marked "existing" still has to be assessed when applicable; it is not a claim that a target website passed.

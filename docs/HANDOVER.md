@@ -65,6 +65,8 @@ Each task names its files and its acceptance. None overlaps another. Harness tas
 
 ## Website readiness update
 
+On 17 November 2026, added `skills/ux-ui-patterns/typography-engineering-review.md` for S20.01–S20.10. Wired it into website readiness, code-audit, UX, front-end design, Impeccable and accessibility with explicit coverage mapping. The standalone brief becomes v1.5 with 20 images and 286 source entries; the 119 controls, 12 topics, 24 options, finding schema and read-only default stay unchanged. Test font fallbacks, language, zoom and accessible full text; source-only evidence is not a rendered pass.
+
 On 17 November 2026, added `skills/ux-ui-patterns/animation-engineering-review.md` (ANIM-01–ANIM-20) and wired it into code-audit, website readiness, UX, performance, robustness, accessibility and Impeccable. Covers setup/teardown, timers/rAF, interrupted timelines and promises, retained DOM/heap, compositor/GPU/Three.js resources, viewport/visibility/motion changes and installed-version library integrations. This extends standalone brief v1.4 while retaining all 276 screenshot source entries and 119 control IDs. No new lens, report schema, gate or feature requirement. Source-only audits cannot claim browser performance or leak verification.
 
 

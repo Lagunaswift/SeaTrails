@@ -86,6 +86,8 @@ Read `../ux-ui-patterns/nielsen-usability-review.md` and apply its ten perspecti
 
 Read `../ux-ui-patterns/design-execution-review.md` for the S17 typography, layout, input and motion probes. Coordinate relevant checks with accessibility, mobile-and-responsive, frontend-robustness, performance and the selected design lenses. Assess techniques only where used or justified, with rendered/interactive evidence for visual or behavioural claims. Preserve useful brand choices and record untested scope.
 
+Read `../ux-ui-patterns/typography-engineering-review.md` for S20.01–S20.10 wherever user-facing typography exists. Record the applicable checks or inapplicability with evidence, and route visual, accessibility, functional and locale defects to their native owners. Font or CSS technique absence is not automatically a defect.
+
 Read `../ux-ui-patterns/animation-engineering-review.md` when the project has CSS/WAAPI, JS-timeline, Canvas or WebGL motion. Record ANIM-01–ANIM-20 dispositions using existing website topics or normal UI lens coverage; route runtime, accessibility, rendering and dependency issues to their native owners. A source-only read cannot prove GPU performance or a memory leak. An absent animation engine is not a defect.
 
 - **`ux-ui-patterns`** for usability and interaction patterns: form design, navigation structure, accessibility, responsive behaviour, data display, error states, empty states, loading states, and microcopy. This lens asks "can the user accomplish their task correctly and efficiently?"
