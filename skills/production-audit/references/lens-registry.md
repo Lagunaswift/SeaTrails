@@ -179,11 +179,11 @@ When running a lens (Stage 2), the orchestrator should:
 ## Lens 19: infrastructure-config  (prefix INFRA · priority 2 · ATOMIC)
 
 - **Skill:** `.claude/skills/infrastructure-config/SKILL.md`
-- **Owns:** Deployment and infrastructure configuration files checked into the repo: Dockerfiles, docker-compose, Terraform, CloudFormation, Kubernetes manifests, CI/CD pipelines, reverse proxy configs (nginx/Apache/Caddy), and secrets/env files. Checks for containers running as root, overly permissive IAM, exposed ports, missing security headers, secrets in build args, unpinned base images, privileged containers, and CI pipeline vulnerabilities.
+- **Owns:** Deployment and infrastructure configuration, including supplied redacted gateway and origin access policies. Repository inputs include Dockerfiles, docker-compose, Terraform, CloudFormation, Kubernetes manifests, CI/CD pipelines, reverse proxy configs (nginx/Apache/Caddy), and secrets/env files. Checks for containers running as root, overly permissive IAM, exposed ports, missing security headers, secrets in build args, unpinned base images, privileged containers, and CI pipeline vulnerabilities.
 - **Output:** `INFRA`-prefixed findings, category `infrastructure`. Severity by impact: publicly accessible database or secrets in config is critical/high; missing healthcheck or server version exposure is low/medium.
 - **Passes:** Container security (Docker) → Cloud infrastructure (Terraform/CFN) → Kubernetes manifests → CI/CD pipeline security → Reverse proxy/server config → Environment and secrets files.
 - **Overlap:** Complements `release-and-ops` (app-level deploy safety), `code-audit` (app-level security), and `scaling-audit` (app-level scaling). This lens checks the infrastructure layer beneath all of them.
-- **When to run:** any project with infrastructure config files in the repo. Skip for client-side-only projects with no deployment config.
+- **When to run:** projects with checked-in infrastructure configuration or an identified managed gateway or origin access policy. A known managed policy with no supplied evidence is a partial coverage item. State which setting the operator would need to confirm.
 
 
 ## Lens 20: impeccable-audit  (prefix IMP · priority 5 · ATOMIC)

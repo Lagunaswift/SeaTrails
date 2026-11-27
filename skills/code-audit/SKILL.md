@@ -95,6 +95,8 @@ When fixing, every change runs the refactoring and testing disciplines, no excep
 4. **Fix the cause, at the right level.** For a bug, confirm the cause before fixing (apply `debugging-methodology`); don't patch a symptom. For a structural issue, fix at the level the smell points to.
 5. **Re-verify and report what changed.** After each fix, the net is green and you can state what changed and why. Report the remediation as clearly as the original finding.
 
+Use the [production engineering checks](../production-audit/references/production-engineering.md) for the API contracts, identity flows and data boundaries present in the target. A missing optional sign-in method carries no finding.
+
 ## How to report findings
 
 Whether reporting-only or proposing fixes, structure findings so the person can act on them by priority:

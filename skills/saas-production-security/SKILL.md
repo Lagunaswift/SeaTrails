@@ -14,6 +14,8 @@ Before writing any code, read the relevant reference files:
 
 ---
 
+For email sign-in links or passkeys, apply the [passwordless sign-in checks](references/passwordless-sign-in.md) to the verifier, session and recovery flow.
+
 ## Threat Model
 
 Every SaaS application faces the same baseline threats regardless of what it does. These are not theoretical — they are the attacks that automated scanners and opportunistic attackers run against every publicly accessible application within hours of deployment.
@@ -129,7 +131,7 @@ Subscription manipulation, payment fraud, coupon/referral abuse, rate limit circ
 - [ ] Staging environment mirrors production configuration
 - [ ] Preview/staging deployments access-protected
 - [ ] Rollback procedure documented and tested
-- [ ] Annual third-party penetration test
+- [ ] Where an independent penetration test is required or commissioned, its scope, release, findings and retest evidence are available for review
 
 ### Production Readiness
 - [ ] Subscription state machine implemented (trial → active → past_due → suspended → cancelled → churned)

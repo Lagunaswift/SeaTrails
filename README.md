@@ -135,6 +135,10 @@ Ask Claude or Codex:
 
 The gate checks that the declared profile has complete, consistent coverage records and surviving finding references. Browser/provider evidence limits remain visible. It does not prove visual quality or that every defect was detected.
 
+## Production engineering coverage
+
+The production audit uses a [topic-by-topic coverage map](skills/production-audit/references/production-engineering.md) for engineering questions such as whether a retried job can charge twice, a read replica can show an old permission, or a sign-in link can grant a second session. Each row names the responsible lens and the evidence to inspect. It also shows which checks already existed and which were added or extended.
+
 ## Machine-readable gate
 
 ```bash
