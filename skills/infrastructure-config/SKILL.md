@@ -1,11 +1,11 @@
 ---
 name: infrastructure-config
-description: "Audit infrastructure and deployment configuration files checked into the repo: Dockerfiles, docker-compose, terraform, CloudFormation, Kubernetes manifests, CI/CD pipelines, nginx/apache configs, and cloud provider settings. Checks for: containers running as root, overly permissive IAM policies, exposed ports, missing security headers, secrets in build args, unpinned base images, privileged containers, and CI pipeline vulnerabilities. Trigger on: 'infrastructure audit', 'docker security', 'terraform review', 'CI/CD security', 'server config', 'cloud security', or when a production-audit selects this lens. Works by reading config files in the repo — does not connect to any cloud provider or run any container."
+description: "Audit checked-in infrastructure configuration and supplied redacted gateway or origin access policies: Dockerfiles, docker-compose, terraform, CloudFormation, Kubernetes manifests, CI/CD pipelines, nginx/apache configs, and cloud provider settings. Checks for: containers running as root, overly permissive IAM policies, exposed ports, missing security headers, secrets in build args, unpinned base images, privileged containers, and CI pipeline vulnerabilities. Trigger on: 'infrastructure audit', 'docker security', 'terraform review', 'CI/CD security', 'server config', 'cloud security', or when a production-audit selects this lens. Reads configuration and supplied evidence offline."
 ---
 
 # Infrastructure Config
 
-Audits the infrastructure and deployment configuration files that live in the repo: Dockerfiles, compose files, Terraform, CloudFormation, Kubernetes manifests, CI/CD pipelines, reverse proxy configs, and cloud IAM policies. Everything this lens checks is a file in the repo — it never connects to a cloud provider, runs a container, or queries a remote API.
+Audits the infrastructure and deployment configuration files that live in the repo: Dockerfiles, compose files, Terraform, CloudFormation, Kubernetes manifests, CI/CD pipelines, reverse proxy configs, and cloud IAM policies. For a known managed gateway or origin access policy, review supplied redacted settings alongside the repository files. Record the environment and date of any export and which deployed behaviour still needs confirmation. Review these controls offline.
 
 ## Why this matters
 
@@ -97,6 +97,8 @@ Read `nginx.conf`, `.nginx`, `apache2.conf`, `.htaccess`, `Caddyfile`, or simila
 - `.env.example` or `.env.template` containing real values instead of placeholders.
 - Credentials in any config file (`database.yml`, `config.json`, `settings.py`) — look for patterns like passwords, API keys, connection strings with credentials.
 - Private keys (`.pem`, `.key`, `id_rsa`) in the repo.
+
+Where a service uses a managed API gateway, include the gateway and origin policies in the [traffic review](../production-audit/references/production-engineering.md#traffic-persistence-and-asynchronous-work). Record deployed settings that require operator evidence.
 
 ## What to produce
 

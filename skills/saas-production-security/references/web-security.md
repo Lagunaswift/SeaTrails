@@ -73,7 +73,9 @@ Every page, every API endpoint, every asset, every WebSocket connection. No exce
 
 ### OAuth and Social Login
 
-If you support "Sign in with Google/GitHub/etc.":
+Account linking requires authenticated proof of control of the existing account and the new identity. Use the provider's stable subject and issuer as the identity key. A verified email can locate a candidate account only. Complete the link after both proofs succeed.
+
+For an OAuth-only provider, use its documented authenticated identity lookup. For OpenID Connect, apply the following callback checks within that account-linking policy:
 - Validate the `state` parameter on callback to prevent CSRF
 - Verify the `id_token` signature using the provider's public keys (fetched from their JWKS endpoint)
 - Check `iss` (issuer) and `aud` (audience) claims match your application
@@ -666,7 +668,7 @@ Run automated vulnerability scanning against a staging deployment. Tools: OWASP 
 ### Manual Testing
 
 **Penetration testing:**
-Hire a third-party penetration testing firm annually. Provide them with your threat model (including AI-specific threats) so they test the full surface.
+Check any agreed independent assessment against its scope, date and tested release. Trace outstanding issues to remediation and retest records. If the report or provider evidence is unavailable, record the gap. Set the assessment interval from the product's risk and applicable commitments.
 
 **Code review:**
 Security-focused code review on all changes to authentication, authorization, payment, and AI proxy code. These are the highest-risk areas.

@@ -49,6 +49,8 @@ How code actually gets from a commit to running.
 - Is the deploy triggered consistently (on merge to main, on a tag), so what is in production is always knowable?
 `references/ci-cd.md` covers pipeline structure, gating deploys on checks, and deploy triggers.
 
+Apply the [delivery and release checks](../production-audit/references/production-engineering.md#delivery-releases-and-working-with-evidence) to scheduled jobs, the production branch or tag, and any maintained release branches.
+
 ### 5. Reproducibility and infrastructure
 Whether the running system could be recreated if it vanished.
 - Is the infrastructure defined (infra-as-code, a container definition, a documented setup), or is the live system a hand-tended pet nobody could rebuild?

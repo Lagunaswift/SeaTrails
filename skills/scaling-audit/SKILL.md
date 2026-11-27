@@ -63,6 +63,8 @@ Whether you'd even know it was breaking. Without this, every other failure is di
 - Logs that help diagnose, without leaking secrets or PII (ties to `ai-saas-security`).
 `references/observability.md` covers logging, metrics, alerting, health checks, and knowing-before-the-user-does.
 
+For deployed services, use the [traffic and persistence](../production-audit/references/production-engineering.md#traffic-persistence-and-asynchronous-work) and [operations](../production-audit/references/production-engineering.md#operations-and-user-experience) tables for replica freshness, worker shutdown, tracing and memory retention.
+
 ## How to report
 
 Order by severity (catastrophic-and-likely first: data loss, total outage), and for each: what breaks, at roughly what scale, why it matters, and the fix. Distinguish "will break" from "might strain." Note what you could not assess. Don't drown the real risks (no backups, single point of failure) under minor ones. The point is surfacing the few things that will actually take the app down as it grows, in the order they'll happen.
